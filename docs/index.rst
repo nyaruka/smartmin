@@ -84,6 +84,9 @@ Contents:
    :maxdepth: 2
 
    quickstart
+   views
+   crudl
+   templates
    perms
    misc
 

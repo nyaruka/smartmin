@@ -3,6 +3,21 @@ Miscelaneous Utilities
 
 We've included a few bonus features that we find useful when developing django apps.
 
+Django Compressor
+===================
+
+Smartmin already comes with django-compressor support.  The default ``base.html`` template will wrap your CSS and JS in ``{% compress %}`` tags in order to optimize your page load times.
+
+If you want to enable this, you'll just need to add ``compressor`` to your ``INSTALLED_APPS`` in ``settings.py``::
+
+  INSTALLED_APPS = (
+    # .. other apps ..
+    'compressor',
+  )
+
+And change the commented out ``{# compress #}`` tags in ``base.html`` to be valid, ie: ``{% compress %}``.
+
+
 pdb Template Tag
 ===================
 
