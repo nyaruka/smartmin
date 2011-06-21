@@ -1,0 +1,28 @@
+{% extends "smartmin/base.html" %}
+
+{% load smartmin %}
+
+{% block main-content %}
+{% block pjax %}
+<div class="content">
+    <div class="confirmation">
+
+    <h3>Remove {% get_value object name_field %}</h3>
+    <p>Are you sure you want to remove <b>{% get_value object name_field %}</b>?</p>
+    <p>Once it is removed, it will be gone forever. There is no way to undo this operation.</p>
+
+        <form method=POST>
+
+        {% block delete_form %}{% endblock %}
+
+        <div class="buttons">
+        <a style="float:left" class="button" href="{{ cancel_url }}">Cancel</a>
+                {% csrf_token %}
+                <input type="submit" style="height:25px;" class="button destructive" value="Remove"/>
+        </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% load smartmin %}
+
+{% block login %}{% endblock %}
+
+{% block content %}
+<div id="login_box">
+<form method="post">
+<div class="login_header rounded_top">
+Login
+</div>
+<table class="form_table login" cellspacing="0">
+{% for field, errors in form.errors.items %}
+{% if field == '__all__' %}
+<tr>
+  <td colspan='2' class="errors form_errors">
+    <ul class="errorlist">
+    {% for error in errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  </td>
+</tr>
+    
+{% endif %}
+{% endfor %}
+
+{% for field in form %}
+<tr>
+  <td class="label">{{ field.label }}</td>
+  <td class="value">
+    {{ field }}
+    {% if field.errors %}
+    {{ field.errors }}
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
+</table>
+<div class="login_footer rounded_bottom">
+  {% csrf_token %}
+  <input class="button" type="submit" value="Login"></input></td></tr>
+</div>
+
+</form>
+</div>
+{% endblock %}

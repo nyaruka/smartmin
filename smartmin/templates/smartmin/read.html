@@ -1,0 +1,39 @@
+{% extends "smartmin/base.html" %}
+
+{% load smartmin %}
+
+{% block main-content %}
+<div class="content">
+
+  <div class="form_view_top">
+    <div class="right">
+    {% block read-buttons %}
+      {% if view.edit_button %}
+      <a class="small button" href="../../u/{{ object.id }}/">edit</a>
+      {% endif %}
+    {% endblock %}
+    </div>
+    <div class="form_view_title">{{ object }}</div>
+  </div>
+
+  <div class="detail_view">
+    {% block fields %}
+    {% for field in fields %}
+    <div class="row detail_{{field}}">
+      <div class="label">{% get_label field %}:</div>
+      <p>{% get_value object field %}&nbsp;</p>
+    </div>
+    {% endfor %}
+    {% endblock %}
+
+    {% block afterfields %}
+    {% endblock %}
+  </div>
+
+  {% block bottom %}
+  <div class="form_view_bottom rounded_bottom">
+    &nbsp;
+  </div>
+  {% endblock %}
+</div>
+{% endblock %}

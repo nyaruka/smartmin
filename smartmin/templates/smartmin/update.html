@@ -1,0 +1,9 @@
+{% extends "smartmin/form.html" %}
+
+{% block table_header_buttons %}
+{{ block.super }}
+{% if delete_url %}
+  <a href="{{ delete_url }}" class="button small destructive">Remove</a>
+{% endif %}
+{% endblock %}
+

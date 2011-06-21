@@ -1,0 +1,130 @@
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7 ]> <html class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html class="no-js ie8"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+       Remove this if you use the .htaccess -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>{% block title %}Smartmin{% endblock %}</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Place favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="icon" type="image/x-icon" href="{{ STATIC_URL }}img/favicon.ico">
+
+  <!-- CSS: implied media="all" -->
+  {# load compress #}
+  {# compress css #}
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/reset.css">
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/smartmin_styles.css">
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/styles.css">
+  {% block extrastyle %}{% endblock %}
+
+  {# endcompress #}
+
+  <!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
+  <script src="{{ STATIC_URL }}js/libs/modernizr-1.6.min.js"></script>
+
+</head>
+
+  <body lang="en">
+    <div id="container">
+
+      <div id="main">
+
+        <div id="header">
+
+        {% block login %}
+        <div id="login">
+          <div>
+          {% if request.user and request.user.is_authenticated %}
+          Welcome {{ request.user.username }} | <a href="{% url users_logout %}?go=/">logout</a>
+          {% else %}
+          <a href="{% url users_login %}">Login</a>
+          {% endif %}
+          </div>
+        </div>
+        {% endblock %}
+
+        {% block logo %}
+	<div id="logo">
+          <a href="/"><img border="0" src="{{ STATIC_URL }}img/smartmin.png"/></a>
+        </div>
+        {% endblock %}
+        </div>
+
+        {% load smartmin %}
+      
+        {% block messages %}
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% endblock %}
+
+        {% block content %}{% endblock %}
+
+        <div id="footer">
+          {% block footer %}
+          <a href="http://www.nyaruka.com">
+            <a href="http://www.nyaruka.com/"><div class="right" id="nyaruka_footer"></div></a>
+          </a>
+          {% endblock %}
+        </div><!-- end of #footer -->
+      </div><!-- end of #main -->
+    </div> <!-- end of #container -->
+
+  <!-- JavaScript at the bottom for fast page loading, conditional based on whether we are serving locally -->
+  <script>
+  if (window.location.hostname == "localhost"){
+    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.5.0.js"%3E%3C/script%3E'));
+  } else {
+    document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"%3E%3C/script%3E'));
+  }
+  </script>
+
+  {# compress js #}
+
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.pjax.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/scripts.js"></script>
+
+  {# media associated with any form we are displaying #}
+  {% if form %}
+  {{ form.media }}
+  {% endif %}
+
+  {% block extrascript %}{% endblock %}
+  {% block script %}{% endblock %}
+
+  {# endcompress #}
+
+  <!-- end scripts-->
+
+  <!--[if lt IE 7 ]>
+    <script src="{{ STATIC_URL }}js/libs/dd_belatedpng.js"></script>
+    <script>DD_belatedPNG.fix('img, .png_bg'); // Fix any <img> or .png_bg bg-images. Also, please read goo.gl/mZiyb </script>
+  <![endif]-->
+
+
+  <!-- mathiasbynens.be/notes/async-analytics-snippet Change UA-XXXXX-X to be your site's ID -->
+  <!--script type="text/javascript">
+    var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+    s.parentNode.insertBefore(g,s)}(document,'script'));
+  </script-->
+
+</body>
+</html>

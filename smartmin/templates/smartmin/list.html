@@ -1,0 +1,159 @@
+{% extends "smartmin/base.html" %}
+
+{% load smartmin %}
+
+{% block pre-content %}
+{% endblock %}
+
+{% block buttons %}
+{% if view.add_button and view.search_fields %}
+<div class="buttons">
+  <a class="button small" href="./c/">Add</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block main-content %}
+
+{% block pjax %}
+<div id="pjax">
+
+<div class="content">
+  <div class="list_view_top">
+    {% if view.search_fields %}
+    <div class="list_view_search" style="float: right">
+      <form method="get">
+        <table cellspacing=0>
+          <tr>
+            <td><input type="text" name="search" value="{{ search }}"/><input type="submit" value="Search" class="button small"/></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    {% endif %}
+    <div style="float:right;padding-top:3px">
+      {% block table_buttons %}
+      {% if view.add_button and not view.search_fields %}
+      <a class="button small" href="./c/">Add</a>
+      {% endif %}
+      {% endblock table_buttons %}
+    </div>
+
+    <div class="list_view_title">{{ title }}</div>
+  </div>
+  <table class="list_view {% get_list_class object_list %}" cellspacing="0">
+    <thead>
+      <tr>
+        {% for field in fields %}
+        <th class="header_{{field}} {% if view|field_orderable:field %}orderable{% endif %}" id="order_{{field}}">{% if view|field_orderable:field %}<div class="ordered {% if field == order %}{% if order_asc %}ordered_asc{% else %}ordered_dsc{% endif %}{% endif %}"></div>{% endif %}{% get_label field %}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for obj in object_list %}
+    <tr class="{% cycle 'row2' 'row1' %}">
+      {% for field in fields %}
+      <td class="value_{{field}} {% get_class field obj %} {% if field in link_fields %}clickable{% endif %}">
+          {% if field in link_fields %}<a {% if pjax %}data-pjax='{{ pjax }}'{% endif %} href="{% get_field_link field obj %}">{% endif %}{% get_value obj field %}{% if field in link_fields %}</a>{% endif %}
+      </td>
+      {% endfor %}
+    </tr>
+    {% empty %}
+    <tr class="empty_list">
+      {% for field in fields %}
+      <td></td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="list_view_bottom">
+    {% if not paginator or paginator.num_pages <= 1 %}
+    <div class="not_paginated">
+    {{ object_list|length }} result{% if object_list|length == 0 or object_list|length > 1 %}s{% endif %}
+    </div>
+    {% else %}
+    <div class="paginated">
+      Results {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }}
+      <div class="paginator">
+        <ul>
+          {% if page_obj.has_previous %}
+            <a href="{{url_params|safe}}page={{page_obj.previous_page_number}}"><li>&laquo;</li></a>          
+          {% endif %}
+
+          {% for page_num in paginator.page_range %}
+            {% if page_num < 10 %}
+              {% if not page_num == page_obj.number %}
+              <a href="{{url_params|safe}}page={{page_num}}"><li>{{ page_num }}</li></a>
+              {% else %}
+              <li class="current_page">{{ page_num }}</li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+              
+          {% if page_obj.has_next %}
+              <a href="{{url_params|safe}}page={{page_obj.next_page_number}}"><li>&raquo;</li></a>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endblock %}
+</div>
+{% endblock %}
+
+{% block extrascript %}
+{{ block.super }}
+
+<script>
+$(document).ready(function(){
+   $("th.orderable").click(function(evt){
+     // build up our ordering
+     var field = evt.target.id.substr(evt.target.id.indexOf("_")+1)
+
+     {% if order_asc %}
+     if (field == "{{order}}"){
+         field = "-" + field;
+     } 
+     {% endif %}
+
+     document.location = "{{url_params|safe}}_order=" + field;
+   });
+
+  $("th.orderable").hover(
+    function(evt){
+      this.style.cursor="pointer";
+      $(evt.target).children(".ordered").addClass("show_order");
+    },
+    function(evt){
+      $(evt.target).children(".ordered").removeClass("show_order");
+    });
+  });
+</script>
+
+{% if refresh %}
+<script>
+function refresh(){
+  $.pjax({
+    url: "{{url_params|safe}}page={{page_obj.number}}",
+    data: { 'pjax': "true" },
+    container: '#pjax',
+    push: false,
+    replace: false,
+    timeout: 30000,
+    error: function(){}
+  });
+}
+
+$(document).ready(function(){
+    window.setTimeout(refresh, {{ refresh }});
+});
+</script>
+{% endif %}
+{% endblock %}
+
+{% block post-content %}
+{% endblock %}
+
+

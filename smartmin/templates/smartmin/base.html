@@ -1,0 +1,45 @@
+{% extends base_template %}
+
+{% load smartmin %}
+
+{% block extrastyle %}
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/smartmin_styles.css?v=2">
+{% endblock %}
+
+{% block content %}
+
+{% block pre-content %}
+{% endblock %}
+
+{% block buttons %}
+{% endblock %}
+
+{% block main-content %}
+{% endblock %}
+
+{% block post-content %}
+{% endblock %}
+
+</div>
+{% endblock %}
+
+{% block extrascript %}
+<script>
+  $("td.clickable").hover(
+  function(){
+    this.style.cursor='pointer'
+  },
+  function(){
+  });
+  $("td.clickable").click(
+  function(){
+    document.location = $(this).children("a").attr("href");
+  }
+  );
+</script>
+
+
+{% endblock %}
+
+
+

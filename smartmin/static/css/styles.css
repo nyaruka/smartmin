@@ -1,0 +1,66 @@
+
+html {
+}
+
+body {
+    width: 600px;
+    background: #fff;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+}
+
+header {
+    text-align: right;
+    margin-bottom: 5px;
+}
+
+h1 {
+    font-size: 150%;
+}
+
+h2 {
+    font-size: 140%;
+}
+
+h3 {
+    font-size: 130%;
+}
+
+h4 {
+    font-size: 120%;
+}
+
+h5 {
+    font-size: 110%;
+}
+
+h6 {
+    font-size: 100%;
+}
+
+.menu {
+    float: right;
+    background: #eee;
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.menu a {
+    text-decoration: none;
+}
+
+.menu li {
+    list-style-type: none;
+}
+
+#nyaruka_footer {
+    background-image: url("../img/nyaruka.png");
+    height: 16px;
+    width: 100px;
+    float: right;
+}
+
+#login {
+    float: right;
+}

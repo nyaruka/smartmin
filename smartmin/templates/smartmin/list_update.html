@@ -1,0 +1,122 @@
+{% extends "smartmin/base.html" %}
+
+{% load smartmin %}
+
+{% block pre-content %}
+{% if view.add_button %}
+<div class="list_buttons">
+<a class="button" href="./add">Add</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block main-content %}
+
+<form method="post" action="">
+{{ formset.management_form }}
+
+
+<div class="content">
+  <div class="list_view_top">
+    {% if view.search_fields %}
+    <div class="list_view_search" style="float: right">
+      <form method="get">
+      <table cellspacing=0>
+        <tr>
+          <td><input type="text" name="search" value="{{ search }}"/><input type="submit" value="Search" class="button small"/></td>
+        </tr>
+      </table>
+      </form>
+    </div>
+    {% endif %}
+    <div class="list_view_title">{{ title }}</div>
+  </div>
+
+  <table class="list_view" cellspacing="0">
+    <thead>
+      <tr>
+        {% for field in fields %}
+        <th class="header_{{field}}">{% get_label field %}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+
+    {% for form in formset %}
+    {{ form.id }}
+    <tr>
+        {% for field in fields %}
+            <td class="value_{{field}}">
+
+                {% if field in link_fields %}<a href="{% get_url "view" form.instance.id %}">{% endif %}
+
+                {% if field in update_fields %}
+
+                    {% with form|field:field as form_field %}
+
+                    {{ form_field }}
+
+                        <div class="errors">
+                            {% if form_field %}
+                                {{ form_field.errors }}
+                            {% endif %}
+                        </div>
+                    
+                    {% endwith %}
+
+                {% else %}
+                    {% get_value form.instance field %}
+                {% endif %}
+
+                {% if field in link_fields %}</a>{% endif %}</td>
+
+        {% endfor %}
+    </tr>
+    {% endfor %}
+
+    </tbody>
+  </table>
+
+
+  <div class="list_view_bottom">
+    {% if not paginator or paginator.num_pages <= 1 %}
+    <div class="not_paginated">
+    {{ object_list|length }} result{% if object_list|length == 0 or object_list|length > 1 %}s{% endif %}
+    </div>
+    {% else %}
+    <div class="paginated">
+      Results {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }}
+      <div class="paginator">
+        <ul>
+          {% if page_obj.has_previous %}
+            <a href="{{url_params}}page={{page_obj.previous_page_number}}"><li>&laquo;</li></a>          
+          {% endif %}
+
+          {% for page_num in paginator.page_range %}
+            {% if page_num < 10 %}
+              {% if not page_num == page_obj.number %}
+              <a href="{{url_params}}page={{page_num}}"><li>{{ page_num }}</li></a>
+              {% else %}
+              <li class="current_page">{{ page_num }}</li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+              
+          {% if page_obj.has_next %}
+              <a href="{{url_params}}page={{page_obj.next_page_number}}"><li>&raquo;</li></a>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+{% csrf_token %}
+<div class="buttons">
+<input class="button small" type="submit" value="Save"/>
+</div>
+
+</form>
+
+</div>
+{% endblock %}
