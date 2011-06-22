@@ -25,7 +25,7 @@ You can also add specific permissions for particular objects if you'd like by sp
     'fruits.apple': ('pick',)
   }
 
-Smartmin will name this permission automatically in the form: ``fruits.pick_apple``
+Smartmin will name this permission automatically in the form: ``fruits.apple_pick``.  Note that this is slightly different than standard Django convention, which usually uses the order of 'verb'->'object', but Smartmin does this on purpose so that URL reverse names and permissions are named identically.
 
 Assigning Permissions for Groups
 ==================================
@@ -33,12 +33,20 @@ Assigning Permissions for Groups
 It is usually most convenient to assign users to particular groups, and assign permissions per group.  Smartmin makes this easy by allowing you to define the groups that exist in your system, and the permissions granted to them via the settings file.  Here's an example::
 
   GROUP_PERMISSIONS = {
-    "Administrator": ('auth.create_user', 'auth.read_user', 'auth.update_user', 
-                      'auth.delete_user', 'auth.list_user'),
-    "Fruit Picker": ('fruits.list_apple', 'fruits.pick_apple'),
+    "Administrator": ('auth.user_create', 'auth.user_read', 'auth.user_update', 
+                      'auth.user_delete', 'auth.user_list'),
+    "Fruit Picker": ('fruits.apple_list', 'fruits.apple_pick'),
   }
 
 Again, these groups and permissions will automatically be created and granted when you run ``python manage.py syncdb``
+
+If you want a particular user to have *ALL* permissions on an object, you can do so by using a wildcard format.  For example, to have the Administrator group above be able to perform any action on the user object, you could use: ``auth.user.*``::
+
+  GROUP_PERMISSIONS = {
+    "Administrator": ('auth.user.*', ),
+    "Fruit Picker": ('fruits.apple_list', 'fruits.apple_pick'),
+  }
+
 
 Permissions on Views
 =====================
@@ -53,6 +61,6 @@ But you can also customize permissions on a per view basis by setting the permis
 
   class FruitListView(SmartListView):
     model = Fruit
-    permission = 'fruits.list_apple'
+    permission = 'fruits.apple_list'
 
 The user will automatically be redirected to a login page if they try to access this view.
