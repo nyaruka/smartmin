@@ -9,25 +9,47 @@ def check_group_permissions(group, permissions):
     Checks the the passed in group has all the passed in permissions, granting them
     if necessary.
     """
+    group_permissions = []
+    
     # get all the current permissions, we'll remove these as we verify they should still be granted
     for permission in permissions:
         splits = permission.split(".")
-        if len(splits) != 2:
-            sys.stderr.write("  invalid permission %s, ignoring" % permission)
+        if len(splits) != 2 and len(splits) != 3:
+            sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
             continue
 
-        (app, codename) = splits
-        if not group.permissions.filter(codename=codename, content_type__app_label=app):
-            try:
-                group.permissions.add(Permission.objects.get(codename=codename, content_type__app_label=app))
-                sys.stderr.write(" ++ added %s to %s group\n" % (permission, group.name))
-            except Permission.DoesNotExist:
-                pass
+        app = splits[0]
+        codenames = []
+
+        if len(splits) == 2:
+            codenames.append(splits[1])
+        else:
+            (object, action) = splits[1:]
+
+            # if this is a wildcard, then query our database for all the permissions that exist on this object
+            if action == '*':
+                for perm in Permission.objects.filter(codename__startswith="%s_" % object, content_type__app_label=app):
+                    codenames.append(perm.codename)
+            # otherwise, this is an error, continue
+            else:
+                sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
+                continue                
+
+        for codename in codenames:
+            # this marks all the permissions which should remain
+            group_permissions.append("%s.%s" % (app, codename))
+            
+            if not group.permissions.filter(codename=codename, content_type__app_label=app):
+                try:
+                    group.permissions.add(Permission.objects.get(codename=codename, content_type__app_label=app))
+                    sys.stderr.write(" ++ added %s to %s group\n" % (codename, group.name))
+                except Permission.DoesNotExist:
+                    sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
 
     # remove any that are extra
     for permission in group.permissions.all():
         key = "%s.%s"  % (permission.content_type.app_label, permission.codename)
-        if not key in permissions:
+        if not key in group_permissions:
             group.permissions.remove(permission)
             sys.stderr.write(" -- removed %s from %s group\n" % (key, group.name))            
 
@@ -51,7 +73,7 @@ def add_permission(content_type, permission):
     in should be a single word, or verb.  The proper 'codename' will be generated from that.
     """
     # build our permission slug
-    codename = "%s_%s" % (permission, content_type.model)
+    codename = "%s_%s" % (content_type.model, permission)
 
     # does it already exist
     if not Permission.objects.filter(content_type=content_type, codename=codename):

@@ -8,7 +8,7 @@
 {% block buttons %}
 {% if view.add_button and view.search_fields %}
 <div class="buttons">
-  <a class="button small" href="./c/">Add</a>
+  <a class="button small" href="./create/">Add</a>
 </div>
 {% endif %}
 {% endblock %}
@@ -34,7 +34,7 @@
     <div style="float:right;padding-top:3px">
       {% block table_buttons %}
       {% if view.add_button and not view.search_fields %}
-      <a class="button small" href="./c/">Add</a>
+      <a class="button small" href="./create/">Add</a>
       {% endif %}
       {% endblock table_buttons %}
     </div>

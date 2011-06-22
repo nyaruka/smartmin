@@ -1016,23 +1016,13 @@ class SmartCRUDL(object):
         """
         Returns the permission to use for the passed in action
         """
-        if action == 'create':
-            return "%s.create_%s" % (self.app_name.lower(), self.model_name.lower())
+        return "%s.%s_%s" % (self.app_name.lower(), self.model_name.lower(), action)
 
-        elif action == 'read':
-            return "%s.read_%s" % (self.app_name.lower(), self.model_name.lower())
-        
-        elif action == 'update':
-            return "%s.update_%s" % (self.app_name.lower(), self.model_name.lower())
-
-        elif action == 'delete':
-            return "%s.delete_%s" % (self.app_name.lower(), self.model_name.lower())
-
-        elif action == 'list':
-            return "%s.list_%s" % (self.app_name.lower(), self.model_name.lower())
-
-        # otherwise, just guess
-        return "%s.%s_%s" % (self.app_name.lower(), action, self.model_name.lower())        
+    def url_name_for_action(self, action):
+        """
+        Returns the permission to use for the passed in action
+        """
+        return "%s.%s_%s" % (self.module_name, self.model_name.lower(), action)        
 
     def view_for_action(self, action):
         """
@@ -1128,16 +1118,16 @@ class SmartCRUDL(object):
         Returns the pattern for the passed in action.
         """
         if action == 'create':
-            return r'^%s/c/$' % self.path
+            return r'^%s/create/$' % self.path
 
         elif action == 'read':
-            return r'^%s/r/(?P<pk>\d+)/$' % self.path
+            return r'^%s/read/(?P<pk>\d+)/$' % self.path
 
         elif action == 'update':
-            return r'^%s/u/(?P<pk>\d+)/$' % self.path
+            return r'^%s/update/(?P<pk>\d+)/$' % self.path
 
         elif action == 'delete':
-            return r'^%s/d/(?P<pk>\d+)/$' % self.path
+            return r'^%s/delete/(?P<pk>\d+)/$' % self.path
 
         elif action == 'list':
             return '^%s/$' % self.path
@@ -1155,8 +1145,8 @@ class SmartCRUDL(object):
         for action in self.actions:
             view_class = self.view_for_action(action)
             view_pattern = self.pattern_for_action(action)
-            urlpatterns += patterns('', url(view_pattern, view_class.as_view(),
-                                            name="%s.%s_%s" % (self.module_name, self.model_name.lower(), action)))
+            name = self.url_name_for_action(action)
+            urlpatterns += patterns('', url(view_pattern, view_class.as_view(), name=name))
 
         return urlpatterns
 
