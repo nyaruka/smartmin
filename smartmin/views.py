@@ -476,14 +476,14 @@ class SmartListView(SmartView, ListView):
 
         return context
 
-    def get_queryset(self, **kwargs):
+    def derive_queryset(self, **kwargs):
         """
-        Gets our queryset.  This takes care of filtering if there are any
-        fields to filter by.
+        Derives our queryset.
         """
         # get our parent queryset
         queryset = super(SmartListView, self).get_queryset(**kwargs)
 
+        # apply any filtering
         if self.search_fields and 'search' in self.request.REQUEST:
             terms = self.request.REQUEST['search'].split()
 
@@ -495,6 +495,16 @@ class SmartListView(SmartView, ListView):
                 query &= term_query
 
             queryset = queryset.filter(query)
+
+        # return our queryset
+        return queryset
+
+    def get_queryset(self, **kwargs):
+        """
+        Gets our queryset.  This takes care of filtering if there are any
+        fields to filter by.
+        """
+        queryset = self.derive_queryset(**kwargs)
 
         # if our list should be filtered by a permission as well, do so
         if self.list_permission:

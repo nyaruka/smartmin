@@ -3,3 +3,4 @@ recursive-include smartmin/static *
 recursive-include smartmin/templates *
 recursive-include smartmin/templatetags *
 recursive-include smartmin/management *
+prune proj

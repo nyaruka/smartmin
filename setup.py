@@ -7,13 +7,14 @@ setup(
 
     install_requires = [
         "django>=1.3",
-        "django-guardian>=1.0.2"
+        "django-guardian>=1.0.2",
+        "django_compressor",
     ],
 
     description="Scaffolding system for Django object management.",
     long_description=open('README.rst').read(),
 
-    author='Nicolas Pottier, Nyaruka Ltd',
+    author='Nyaruka Ltd',
     author_email='code@nyaruka.com',
 
     url='http://github.com/nyaruka/smartmin',

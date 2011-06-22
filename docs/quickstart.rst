@@ -65,4 +65,3 @@ We can click on any of the items to edit them, and when editing, and from there 
 
 And that's it.  You probably want to learn how to customize things, either at the CRUDL layer or on each individual view.
 
-
