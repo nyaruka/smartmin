@@ -45,7 +45,7 @@
     <thead>
       <tr>
         {% for field in fields %}
-        <th class="header_{{field}} {% if view|field_orderable:field %}orderable{% endif %}" id="order_{{field}}">{% if view|field_orderable:field %}<div class="ordered {% if field == order %}{% if order_asc %}ordered_asc{% else %}ordered_dsc{% endif %}{% endif %}"></div>{% endif %}{% get_label field %}</th>
+        <th class="header_{{field}} {% if view|field_orderable:field %}orderable{% endif %}" id="order_{{field}}">{% if view|field_orderable:field %}<div id="order_{{field}}" class="ordered {% if field == order %}{% if order_asc %}ordered_asc{% else %}ordered_dsc{% endif %}{% endif %}"></div>{% endif %}{% get_label field %}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -110,7 +110,7 @@
 $(document).ready(function(){
    $("th.orderable").click(function(evt){
      // build up our ordering
-     var field = evt.target.id.substr(evt.target.id.indexOf("_")+1)
+     var field = evt.target.id.substr(evt.target.id.indexOf("_")+1);
 
      {% if order_asc %}
      if (field == "{{order}}"){
