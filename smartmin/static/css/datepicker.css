@@ -1,0 +1,209 @@
+div.datepicker {
+	position: relative;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	width: 196px;
+	height: 147px;
+	position: absolute;
+	cursor: default;
+	top: 0;
+	left: 0;
+	display: none;
+}
+.datepickerContainer {
+        color: #333;
+        background: url("../img/smartmin/nav-bg.gif") #fefefe;
+        background-position: 0 -10px;
+        background-repeat: repeat-x;
+/*	background: #efefef; */
+	position: absolute;
+	top: 2px;
+	left: 2px;
+}
+.datepickerBorderT {
+	position: absolute;
+	left: 2px;
+	top: 0;
+	right: 2px;
+	height: 2px;
+	background: #888;
+}
+.datepickerBorderB {
+	position: absolute;
+	left: 2px;
+	bottom: 0;
+	right: 2px;
+	height: 2px;
+	background: #888;
+}
+.datepickerBorderL {
+	position: absolute;
+	left: 0;
+	bottom: 2px;
+	top: 2px;
+	width: 2px;
+	background: #888;
+}
+td.datepickerSelected a span {
+    color: white;
+}
+.datepickerBorderR {
+	position: absolute;
+	right: 0;
+	bottom: 2px;
+	top: 2px;
+	width: 2px;
+	background: #888;
+}
+.datepickerBorderTL {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 2px;
+	height: 2px;
+	background: #888;
+}
+.datepickerBorderTR {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 2px;
+	height: 2px;
+	background: #888;
+}
+.datepickerBorderBL {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 2px;
+	height: 2px;
+	background: #888;
+}
+.datepickerBorderBR {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: 2px;
+	height: 2px;
+	background: #888;
+}
+.datepickerHidden {
+	display: none;
+}
+div.datepicker table {
+	border-collapse:collapse;
+}
+div.datepicker a {
+	color: #333;
+	text-decoration: none;
+	cursor: default;
+	outline: none;
+}
+
+div.datepicker table td {
+	text-align: right;
+	padding: 0;
+	margin: 0;
+}
+div.datepicker th {
+    color: black;
+    text-align: right;
+    font-weight: normal;
+}
+div.datepicker tbody a {
+    display: block;
+}
+.datepickerDays a {
+    width: 26px;
+    line-height: 16px;
+    height: 16px;
+    padding-right: 2px;
+}
+
+.datepickerContainer table {
+    border: 1px solid #ccc;;
+}
+
+.datepickerYears a,
+.datepickerMonths a{
+	width: 49px;
+	line-height: 36px;
+	height: 36px;
+	text-align: center;
+}
+td.datepickerNotInMonth a {
+	color: #666;
+}
+tbody.datepickerDays td.datepickerSelected{
+	background: #888;
+}
+tbody.datepickerDays td.datepickerNotInMonth.datepickerSelected {
+	background: #888;
+}
+tbody.datepickerYears td.datepickerSelected,
+tbody.datepickerMonths td.datepickerSelected{
+	background: #888;
+}
+div.datepicker a:hover,
+div.datepicker a:hover {
+	color: #446B8F;;
+}
+div.datepicker td.datepickerNotInMonth a:hover {
+	color: #999;
+}
+div.datepicker tbody th {
+    text-align: center;
+    padding-bottom: 2px;
+}
+.datepickerSpace div {
+	width: 20px;
+}
+
+.datepickerMonth {
+    vertical-align: top;
+    padding-bottom: 2px;
+}
+
+.datepickerGoNext a,
+.datepickerGoPrev a,
+.datepickerMonth a, .datepickerMonth a span {
+	text-align: center;
+        height: 20px;
+        line-height: 20px;
+        vertical-align: top;
+}
+.datepickerGoNext a {
+	float: right;
+	width: 20px;
+}
+.datepickerGoPrev a {
+	float: left;
+	width: 20px;
+}
+table.datepickerViewDays tbody.datepickerMonths,
+table.datepickerViewDays tbody.datepickerYears {
+	display: none;
+}
+table.datepickerViewMonths tbody.datepickerDays,
+table.datepickerViewMonths tbody.datepickerYears,
+table.datepickerViewMonths tr.datepickerDoW {
+	display: none;
+}
+table.datepickerViewYears tbody.datepickerDays,
+table.datepickerViewYears tbody.datepickerMonths,
+table.datepickerViewYears tr.datepickerDoW {
+	display: none;
+}
+td.datepickerDisabled a,
+td.datepickerDisabled.datepickerNotInMonth a{
+	color: #333;
+}
+td.datepickerDisabled a:hover {
+	color: #333;
+}
+td.datepickerSpecial a {
+	background: #700;
+}
+td.datepickerSpecial.datepickerSelected a {
+	background: #a00;
+}

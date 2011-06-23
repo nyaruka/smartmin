@@ -35,6 +35,10 @@ def check_group_permissions(group, permissions):
                 sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
                 continue                
 
+        if len(codenames) == 0:
+            sys.stderr.write("  no permissions found for %s, ignoring\n" % permission)
+            continue                            
+
         for codename in codenames:
             # this marks all the permissions which should remain
             group_permissions.append("%s.%s" % (app, codename))

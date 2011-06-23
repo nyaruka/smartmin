@@ -17,8 +17,9 @@ from django import forms
 from django.utils import simplejson
 from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import reverse
-
 import string
+
+import widgets
 
 def smart_url(url, id=None):
     """
@@ -39,7 +40,7 @@ def smart_url(url, id=None):
 class SmartView(object):
     fields = None
     exclude = None
-    field_config = {}
+    field_config = { }
     title = None
     permission = None
     refresh = None
@@ -179,7 +180,7 @@ class SmartView(object):
                     return model_field.verbose_name.title()
 
         # otherwise, derive it from our field name
-        if not label:
+        if label is None:
             label = self.derive_field_label(field)
 
         return label
@@ -392,6 +393,7 @@ class SmartListView(SmartView, ListView):
     search_fields = None
     paginate_by = 25
     pjax = None
+    field_config = { 'is_active': dict(label='') }
 
     list_permission = None
 
@@ -417,7 +419,10 @@ class SmartListView(SmartView, ListView):
         else:
             link_fields = set()
             if self.fields:
-                link_fields.add(self.fields[0])
+                for field in self.fields:
+                    if field != 'is_active':
+                        link_fields.add(field)
+                        break
 
         return link_fields
 
@@ -607,7 +612,22 @@ class SmartFormView(SmartView, ModelFormMixin):
             self.fields = list(self.fields)
             self.fields.append('loc')
 
+        # provides a hook to programmatically customize fields before rendering
+        for (name, field) in self.form.fields.items():
+            field = self.customize_form_field(name, field)
+            self.form.fields[name] = field
+
         return self.form
+
+    def customize_form_field(self, name, field):
+        """
+        Allows views to customize their form fields.  By default, Smartmin replaces the plain textbox
+        date input with it's own DatePicker implementation.
+        """
+        if isinstance(field, forms.fields.DateField) and isinstance(field.widget, forms.widgets.DateInput):
+            field.widget = widgets.DatePickerWidget()
+        
+        return field
 
     def lookup_field_label(self, context, field, default=None):
         """
@@ -681,13 +701,14 @@ class SmartFormView(SmartView, ModelFormMixin):
 
         return fields
 
-
     def get_form_class(self):
         """
         Returns the form class to use in this view
         """
+        form_class = None
+        
         if self.form_class:
-            return self.form_class
+            form_class = self.form_class
 
         else:
             if self.model is not None:
@@ -704,7 +725,9 @@ class SmartFormView(SmartView, ModelFormMixin):
 
             # run time parameters when building our form
             factory_kwargs = self.get_factory_kwargs()
-            return model_forms.modelform_factory(model, **factory_kwargs)
+            form_class = model_forms.modelform_factory(model, **factory_kwargs)
+
+        return form_class
 
     def get_factory_kwargs(self):
         """
@@ -788,6 +811,7 @@ class SmartFormView(SmartView, ModelFormMixin):
 
 class SmartUpdateView(SmartFormView, UpdateView):
     default_template = 'smartmin/update.html'
+    exclude = ('created_by', 'modified_by')    
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
@@ -854,6 +878,7 @@ class SmartMultiFormView(SmartView, TemplateView):
 
 class SmartCreateView(SmartFormView, CreateView):
     default_template = 'smartmin/create.html'
+    exclude = ('created_by', 'modified_by', 'is_active')
 
     def pre_save(self, obj):
         # auto populate created_by if it is present

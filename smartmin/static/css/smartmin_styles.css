@@ -580,6 +580,9 @@ ul.messages li.success {
     float: right;
 }
 
+form input.datepicker[type="text"] {
+    width: 198px;
+}
 
 
 
