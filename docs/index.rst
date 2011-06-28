@@ -55,7 +55,7 @@ To get started with smartmin, the following changes to your ``settings.py`` are 
   # assigns the permissions that each group should have, here creating an Administrator group with 
   # authority to create and change users
   GROUP_PERMISSIONS = {
-      "Administrator": ('auth.create_user', 'auth.read_user', 'auth.update_user','auth.list_user')
+      "Administrator": ('auth.user.*',)
   }
 
   # this is required by guardian
