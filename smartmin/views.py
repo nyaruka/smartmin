@@ -626,6 +626,9 @@ class SmartFormView(SmartView, ModelFormMixin):
         """
         if isinstance(field, forms.fields.DateField) and isinstance(field.widget, forms.widgets.DateInput):
             field.widget = widgets.DatePickerWidget()
+
+        if isinstance(field, forms.fields.ImageField) and isinstance(field.widget, forms.widgets.ClearableFileInput):
+            field.widget = widgets.ImageThumbnailWidget()
         
         return field
 
@@ -743,7 +746,8 @@ class SmartFormView(SmartView, ModelFormMixin):
         if self.fields:
             fields = list(self.fields)
             for ex in exclude:
-                fields.remove(ex)
+                if ex in fields:
+                    fields.remove(ex)
             
             params['fields'] = fields
 
@@ -785,6 +789,7 @@ class SmartFormView(SmartView, ModelFormMixin):
 
         self.object = self.pre_save(self.object)
         self.object.save()
+        self.form.save_m2m()        
         self.object = self.post_save(self.object)
 
         return HttpResponseRedirect(self.get_success_url())
@@ -811,7 +816,8 @@ class SmartFormView(SmartView, ModelFormMixin):
 
 class SmartUpdateView(SmartFormView, UpdateView):
     default_template = 'smartmin/update.html'
-    exclude = ('created_by', 'modified_by')    
+    exclude = ('created_by', 'modified_by')
+    readonly = ('modified', 'created')
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
@@ -830,6 +836,24 @@ class SmartUpdateView(SmartFormView, UpdateView):
             context['delete_url'] = smart_url(self.delete_url, self.object.id)
             
         return context
+
+    def derive_readonly(self):
+        """
+        Figures out what fields should be readonly.  We iterate our field_config to find all
+        that have a readonly of true
+        """
+        readonly = list(self.readonly)
+        for key, value in self.field_config.items():
+            if 'readonly' in value and value['readonly']:
+                readonly.append(key)
+
+        return readonly
+
+    def get_modified(self, obj):
+        return "%s by %s" % (obj.modified_on.strftime("%B %d, %Y at %I:%M %p"), obj.modified_by)
+
+    def get_created(self, obj):
+        return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
 
 class SmartMultiFormView(SmartView, TemplateView):
     default_template = 'smartmin/multi_form.html'
@@ -1087,6 +1111,10 @@ class SmartCRUDL(object):
                     view.link_url = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
                 else:
                     view.link_fields = ()
+
+            # set add_button based on existance of Create view if add_button not explicitely set
+            if not getattr(view, 'add_button', None) and (action == 'list' and 'create' in self.actions):
+                view.add_button = True
 
             # if update or create, set success url if not set
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):

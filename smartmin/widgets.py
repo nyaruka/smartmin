@@ -49,7 +49,21 @@ class DatePickerWidget(widgets.Widget):
 
     class Media:
        js = ('js/datepicker.js',)
-       css = { 'all': ('css/datepicker.css',) }    
+       css = { 'all': ('css/datepicker.css',) }
+
+class ImageThumbnailWidget(widgets.ClearableFileInput): 
+
+    def __init__(self, thumb_width=75, thumb_height=75): 
+        self.width = thumb_width 
+        self.height = thumb_height 
+        super(ImageThumbnailWidget, self).__init__({}) 
+
+    def render(self, name, value, attrs=None): 
+        thumb_html = '' 
+        if value and hasattr(value, "url"): 
+            thumb_html = '<img src="%s" width="%s" width="%s"style="float:left;padding-right:10px;" />' % (value.url, self.width, self.height) 
+        return mark_safe("%s%s" % (thumb_html,
+                                   super(ImageThumbnailWidget, self).render(name, value, attrs)))        
 
 
     

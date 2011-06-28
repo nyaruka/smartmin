@@ -36,7 +36,6 @@ def check_group_permissions(group, permissions):
                 continue                
 
         if len(codenames) == 0:
-            sys.stderr.write("  no permissions found for %s, ignoring\n" % permission)
             continue                            
 
         for codename in codenames:
