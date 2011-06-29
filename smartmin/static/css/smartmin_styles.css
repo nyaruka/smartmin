@@ -580,6 +580,35 @@ ul.messages li.success {
     float: right;
 }
 
+form input.datepicker[type="text"] {
+    width: 198px;
+}
+
+.add_button {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    background-image: url("../img/smartmin/add.png");
+}
+
+.add_button span {
+    position: absolute;
+    top: -999em;
+}
+
+.delete_button {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    display: inline-block;
+    background-image: url("../img/smartmin/decline.png");
+}
+
+.delete_button span {
+    position: absolute;
+    top: -999em;
+}
 
 
 
