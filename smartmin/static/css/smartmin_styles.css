@@ -610,6 +610,23 @@ form input.datepicker[type="text"] {
     top: -999em;
 }
 
+div.active_icon {
+    background-image: url('../img/active.png');
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.list_view th.header_is_active {
+    width: 30px;
+    text-align: center;
+}
+
+td.value_is_active {
+    width: 30px;
+}
 
 
 
