@@ -251,7 +251,7 @@ class SmartView(object):
         templates = []
         if hasattr(self, 'template_name') and self.template_name:
             templates.append(self.template_name)
-        
+
         if hasattr(self, 'default_template'):
             templates.append(self.default_template)
         else:
@@ -393,7 +393,7 @@ class SmartListView(SmartView, ListView):
     search_fields = None
     paginate_by = 25
     pjax = None
-    field_config = { 'is_active': dict(label='') }
+    field_config = { 'is_active': dict(label=''), }
 
     list_permission = None
 
@@ -559,6 +559,8 @@ class SmartListView(SmartView, ListView):
 class SmartFormView(SmartView, ModelFormMixin):
     grant_permissions = None
     javascript_submit = None
+    field_config = { 'modified_blurb': dict(label="Modified"),
+                     'created_blurb': dict(label="Created") }    
 
     def derive_title(self):
         """
@@ -789,10 +791,16 @@ class SmartFormView(SmartView, ModelFormMixin):
 
         self.object = self.pre_save(self.object)
         self.object.save()
-        self.form.save_m2m()        
+        self.save_m2m()
         self.object = self.post_save(self.object)
 
         return HttpResponseRedirect(self.get_success_url())
+
+    def save_m2m(self):
+        """
+        By default saves the form's m2m, can be overridden if a more complicated m2m model exists
+        """
+        self.form.save_m2m()
 
     def post_save(self, obj):
         """
@@ -816,8 +824,8 @@ class SmartFormView(SmartView, ModelFormMixin):
 
 class SmartUpdateView(SmartFormView, UpdateView):
     default_template = 'smartmin/update.html'
-    exclude = ('created_by', 'modified_by')
-    readonly = ('modified', 'created')
+    exclude = ()
+    readonly = ()
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
@@ -849,10 +857,10 @@ class SmartUpdateView(SmartFormView, UpdateView):
 
         return readonly
 
-    def get_modified(self, obj):
+    def get_modified_blurb(self, obj):
         return "%s by %s" % (obj.modified_on.strftime("%B %d, %Y at %I:%M %p"), obj.modified_by)
 
-    def get_created(self, obj):
+    def get_created_blurb(self, obj):
         return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
 
 class SmartMultiFormView(SmartView, TemplateView):

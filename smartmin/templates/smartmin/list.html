@@ -39,7 +39,7 @@
       {% endblock table_buttons %}
     </div>
 
-    <div class="list_view_title">{{ title }}</div>
+    <div class="list_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
   </div>
   <table class="list_view {% get_list_class object_list %}" cellspacing="0">
     <thead>

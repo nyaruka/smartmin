@@ -99,6 +99,11 @@ span.label {
     padding-bottom:10px;
 }
 
+.blr {
+    border-left: 1px solid #CCC;
+    border-right: 1px solid #CCC;
+}
+
 .form_table td {
     font-family: "Lucida Grande", Verdana, Arial, sans-serif;
     border-bottom: 0px solid #CCC;
