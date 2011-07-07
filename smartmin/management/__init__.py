@@ -70,11 +70,19 @@ def check_all_group_permissions(sender, **kwargs):
             sys.stderr.write("Added %s group\n" % name)
         check_group_permissions(group, permissions)
 
+
+HANDLED_MODELS = set()
+
 def add_permission(content_type, permission):
     """
     Adds the passed in permission to that content type.  Note that the permission passed
     in should be a single word, or verb.  The proper 'codename' will be generated from that.
     """
+    # bail if we already handled this model
+    key = "%s:%s" % (content_type.model, permission)
+    if key in HANDLED_MODELS:
+        return
+    
     # build our permission slug
     codename = "%s_%s" % (content_type.model, permission)
 
@@ -84,6 +92,9 @@ def add_permission(content_type, permission):
                                   codename=codename,
                                   name="Can %s %s" % (permission, content_type.name))
         sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
+
+    # add this to our cache of handled
+    HANDLED_MODELS.add(key)
 
 def check_all_permissions(sender, **kwargs):
     """

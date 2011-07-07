@@ -65,27 +65,3 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         return mark_safe("%s%s" % (thumb_html,
                                    super(ImageThumbnailWidget, self).render(name, value, attrs)))        
 
-class DoubleBoxWidget(widgets.SelectMultiple):
-    def render(self, name, value, attrs=None, choices=()):
-        if value is None: value = []
-        has_id = attrs and 'id' in attrs
-        final_attrs = self.build_attrs(attrs, name=name)
-
-        output = '<div class="doubleboxwidget">'
-        output += '<select>'
-
-        for (option_value, option_label) in self.choices:
-            output += '<option>%s</option>' % option_label
-
-        output += '</select>'
-        output += '</div>'
-            
-        return mark_safe(output)
-
-    def id_for_label(self, id_):
-        # See the comment for RadioSelect.id_for_label()
-        if id_:
-            id_ += '_0'
-        return id_
-                       
-    

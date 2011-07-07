@@ -558,8 +558,16 @@ ul.messages li.success {
     font-style: italic;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .pb15 {
     padding-bottom: 15px;
+}
+
+.p10 {
+    padding: 10px;
 }
 
 .ordered {
@@ -633,6 +641,24 @@ td.value_is_active {
     width: 30px;
 }
 
+.dbw_left select {
+    margin-bottom: 5px;
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+.dbw_right select {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.dbw_left {
+    text-align: center;
+}
+
+.dbw_right {
+    text-align: center;
+}
 
 
 
