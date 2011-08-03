@@ -394,6 +394,7 @@ class SmartListView(SmartView, ListView):
     paginate_by = 25
     pjax = None
     field_config = { 'is_active': dict(label=''), }
+    default_order = None
 
     list_permission = None
 
@@ -1075,7 +1076,11 @@ class SmartListUpdateView(SmartListView, ListView, ModelFormMixin, ProcessFormVi
 
 class SmartCRUDL(object):
     actions = ('create', 'read', 'update', 'delete', 'list')
+    model_name = None
+    app_name = None
+    module_name = None
     path = None
+    
     permissions = False
 
     def __init__(self, model=None, path=None, actions=None):
@@ -1084,16 +1089,20 @@ class SmartCRUDL(object):
             self.model = model
 
         # derive our model name
-        self.model_name = self.model._meta.object_name
+        if not self.model_name:
+            self.model_name = self.model._meta.object_name
 
         # derive our app name
-        self.app_name = self.model._meta.app_label
+        if not self.app_name:
+            self.app_name = self.model._meta.app_label
 
         # derive our path from our class name
         if not path and not self.path:
             self.path = self.model_name.lower()
 
-        self.module_name = self.__class__.__module__.split(".")[0]
+        # derive our module name from our class's module
+        if not self.module_name:
+            self.module_name = self.__class__.__module__.split(".")[0]
 
         # set our actions if set
         if actions:

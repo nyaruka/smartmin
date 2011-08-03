@@ -660,6 +660,12 @@ td.value_is_active {
     text-align: center;
 }
 
+.list_pre_table {
+    border-left: 1px solid #CCC;
+    border-right: 1px solid #CCC;    
+    padding: 5px;
+}
+
 
 
 

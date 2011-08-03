@@ -41,6 +41,7 @@
 
     <div class="list_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
   </div>
+  {% block pre-table %}{% endblock %}
   <table class="list_view {% get_list_class object_list %}" cellspacing="0">
     <thead>
       <tr>
