@@ -2,7 +2,7 @@ from django.db import models
 
 from django.utils.encoding import force_unicode
 from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView
-from django.views.generic.base import TemplateView
+from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
 import django.forms.models as model_forms
 from guardian.decorators import permission_required
@@ -470,8 +470,8 @@ class SmartListView(SmartView, ListView):
             context['search'] = self.request.REQUEST['search']
 
         # our ordering field if any
-        if '_order' in self.request.REQUEST:
-            order = self.request.REQUEST['_order']
+        order = self.derive_ordering()
+        if order:
             if order[0] == '-':
                 context['order'] = order[1:]
                 context['order_asc'] = False
@@ -519,13 +519,27 @@ class SmartListView(SmartView, ListView):
 
         return self.order_queryset(queryset)
 
+    def derive_ordering(self):
+        """
+        Returns what field should be used for ordering (using a prepended '-' to indicate descending sort).
+
+        If the default order of the queryset should be used, returns None
+        """
+        if '_order' in self.request.REQUEST:
+            return self.request.REQUEST['_order']
+        elif self.default_order:
+            return self.default_order
+        else:
+            return None
+
     def order_queryset(self, queryset):
         """
         Orders the passed in queryset, returning a new queryset in response.  By default uses the _order query
         parameter.
         """
-        if '_order' in self.request.REQUEST:
-            queryset = queryset.order_by(self.request.REQUEST['_order'])
+        order = self.derive_ordering()
+        if order:
+            queryset = queryset.order_by(order)
 
         return queryset
 
@@ -786,12 +800,18 @@ class SmartFormView(SmartView, ModelFormMixin):
         """
         return obj
 
+    def save(self, obj):
+        """
+        Actually does the saving of this object, this is when the object is committed
+        """
+        self.object.save()
+        self.save_m2m()
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
 
         self.object = self.pre_save(self.object)
-        self.object.save()
-        self.save_m2m()
+        self.save(self.object)
         self.object = self.post_save(self.object)
 
         return HttpResponseRedirect(self.get_success_url())

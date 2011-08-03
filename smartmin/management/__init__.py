@@ -15,7 +15,7 @@ def check_group_permissions(group, permissions):
     for permission in permissions:
         splits = permission.split(".")
         if len(splits) != 2 and len(splits) != 3:
-            sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
+#            sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
             continue
 
         app = splits[0]
@@ -32,7 +32,7 @@ def check_group_permissions(group, permissions):
                     codenames.append(perm.codename)
             # otherwise, this is an error, continue
             else:
-                sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
+#                sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
                 continue                
 
         if len(codenames) == 0:
@@ -45,16 +45,17 @@ def check_group_permissions(group, permissions):
             if not group.permissions.filter(codename=codename, content_type__app_label=app):
                 try:
                     group.permissions.add(Permission.objects.get(codename=codename, content_type__app_label=app))
-                    sys.stderr.write(" ++ added %s to %s group\n" % (codename, group.name))
+#                    sys.stderr.write(" ++ added %s to %s group\n" % (codename, group.name))
                 except Permission.DoesNotExist:
-                    sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
+                    pass
+#                    sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
 
     # remove any that are extra
     for permission in group.permissions.all():
         key = "%s.%s"  % (permission.content_type.app_label, permission.codename)
         if not key in group_permissions:
             group.permissions.remove(permission)
-            sys.stderr.write(" -- removed %s from %s group\n" % (key, group.name))            
+#            sys.stderr.write(" -- removed %s from %s group\n" % (key, group.name))            
 
 def check_all_group_permissions(sender, **kwargs):
     """
@@ -67,7 +68,8 @@ def check_all_group_permissions(sender, **kwargs):
         # get or create the group
         (group, created) = Group.objects.get_or_create(name=name)
         if created:
-            sys.stderr.write("Added %s group\n" % name)
+            pass
+#            sys.stderr.write("Added %s group\n" % name)
         check_group_permissions(group, permissions)
 
 
@@ -91,7 +93,7 @@ def add_permission(content_type, permission):
         Permission.objects.create(content_type=content_type,
                                   codename=codename,
                                   name="Can %s %s" % (permission, content_type.name))
-        sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
+#        sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
 
     # add this to our cache of handled
     HANDLED_MODELS.add(key)
