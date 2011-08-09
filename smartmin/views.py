@@ -337,6 +337,12 @@ class SmartReadView(SmartView, DetailView):
     default_template = 'smartmin/read.html'
     edit_button = False
 
+    def derive_title(self):
+        """
+        By default we just return the string representation of our object
+        """
+        return str(self.object)
+
     def derive_fields(self):
         """
         Derives our fields.  We first default to using our 'fields' variable if available,
