@@ -1,7 +1,7 @@
 from django.db import models
 
 from django.utils.encoding import force_unicode
-from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView
+from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
 import django.forms.models as model_forms
@@ -131,6 +131,30 @@ class SmartView(object):
         """
         return None
 
+    def lookup_obj_attribute(self, obj, field):
+        """
+        Looks for a field's value from the passed in obj.  Note that this will strip
+        leading attributes to deal with subelements if possible
+        """
+        curr_field = field
+        rest = None
+
+        if field.find('.') >= 0:
+            curr_field = field.split('.')[0]
+            rest = '.'.join(field.split('.')[1:])
+
+        # next up is the object itself
+        obj_field = getattr(obj, curr_field, None)
+
+        # if it is callable, do so
+        if obj_field and getattr(obj_field, '__call__', None):
+            obj_field = obj_field()
+
+        if obj_field and rest:
+            return self.lookup_obj_attribute(obj_field, rest)
+        else:
+            return obj_field
+
     def lookup_field_value(self, context, obj, field):
         """
         Looks up the field value for the passed in object and field name.
@@ -141,19 +165,14 @@ class SmartView(object):
         This may be used for example to change the display value of a variable depending on
         other variables within our context.
         """
-        # view supercedes all, does it have a 'get_' method for this obj
-        view_method = getattr(self, 'get_%s' % field, None)
-        if view_method:
-            return view_method(obj)
+        # if this isn't a subfield, check the view to see if it has a get_ method
+        if field.find('.') == -1:
+            # view supercedes all, does it have a 'get_' method for this obj
+            view_method = getattr(self, 'get_%s' % field, None)
+            if view_method:
+                return view_method(obj)
 
-        # next up is the object itself
-        obj_field = getattr(obj, field, None)
-
-        # if it is callable, do so
-        if obj_field and getattr(obj_field, '__call__', None):
-            return obj_field()
-
-        return obj_field
+        return self.lookup_obj_attribute(obj, field)
 
     def lookup_field_label(self, context, field, default=None):
         """
@@ -163,6 +182,10 @@ class SmartView(object):
             1) we check to see if our field_config has a label specified
             2) if not, then we derive a field value from the field name
         """
+        # if this is a subfield, strip off everything but the last field name
+        if field.find('.') >= 0:
+            return self.lookup_field_label(context, field.split('.')[-1], default)
+        
         label = None
 
         # is there a label specified for this field
@@ -577,9 +600,7 @@ class SmartListView(SmartView, ListView):
         else:
             return ''
 
-class SmartFormView(SmartView, ModelFormMixin):
-    grant_permissions = None
-    javascript_submit = None
+class SmartFormMixin(object):
     field_config = { 'modified_blurb': dict(label="Modified"),
                      'created_blurb': dict(label="Created") }    
 
@@ -587,10 +608,10 @@ class SmartFormView(SmartView, ModelFormMixin):
         """
         Derives our title from our object
         """
-        title = super(SmartFormView, self).derive_title()
+        title = super(SmartFormMixin, self).derive_title()
 
         if not title:
-            return "Edit %s" % force_unicode(self.model._meta.verbose_name).title()
+            return "Form"
         else:
             return title
     
@@ -598,7 +619,7 @@ class SmartFormView(SmartView, ModelFormMixin):
         """
         Returns an instance of the form to be used in this view.
         """
-        self.form = super(SmartFormView, self).get_form(form_class)
+        self.form = super(SmartFormMixin, self).get_form(form_class)
         
         # we specified our own form class, which means we need to apply any field filtering
         # ourselves.. this is ugly but the only way to make exclude and fields work the same
@@ -670,7 +691,7 @@ class SmartFormView(SmartView, ModelFormMixin):
                 default = form_field.label
                 break
 
-        return super(SmartFormView, self).lookup_field_label(context, field, default=default)
+        return super(SmartFormMixin, self).lookup_field_label(context, field, default=default)
 
     def lookup_field_help(self, field, default=None):
         """
@@ -686,7 +707,7 @@ class SmartFormView(SmartView, ModelFormMixin):
                 default = form_field.help_text
                 break
 
-        return super(SmartFormView, self).lookup_field_help(field, default=default)
+        return super(SmartFormMixin, self).lookup_field_help(field, default=default)
 
     def derive_readonly(self):
         """
@@ -798,9 +819,30 @@ class SmartFormView(SmartView, ModelFormMixin):
 
         Otherwise we include all fields in a standard ModelForm.
         """
-        kwargs = super(SmartFormView, self).get_form_kwargs()
+        kwargs = super(SmartFormMixin, self).get_form_kwargs()
         return kwargs;
 
+class SmartFormView(SmartFormMixin, SmartView, FormView):
+    template_name = 'smartmin/form.html'
+
+class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
+    grant_permissions = None
+    javascript_submit = None
+
+    field_config = { 'modified_blurb': dict(label="Modified"),
+                     'created_blurb': dict(label="Created") }    
+
+    def derive_title(self):
+        """
+        Derives our title from our object
+        """
+        title = super(SmartModelFormView, self).derive_title()
+
+        if not title:
+            return "Edit %s" % force_unicode(self.model._meta.verbose_name).title()
+        else:
+            return title
+    
     def pre_save(self, obj):
         """
         Called before an object is saved away
@@ -844,12 +886,11 @@ class SmartFormView(SmartView, ModelFormMixin):
         return obj
 
     def get_context_data(self, **kwargs):
-        context = super(SmartFormView, self).get_context_data(**kwargs)
+        context = super(SmartModelFormView, self).get_context_data(**kwargs)
         context['javascript_submit'] = self.javascript_submit
         return context
 
-
-class SmartUpdateView(SmartFormView, UpdateView):
+class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = 'smartmin/update.html'
     exclude = ()
     readonly = ()
@@ -935,7 +976,7 @@ class SmartMultiFormView(SmartView, TemplateView):
             
         return context
 
-class SmartCreateView(SmartFormView, CreateView):
+class SmartCreateView(SmartModelFormView, CreateView):
     default_template = 'smartmin/create.html'
     exclude = ('created_by', 'modified_by', 'is_active')
 

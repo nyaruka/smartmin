@@ -641,6 +641,10 @@ td.value_is_active {
     width: 30px;
 }
 
+.mt10 {
+    margin-top: 10px;
+}
+
 .dbw_left select {
     margin-bottom: 5px;
     margin-top: 5px;
