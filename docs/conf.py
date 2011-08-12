@@ -43,7 +43,7 @@ copyright = u'2011, Nyaruka Ltd'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
+# 
 # The short X.Y version.
 version = '0.0.3'
 # The full version, including alpha/beta/rc tags.
