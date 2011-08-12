@@ -61,6 +61,9 @@ To get started with smartmin, the following changes to your ``settings.py`` are 
   # this is required by guardian
   ANONYMOUS_USER_ID = -1
 
+  # set this if you want to use smartmin's user login
+  LOGIN_URL = '/users/login'
+
 You'll also need to add smartmin and guardian to your installed apps::
 
   INSTALLED_APPS = (
@@ -77,6 +80,17 @@ Finally, if you want to use the default smartmin views for managing users and lo
     url(r'^users/', include('smartmin.users.urls')),
   )
 
+You can now sync your database and start the server::
+
+   % python manage.py syncdb
+   % python manage.py runserver
+
+And if you want to see a Smartmin view in action, check out smartmin's user management pages for a demo that functionality by pointing your browser to::
+
+    http://localhost:8000/users/user
+
+From here you can create, update and list users on the system, all using standard smartmin views.  The total code to create all this functionality is less than 30 lines of Python.
+
 Contents:
 ===========================================
 
@@ -85,6 +99,11 @@ Contents:
 
    quickstart
    views
+   createview
+   readview
+   updateview
+   deleteview
+   listview
    crudl
    templates
    perms

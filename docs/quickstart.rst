@@ -65,3 +65,58 @@ We can click on any of the items to edit them, and when editing, and from there 
 
 And that's it.  You probably want to learn how to customize things, either at the CRUDL layer or on each individual view.
 
+Adding Search
+==============
+
+Ok, so now we have some basic views, but let's spruce up our list view by adding search.  All we need to do to enable search is define which fields we want to be searchable.  To do this we'll have to overload the default ListView on our PostCRUDL object::
+
+    class PostCRUDL(SmartCRUDL):
+      model = Post
+
+      class List(SmartListView):
+        search_fields = ('title__icontains', 'body__icontains')
+        default_order = 'title'
+
+So we are doing two things here.  First, by defining ``search_fields`` we are telling smartmin to enable searching on this list view, and to search the contents of the title and body when doing searches.  While we are at it, we have also set the default ordering for results to be by the title attribute.
+
+Here's the result:
+
+.. image:: img/quickstart5.png
+
+One thing that could still be better would be to only show the first few words of a post so we don't blow up the table.  We can override what smartmin uses as the value of a column by just defining a ``get_[fieldname]`` method on our view::
+
+      class List(SmartListView):
+        search_fields = ('title__icontains', 'body__icontains')
+        default_order = 'title'
+
+        def get_body(self, obj):
+            """ Show only the first 10 words for long post bodies. """
+            if len(obj.body) < 100:
+                return obj.body
+            else:
+                return " ".join(obj.body.split(" ")[0:10]) + ".."
+
+That gives us this:
+
+.. image:: img/quickstart6.png
+
+
+Permissions
+==============
+
+Very few sites really want to allow just anybody to edit content, and the sanest way of managing who can do what is by using permissions.  Smartmin uses permissions and groups throughout to help you manage this functionality easily.
+
+So far we've enabled anybody to create Posts, so as a first step let's required that only authenticated users (and admins) who have the proper privileges can access our views.
+
+Thankfully, that's a one line change, we just need to add the ``permissions=True`` attribute to our CRUDL object::
+
+    class PostCRUDL(SmartCRUDL):
+        model = Post
+        permissions = True
+
+        # .. view definitions ..
+
+Now when we try to view any of the CRUDL pages for our Post object we are redirected to a login page.
+
+
+

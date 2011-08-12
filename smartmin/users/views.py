@@ -32,8 +32,7 @@ class UserForm(forms.ModelForm):
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active')
 
 class UserUpdateForm(UserForm):
-    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput,
-                                   required=False)
+    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
 
 class UserCRUDL(SmartCRUDL):
     model = User
@@ -73,13 +72,14 @@ class UserCRUDL(SmartCRUDL):
         field_config = {
             'groups': dict(help="Users will only get those permissions that are allowed for their group."),
             'new_password': dict(label="Password"),
+            'groups': dict(help="Users will only get those permissions that are allowed for their group."),
+            'new_password': dict(help="Set the user's initial password here."),
         }
 
         def post_save(self, obj):
             """
             Make sure our groups are up to date
             """
-            obj.groups.all().delete()
             for group in self.form.cleaned_data['groups']:
                 obj.groups.add(group)
 
@@ -95,4 +95,15 @@ class UserCRUDL(SmartCRUDL):
             'groups': dict(help="Users will only get those permissions that are allowed for their group."),
             'new_password': dict(help="You can reset the user's password by entering a new password here."),
         }
+
+        def post_save(self, obj):
+            """
+            Make sure our groups are up to date
+            """
+            obj.groups.clear()
+            for group in self.form.cleaned_data['groups']:
+                obj.groups.add(group)
+
+            return obj
+
 
