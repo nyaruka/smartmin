@@ -1,7 +1,7 @@
 from django.db import models
 
 from django.utils.encoding import force_unicode
-from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
+from django.views.generic.edit import FormMixin, ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
 import django.forms.models as model_forms
@@ -58,6 +58,13 @@ class SmartView(object):
         Returns the title used on this page.
         """
         return self.title
+
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        """
+        Returns the URL pattern for this view.
+        """
+        return r'^%s/%s/$' % (path, action)
 
     def has_permission(self, request, *args, **kwargs):
 
@@ -366,6 +373,13 @@ class SmartReadView(SmartView, DetailView):
         """
         return str(self.object)
 
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        """
+        Returns the URL pattern for this view.
+        """
+        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+
     def derive_fields(self):
         """
         Derives our fields.  We first default to using our 'fields' variable if available,
@@ -385,6 +399,13 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
     name_field = 'name'
     cancel_url = None
     redirect_url = None
+
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        """
+        Returns the URL pattern for this view.
+        """
+        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def get_cancel_url(self):
         if not self.cancel_url:
@@ -601,8 +622,9 @@ class SmartListView(SmartView, ListView):
             return ''
 
 class SmartFormMixin(object):
+    readonly = ()
     field_config = { 'modified_blurb': dict(label="Modified"),
-                     'created_blurb': dict(label="Created") }    
+                     'created_blurb': dict(label="Created") }
 
     def derive_title(self):
         """
@@ -714,7 +736,7 @@ class SmartFormMixin(object):
         Figures out what fields should be readonly.  We iterate our field_config to find all
         that have a readonly of true
         """
-        readonly = []
+        readonly = list(self.readonly)
         for key, value in self.field_config.items():
             if 'readonly' in value and value['readonly']:
                 readonly.append(key)
@@ -813,6 +835,13 @@ class SmartFormMixin(object):
         
         raise ImproperlyConfigured("No redirect location found, override get_success_url to not use redirect urls")
 
+
+    def derive_initial(self):
+        """
+        Returns what initial dict should be passed to our form. By default this is empty.
+        """
+        return dict()
+
     def get_form_kwargs(self):
         """
         We override this, using only those fields specified if they are specified.
@@ -820,7 +849,8 @@ class SmartFormMixin(object):
         Otherwise we include all fields in a standard ModelForm.
         """
         kwargs = super(SmartFormMixin, self).get_form_kwargs()
-        return kwargs;
+        kwargs['initial'] = self.derive_initial()
+        return kwargs
 
 class SmartFormView(SmartFormMixin, SmartView, FormView):
     template_name = 'smartmin/form.html'
@@ -893,10 +923,16 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
 class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = 'smartmin/update.html'
     exclude = ()
-    readonly = ()
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
+
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        """
+        Returns the URL pattern for this view.
+        """
+        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def pre_save(self, obj):
         # auto populate modified_by if it is present
@@ -912,18 +948,6 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
             context['delete_url'] = smart_url(self.delete_url, self.object.id)
             
         return context
-
-    def derive_readonly(self):
-        """
-        Figures out what fields should be readonly.  We iterate our field_config to find all
-        that have a readonly of true
-        """
-        readonly = list(self.readonly)
-        for key, value in self.field_config.items():
-            if 'readonly' in value and value['readonly']:
-                readonly.append(key)
-
-        return readonly
 
     def get_modified_blurb(self, obj):
         return "%s by %s" % (obj.modified_on.strftime("%B %d, %Y at %I:%M %p"), obj.modified_by)
@@ -1200,6 +1224,10 @@ class SmartCRUDL(object):
             if not getattr(view, 'add_button', None) and (action == 'list' and 'create' in self.actions):
                 view.add_button = True
 
+            # set edit_button based on existance of Update view if edit_button not explicitely set
+            if not getattr(view, 'edit_button', None) and (action == 'read' and 'update' in self.actions):
+                view.edit_button = True
+
             # if update or create, set success url if not set
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
                 view.success_url = "@%s.%s_list" % (self.module_name, self.model_name.lower())
@@ -1260,27 +1288,17 @@ class SmartCRUDL(object):
 
         return view
 
-    def pattern_for_action(self, action):
+    def pattern_for_view(self, view, action):
         """
-        Returns the pattern for the passed in action.
+        Returns the URL pattern for the passed in action.
         """
-        if action == 'create':
-            return r'^%s/create/$' % self.path
+        # if this view knows how to define a URL pattern, call that
+        if getattr(view, 'derive_url_pattern', None):
+            return view.derive_url_pattern(self.path, action)
 
-        elif action == 'read':
-            return r'^%s/read/(?P<pk>\d+)/$' % self.path
-
-        elif action == 'update':
-            return r'^%s/update/(?P<pk>\d+)/$' % self.path
-
-        elif action == 'delete':
-            return r'^%s/delete/(?P<pk>\d+)/$' % self.path
-
-        elif action == 'list':
-            return '^%s/$' % self.path
-
+        # otherwise take our best guess
         else:
-            return '^%s/%s/$' % (self.path, action.lower())
+            return r'^%s/%s/$' % (self.path, action)            
 
     def as_urlpatterns(self):
         """
@@ -1291,7 +1309,7 @@ class SmartCRUDL(object):
         # for each of our actions
         for action in self.actions:
             view_class = self.view_for_action(action)
-            view_pattern = self.pattern_for_action(action)
+            view_pattern = self.pattern_for_view(view_class, action)
             name = self.url_name_for_action(action)
             urlpatterns += patterns('', url(view_pattern, view_class.as_view(), name=name))
 

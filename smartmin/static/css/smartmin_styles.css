@@ -670,6 +670,13 @@ td.value_is_active {
     padding: 5px;
 }
 
+table.field_table tr td {
+    padding-left: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
 
-
+table.field_table tr td:first-child {
+    font-weight: bold;
+}
 
