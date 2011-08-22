@@ -49,7 +49,7 @@ def get_class(context, field, obj=None):
     Looks up the class for this field
     """
     view = context['view']
-    return view.lookup_field_class(field, obj)
+    return view.lookup_field_class(field, obj, "field_" + field)
 
 @register.simple_tag(takes_context=True)
 def get_label(context, field, obj=None):

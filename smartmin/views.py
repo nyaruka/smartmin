@@ -645,7 +645,9 @@ class SmartFormMixin(object):
         Returns an instance of the form to be used in this view.
         """
         self.form = super(SmartFormMixin, self).get_form(form_class)
-        
+
+        fields = list(self.derive_fields())
+
         # we specified our own form class, which means we need to apply any field filtering
         # ourselves.. this is ugly but the only way to make exclude and fields work the same
         # despite specifying your own form class
@@ -654,17 +656,15 @@ class SmartFormMixin(object):
             exclude = self.derive_exclude()
             exclude += self.derive_readonly()
 
-            fields = self.fields
-
             # remove any excluded fields
             for field in exclude:
                 if field in self.form.fields:
                     del self.form.fields[field]
             
-            if self.fields:
-                # if we have explicit fields, limit to those as well
+            if fields:
+                # filter out our form fields
                 for name, field in self.form.fields.items():
-                    if not name in self.fields:
+                    if not name in fields:
                         del self.form.fields[name]
 
 
@@ -677,9 +677,8 @@ class SmartFormMixin(object):
         # add the location to our form fields
         self.form.fields['loc'] = location
 
-        if self.fields:
-            self.fields = list(self.fields)
-            self.fields.append('loc')
+        if fields:
+            fields.append('loc')
 
         # provides a hook to programmatically customize fields before rendering
         for (name, field) in self.form.fields.items():
@@ -1198,7 +1197,8 @@ class SmartCRUDL(object):
         """
         Returns the appropriate view class for the passed in action
         """
-        class_name = action.capitalize()
+        # this turns replace_foo into ReplaceFoo and read into Read
+        class_name = "".join([word.capitalize() for word in action.split("_")])
         view = None
 
         # see if we have a custom class defined for this action

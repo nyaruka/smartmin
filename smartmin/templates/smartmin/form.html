@@ -16,6 +16,8 @@
           <div class="form_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
         </div>
 
+        {% block beforefields %}{% endblock %}
+
         <table class="form_table" cellspacing="0" border="1">
           {% if form.non_field_errors %}
             <tr><td class="label"></td>
@@ -23,8 +25,6 @@
                 {{ form.non_field_errors }}
             </td></tr>
           {% endif %}
-
-          {% block beforefields %}{% endblock %}
 
           {% for field in fields %}
           {% with form|field:field as form_field %}
