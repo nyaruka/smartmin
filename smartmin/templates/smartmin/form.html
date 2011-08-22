@@ -11,9 +11,7 @@
       <form id="smartmin_form" method="post" enctype="multipart/form-data">
 
         <div class="form_view_top">
-          <div style="float:right;margin-top:3px">
-            {% block table_header_buttons %}{% endblock %}
-          </div>
+          <div style="float:right;margin-top:3px">{% block table_header_buttons %}{% endblock %}</div>
 
           <div class="form_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
         </div>
@@ -80,9 +78,14 @@
         <div class="form_buttons">
           <input class="button" type="submit" value="{% if object %}Save{% else %}Create{% endif %}"></input>
         </div>
-        <div class="rounded_bottom">&nbsp;</div>
         {% endblock %}
+
+        {% block afterform %}
+        {% endblock %}
+
+        <div class="rounded_bottom">&nbsp;</div>
       </form>
+
     </div>
   </div>
 {% endblock pjax %}

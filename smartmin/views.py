@@ -91,7 +91,6 @@ class SmartView(object):
 
             return has_perm
 
-
     def has_object_permission(self, getter_name):
 
         """
@@ -447,6 +446,10 @@ class SmartListView(SmartView, ListView):
     default_order = None
 
     list_permission = None
+
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        return r'^%s/$' % (path)
 
     def derive_title(self):
         """
