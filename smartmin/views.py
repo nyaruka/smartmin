@@ -366,6 +366,9 @@ class SmartReadView(SmartView, DetailView):
     default_template = 'smartmin/read.html'
     edit_button = False
 
+    field_config = { 'modified_blurb': dict(label="Modified"),
+                     'created_blurb': dict(label="Created") }
+
     def derive_title(self):
         """
         By default we just return the string representation of our object
@@ -392,6 +395,12 @@ class SmartReadView(SmartView, DetailView):
             for field in self.object._meta.fields:
                 fields.append(field.name)
             return fields
+
+    def get_modified_blurb(self, obj):
+        return "%s by %s" % (obj.modified_on.strftime("%B %d, %Y at %I:%M %p"), obj.modified_by)
+
+    def get_created_blurb(self, obj):
+        return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
 
 class SmartDeleteView(SmartView, DetailView, ProcessFormView):
     default_template = 'smartmin/delete_confirm.html'
@@ -854,6 +863,12 @@ class SmartFormMixin(object):
         kwargs['initial'] = self.derive_initial()
         return kwargs
 
+    def derive_button_name(self):
+        """
+        Returns the name for our button
+        """
+        return "Submit"
+
 class SmartFormView(SmartFormMixin, SmartView, FormView):
     template_name = 'smartmin/form.html'
 
@@ -936,6 +951,9 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
         """
         return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
+    def derive_button_name(self):
+        return "Save"
+
     def pre_save(self, obj):
         # auto populate modified_by if it is present
         if hasattr(obj, 'modified_by_id') and self.request.user.id > 0:
@@ -1016,6 +1034,9 @@ class SmartCreateView(SmartModelFormView, CreateView):
             obj.modified_by = self.request.user            
 
         return obj
+
+    def derive_button_name(self):
+        return "Create"
 
     def derive_title(self):
         """

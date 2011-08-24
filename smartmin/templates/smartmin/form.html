@@ -76,7 +76,7 @@
 
         {% block save %}
         <div class="form_buttons">
-          <input class="button" type="submit" value="{% if object %}Save{% else %}Create{% endif %}"></input>
+          <input class="button" type="submit" value="{{ view.derive_button_name }}"></input>
         </div>
         {% endblock %}
 
