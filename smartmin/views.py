@@ -40,7 +40,7 @@ def smart_url(url, id=None):
 class SmartView(object):
     fields = None
     exclude = None
-    field_config = { }
+    field_config = {}
     title = None
     permission = None
     refresh = None
@@ -319,6 +319,9 @@ class SmartView(object):
 
         # add our fields
         self.fields = self.derive_fields()
+
+        # set our blocks
+        context['blocks'] = dict()
 
         # stuff it all in our context
         context['fields'] = self.fields
@@ -642,12 +645,10 @@ class SmartFormMixin(object):
         """
         Derives our title from our object
         """
-        title = super(SmartFormMixin, self).derive_title()
-
-        if not title:
+        if not self.title:
             return "Form"
         else:
-            return title
+            return self.title
     
     def get_form(self, form_class):
         """
@@ -883,12 +884,10 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
         """
         Derives our title from our object
         """
-        title = super(SmartModelFormView, self).derive_title()
-
-        if not title:
+        if not self.title:
             return "Edit %s" % force_unicode(self.model._meta.verbose_name).title()
         else:
-            return title
+            return self.title
     
     def pre_save(self, obj):
         """

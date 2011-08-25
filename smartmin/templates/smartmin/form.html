@@ -19,6 +19,7 @@
         {% block beforefields %}{% endblock %}
 
         <table class="form_table" cellspacing="0" border="1">
+          {% block fields %}
           {% if form.non_field_errors %}
             <tr><td class="label"></td>
               <td colspan=2 class="form_errors">
@@ -63,8 +64,12 @@
             </tr>
           {% endif %}
 
+          {% getblock "after_field_" field %}
+
           {% endwith %}
           {% endfor %}
+
+          {% endblock fields %}
 
           {% block extrafields %}
           {% endblock %}

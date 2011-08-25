@@ -1,6 +1,7 @@
 from django import template
 from datetime import datetime
 from django.utils import simplejson
+from django.template import TemplateSyntaxError
 
 register = template.Library()
 
@@ -119,5 +120,47 @@ class PDBNode(template.Node):
 @register.tag
 def pdb(parser, token):
     return PDBNode()
+
+
+@register.simple_tag(takes_context=True)
+def getblock(context, prefix, suffix=None):
+    key = prefix
+    if suffix:
+        key += str(suffix)
+
+    if not 'blocks' in context:
+        raise TemplateSyntaxError("setblock/endblock can only be used with SmartView or it's subclasses")
+
+    if key in context['blocks']:
+        return context['blocks'][key]
+    else:
+        return ""
+
+def setblock(parser, token):
+    args = token.split_contents()
+    if len(args) != 2:
+        raise TemplateSyntaxError("setblock tag takes one argument, the name of the block got: [%s]" % ",".join(args))
+
+    key = args[1]
+        
+    nodelist = parser.parse(('endsetblock',))
+    parser.delete_first_token()
+    return SetBlockNode(key, nodelist)
+
+class SetBlockNode(template.Node):
+    def __init__(self, key, nodelist):
+        self.key = key
+        self.nodelist = nodelist
+        
+    def render(self, context):
+        if not 'blocks' in context:
+            raise TemplateSyntaxError("setblock/endblock can only be used with SmartView or it's subclasses")
+        
+        output = self.nodelist.render(context)
+        context['blocks'][self.key] = output
+        return ""
+
+# register our tag
+setblock = register.tag(setblock)
 
 
