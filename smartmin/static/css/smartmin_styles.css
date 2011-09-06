@@ -117,6 +117,17 @@ span.label {
     padding-right: 10px;
     padding-top: 16px;
     padding-bottom: 10px;
+    text-align: right;
+}
+
+td.detail_label {
+    font-weight: bold;
+    padding: 5px;
+    text-align: right;
+}
+
+td.detail_value {
+    padding: 5px;
 }
 
 label {

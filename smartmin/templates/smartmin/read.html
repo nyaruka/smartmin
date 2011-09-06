@@ -17,14 +17,21 @@
   </div>
 
   <div class="detail_view">
-    {% block fields %}
-    {% for field in fields %}
-    <div class="row detail_{{field}}">
-      <div class="label">{% get_label field %}:</div>
-      <p>{% get_value object field %}&nbsp;</p>
-    </div>
-    {% endfor %}
+    {% block beforefields %}
     {% endblock %}
+
+    {% block fields %}
+    <div class="detail_table">
+      <table>
+        {% for field in fields %}
+        <tr class="detail_{{field}}">
+          <td class="detail_label">{% get_label field %}:</td>
+          <td class="detail_value">{% get_value object field %}&nbsp;</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endblock %}
+    </div>
 
     {% block extrafields %}
     {% endblock %}

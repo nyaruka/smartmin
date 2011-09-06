@@ -4,6 +4,9 @@ from django.contrib.auth.models import Permission, Group
 from django.conf import settings
 import sys
 
+group_created_count = 0
+perms_created_count = 0
+
 def check_group_permissions(group, permissions):
     """
     Checks the the passed in group has all the passed in permissions, granting them
@@ -15,7 +18,7 @@ def check_group_permissions(group, permissions):
     for permission in permissions:
         splits = permission.split(".")
         if len(splits) != 2 and len(splits) != 3:
-#            sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
+            sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
             continue
 
         app = splits[0]
@@ -32,7 +35,7 @@ def check_group_permissions(group, permissions):
                     codenames.append(perm.codename)
             # otherwise, this is an error, continue
             else:
-#                sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
+                sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
                 continue                
 
         if len(codenames) == 0:
@@ -61,6 +64,11 @@ def check_all_group_permissions(sender, **kwargs):
     """
     Checks that all the permissions specified in our settings.py are set for our groups.
     """
+    global group_created_count
+    if kwargs['created_models'] == group_created_count:
+        return
+    group_created_count = kwargs['created_models']
+    
     config = getattr(settings, 'GROUP_PERMISSIONS', dict())
 
     # for each of our items
@@ -103,6 +111,11 @@ def check_all_permissions(sender, **kwargs):
     This syncdb checks our PERMISSIONS setting in settings.py and makes sure all those permissions
     actually exit.
     """
+    global perms_created_count
+    if kwargs['created_models'] == perms_created_count:
+        return
+    perms_created_count = kwargs['created_models']
+    
     config = getattr(settings, 'PERMISSIONS', dict())
 
     # for each of our items

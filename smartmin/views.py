@@ -45,6 +45,9 @@ class SmartView(object):
     permission = None
     refresh = None
 
+    # set by our CRUDL
+    url_name = None
+
     def __init__(self, *args):
         """
         There are a few variables we want to mantain in the instance, not the
@@ -1255,8 +1258,6 @@ class SmartCRUDL(object):
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
                 view.success_url = "@%s.%s_list" % (self.module_name, self.model_name.lower())
 
-            return view
-
         # otherwise, use our defaults
         else:
             options = dict(model=self.model)
@@ -1308,6 +1309,9 @@ class SmartCRUDL(object):
         if not view:
             # couldn't find a view?  blow up
             raise Exception("No view found for action: %s" % action)
+
+        # set the url name for this view
+        view.url_name = self.url_name_for_action(action)
 
         return view
 
