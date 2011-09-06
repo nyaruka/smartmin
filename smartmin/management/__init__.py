@@ -4,6 +4,11 @@ from django.contrib.auth.models import Permission, Group
 from django.conf import settings
 import sys
 
+# how many models we have seen installed, when this changes we 
+# do the actual check on permissions
+group_created_models = 0
+perms_created_models = 0
+
 def check_group_permissions(group, permissions):
     """
     Checks the the passed in group has all the passed in permissions, granting them
@@ -61,6 +66,13 @@ def check_all_group_permissions(sender, **kwargs):
     """
     Checks that all the permissions specified in our settings.py are set for our groups.
     """
+    global group_created_models
+    
+    # no-op if nothing changed
+    if kwargs['created_models'] == group_created_models:
+        return
+    group_created_models = kwargs['created_models']
+    
     config = getattr(settings, 'GROUP_PERMISSIONS', dict())
 
     # for each of our items
@@ -103,6 +115,13 @@ def check_all_permissions(sender, **kwargs):
     This syncdb checks our PERMISSIONS setting in settings.py and makes sure all those permissions
     actually exit.
     """
+    global perms_created_models
+    
+    # no-op if nothing changed
+    if kwargs['created_models'] == perms_created_models:
+        return
+    perms_created_models = kwargs['created_models']
+    
     config = getattr(settings, 'PERMISSIONS', dict())
 
     # for each of our items
