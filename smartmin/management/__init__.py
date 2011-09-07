@@ -4,8 +4,11 @@ from django.contrib.auth.models import Permission, Group
 from django.conf import settings
 import sys
 
-group_created_count = 0
-perms_created_count = 0
+def is_last_model(kwargs):
+    """
+    Returns whether this is the last post_syncdb called in the application.
+    """
+    return kwargs['app'].__name__ == settings.INSTALLED_APPS[-1] + ".models"
 
 def check_group_permissions(group, permissions):
     """
@@ -64,11 +67,9 @@ def check_all_group_permissions(sender, **kwargs):
     """
     Checks that all the permissions specified in our settings.py are set for our groups.
     """
-    global group_created_count
-    if kwargs['created_models'] == group_created_count:
+    if not is_last_model(kwargs):
         return
-    group_created_count = kwargs['created_models']
-    
+
     config = getattr(settings, 'GROUP_PERMISSIONS', dict())
 
     # for each of our items
@@ -78,10 +79,9 @@ def check_all_group_permissions(sender, **kwargs):
         if created:
             pass
 #            sys.stderr.write("Added %s group\n" % name)
+
         check_group_permissions(group, permissions)
 
-
-HANDLED_MODELS = set()
 
 def add_permission(content_type, permission):
     """
@@ -90,8 +90,6 @@ def add_permission(content_type, permission):
     """
     # bail if we already handled this model
     key = "%s:%s" % (content_type.model, permission)
-    if key in HANDLED_MODELS:
-        return
     
     # build our permission slug
     codename = "%s_%s" % (content_type.model, permission)
@@ -103,18 +101,13 @@ def add_permission(content_type, permission):
                                   name="Can %s %s" % (permission, content_type.name))
 #        sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
 
-    # add this to our cache of handled
-    HANDLED_MODELS.add(key)
-
 def check_all_permissions(sender, **kwargs):
     """
     This syncdb checks our PERMISSIONS setting in settings.py and makes sure all those permissions
     actually exit.
     """
-    global perms_created_count
-    if kwargs['created_models'] == perms_created_count:
+    if not is_last_model(kwargs):
         return
-    perms_created_count = kwargs['created_models']
     
     config = getattr(settings, 'PERMISSIONS', dict())
 
