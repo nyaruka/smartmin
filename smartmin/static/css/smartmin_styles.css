@@ -115,7 +115,7 @@ span.label {
     vertical-align: top;
     padding-left: 18px;
     padding-right: 10px;
-    padding-top: 16px;
+    padding-top: 6px;
     padding-bottom: 10px;
     text-align: right;
 }
@@ -138,14 +138,14 @@ label {
 .form_table td.value {
     font-size: 11px;
     vertical-align: top;
-    padding-top: 20px;
+    padding-top: 10px;
     padding-bottom: 10px;
     text-align: left;
     width: 100%;
 }
 
 .form_table td.readonly {
-    padding-top: 20px;
+    padding-top: 10px;
 }
 
 .form_table td .help {
