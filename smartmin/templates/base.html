@@ -47,9 +47,9 @@
         <div id="login">
           <div>
           {% if request.user and request.user.is_authenticated %}
-          Welcome {{ request.user.username }} | <a href="{% url users_logout %}?go=/">logout</a>
+          Welcome {{ request.user.username }} | <a href="{% url users.user_logout %}?go=/">logout</a>
           {% else %}
-          <a href="{% url users_login %}">Login</a>
+          <a href="{% url users.user_login %}">Login</a>
           {% endif %}
           </div>
         </div>

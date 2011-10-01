@@ -93,8 +93,8 @@ def field(form, field):
     return None
 
 @register.filter
-def map(string, object):
-    return string % object.__dict__
+def map(string, args):
+    return string % args.__dict__
 
 @register.filter
 def field_help(view, field):
@@ -102,6 +102,14 @@ def field_help(view, field):
     Returns the field help for the passed in field
     """
     return view.lookup_field_help(field)
+
+
+@register.filter
+def get(dictionary, key):
+    """
+    Simple dict lookup using two variables
+    """
+    return dictionary[key]
 
 @register.filter
 def field_orderable(view, field):
