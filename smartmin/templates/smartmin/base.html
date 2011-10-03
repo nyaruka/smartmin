@@ -56,6 +56,30 @@
   });
 </script>
 
+{% if refresh %}
+<script>
+function refresh(){
+  var url = "{{url_params|safe}}"
+  {% if page_obj %}
+    url += "page={{page_obj.number}}";
+  {% endif %}
+
+  $.pjax({
+    url: url,
+    data: { 'pjax': "true" },
+    container: '#pjax',
+    push: false,
+    replace: false,
+    timeout: 30000,
+    error: function(){}
+  });
+}
+
+$(document).ready(function(){
+    window.setTimeout(refresh, {{ refresh }});
+});
+</script>
+{% endif %}
 
 {% endblock %}
 

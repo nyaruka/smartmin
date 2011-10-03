@@ -43,7 +43,7 @@ class SmartView(object):
     field_config = {}
     title = None
     permission = None
-    refresh = None
+    refresh = 0
 
     # set by our CRUDL
     url_name = None
@@ -310,6 +310,12 @@ class SmartView(object):
 
         return exclude
 
+    def derive_refresh(self):
+        """
+        Returns how many milliseconds before we should refresh
+        """
+        return self.refresh
+
     def get_context_data(self, **kwargs):
         """
         We supplement the normal context data by adding our fields and labels.
@@ -342,8 +348,9 @@ class SmartView(object):
         context['base_template'] = base_template
 
         # set our refresh if we have one
-        if self.refresh:
-            context['refresh'] = self.refresh
+        refresh = self.derive_refresh()
+        if refresh:
+            context['refresh'] = refresh
 
         return context
 

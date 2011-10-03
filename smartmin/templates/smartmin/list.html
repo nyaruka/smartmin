@@ -133,25 +133,6 @@ $(document).ready(function(){
   });
 </script>
 
-{% if refresh %}
-<script>
-function refresh(){
-  $.pjax({
-    url: "{{url_params|safe}}page={{page_obj.number}}",
-    data: { 'pjax': "true" },
-    container: '#pjax',
-    push: false,
-    replace: false,
-    timeout: 30000,
-    error: function(){}
-  });
-}
-
-$(document).ready(function(){
-    window.setTimeout(refresh, {{ refresh }});
-});
-</script>
-{% endif %}
 {% endblock %}
 
 {% block post-content %}
