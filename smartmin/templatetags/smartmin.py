@@ -146,10 +146,10 @@ def getblock(context, prefix, suffix=None):
 
 def setblock(parser, token):
     args = token.split_contents()
-    if len(args) != 2:
+    if len(args) < 2:
         raise TemplateSyntaxError("setblock tag takes one argument, the name of the block got: [%s]" % ",".join(args))
 
-    key = args[1]
+    key = "".join(args[1:])
         
     nodelist = parser.parse(('endsetblock',))
     parser.delete_first_token()

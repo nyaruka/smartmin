@@ -20,12 +20,19 @@
 
         <table class="form_table" cellspacing="0" border="1">
           {% block fields %}
+
+          {% block beforeformerrors %}
+          {% endblock %}
+
           {% if form.non_field_errors %}
             <tr><td class="label"></td>
               <td colspan=2 class="form_errors">
                 {{ form.non_field_errors }}
             </td></tr>
           {% endif %}
+
+          {% block afterformerrors %}
+          {% endblock %}
 
           {% for field in fields %}
           {% with form|field:field as form_field %}

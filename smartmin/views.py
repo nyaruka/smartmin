@@ -1348,5 +1348,5 @@ class SmartCRUDL(object):
 
         return urlpatterns
 
-                       
-    
+
+
