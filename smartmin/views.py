@@ -17,8 +17,8 @@ from django import forms
 from django.utils import simplejson
 from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import reverse
+from django.contrib import messages
 import string
-
 import widgets
 
 def smart_url(url, id=None):
@@ -648,7 +648,8 @@ class SmartListView(SmartView, ListView):
 class SmartFormMixin(object):
     readonly = ()
     field_config = { 'modified_blurb': dict(label="Modified"),
-                     'created_blurb': dict(label="Created") }
+                     'created_blurb': dict(label="Created")    }
+    success_message = None
 
     def derive_title(self):
         """
@@ -658,6 +659,12 @@ class SmartFormMixin(object):
             return "Form"
         else:
             return self.title
+
+    def derive_success_message(self):
+        """
+        Returns a message to display when this form is successfully saved
+        """
+        self.success_message
     
     def get_form(self, form_class):
         """
@@ -882,6 +889,11 @@ class SmartFormMixin(object):
 class SmartFormView(SmartFormMixin, SmartView, FormView):
     template_name = 'smartmin/form.html'
 
+    def form_valid(self, form):
+        # plug in our success message
+        messages.success(self.request, self.derive_success_message())
+        return super(SmartFormView, self).form_valid(form)
+
 class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
     grant_permissions = None
     javascript_submit = None
@@ -918,6 +930,8 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
         self.save(self.object)
         self.object = self.post_save(self.object)
 
+        messages.success(self.request, self.derive_success_message())
+
         return HttpResponseRedirect(self.get_success_url())
 
     def save_m2m(self):
@@ -947,7 +961,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
 
 class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = 'smartmin/update.html'
-    exclude = ()
+    exclude = ('created_by', 'modified_by')
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
@@ -958,6 +972,13 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
         Returns the URL pattern for this view.
         """
         return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+
+    def derive_success_message(self):
+        # first check whether a default message has been set
+        if self.success_message:
+            return self.success_message
+        else:
+            return "Your %s has been updated." % self.model._meta.verbose_name
 
     def derive_button_name(self):
         return "Save"
@@ -1042,6 +1063,13 @@ class SmartCreateView(SmartModelFormView, CreateView):
             obj.modified_by = self.request.user            
 
         return obj
+
+    def derive_success_message(self):
+        # first check whether a default message has been set
+        if self.success_message:
+            return self.success_message
+        else:
+            return "Your new %s has been saved." % self.model._meta.verbose_name
 
     def derive_button_name(self):
         return "Create"
