@@ -1,5 +1,9 @@
 *.pyc
 *.db
 *~
-proj/*
 env/*
+*#
+smartmin.egg-info
+dist
+docs/_build
+
