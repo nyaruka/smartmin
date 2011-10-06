@@ -664,7 +664,6 @@ class SmartFormMixin(object):
         """
         Returns a message to display when this form is successfully saved
         """
-        import pdb; pdb.set_trace()
         self.success_message
     
     def get_form(self, form_class):
