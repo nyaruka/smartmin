@@ -2,140 +2,133 @@
 
 {% load smartmin %}
 
-{% block pre-content %}
-{% endblock %}
-
-{% block buttons %}
-{% if view.add_button and view.search_fields %}
-<div class="buttons">
-  <a class="button small" href="./create/">Add</a>
-</div>
-{% endif %}
-{% endblock %}
-
-{% block main-content %}
-
+{% block content %}
 {% block pjax %}
 <div id="pjax">
 
-<div class="content">
-  <div class="list_view_top">
+<div class="row">
+  <div class="span10">
     {% if view.search_fields %}
-    <div class="list_view_search" style="float: right">
+    <div class="list-view-search">
       <form method="get">
-        <table cellspacing=0>
-          <tr>
-            <td><input type="text" name="search" value="{{ search }}"/><input type="submit" value="Search" class="button small"/></td>
-          </tr>
-        </table>
+        <fieldset>
+          <input type="text" name="search" value="{{ search }}"/>
+          <input class="btn" type="submit" value="Search" class="button small"/>
+        </fieldset>
       </form>
     </div>
     {% endif %}
-    <div style="float:right;padding-top:3px">
-      {% block table_buttons %}
-      {% if view.add_button and not view.search_fields %}
-      <a class="button small" href="./create/">Add</a>
-      {% endif %}
-      {% endblock table_buttons %}
-    </div>
-
-    <div class="list_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
   </div>
-  {% block pre-table %}{% endblock %}
-  <table class="list_view {% get_list_class object_list %}" cellspacing="0">
-    <thead>
-      <tr>
-        {% for field in fields %}
-        <th class="header_{{field}} {% if view|field_orderable:field %}orderable{% endif %}" id="order_{{field}}">{% if view|field_orderable:field %}<div class="ordered {% if field == order %}{% if order_asc %}ordered_asc{% else %}ordered_dsc{% endif %}{% endif %}"></div>{% endif %}{% get_label field %}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-    {% for obj in object_list %}
-    <tr class="{% cycle 'row2' 'row1' %}">
-      {% for field in fields %}
-      <td class="value_{{field}} {% get_class field obj %} {% if field in link_fields %}clickable{% endif %}">
-          {% if field in link_fields %}<a {% if pjax %}data-pjax='{{ pjax }}'{% endif %} href="{% get_field_link field obj %}">{% endif %}{% get_value obj field %}{% if field in link_fields %}</a>{% endif %}
-      </td>
-      {% endfor %}
-    </tr>
-    {% empty %}
-    <tr class="empty_list">
-      {% for field in fields %}
-      <td></td>
-      {% endfor %}
-    </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  <div class="list_view_bottom">
-    {% if not paginator or paginator.num_pages <= 1 %}
-    <div class="not_paginated">
-    {{ object_list|length }} result{% if object_list|length == 0 or object_list|length > 1 %}s{% endif %}
-    </div>
-    {% else %}
-    <div class="paginated">
-      Results {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }}
-      <div class="paginator">
-        <ul>
-          {% if page_obj.has_previous %}
-            <a href="{{url_params|safe}}page={{page_obj.previous_page_number}}"><li>&laquo;</li></a>          
-          {% endif %}
 
-          {% for page_num in paginator.page_range %}
-            {% if page_num < 10 %}
-              {% if not page_num == page_obj.number %}
-              <a href="{{url_params|safe}}page={{page_num}}"><li>{{ page_num }}</li></a>
-              {% else %}
-              <li class="current_page">{{ page_num }}</li>
-              {% endif %}
-            {% endif %}
+  <div class="span4 buttons">
+    {% block table-buttons %}
+    {% if view.add_button %}
+    <a class="btn primary pull-right" href="./create/">Add</a>
+    {% endif %}
+    {% endblock table-buttons %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="span14">
+    {% block pre-table %}{% endblock %}
+    <table class="list-table {% get_list_class object_list %} zebra-striped" cellspacing="0">
+      <thead>
+        <tr>
+          {% for field in fields %}
+          <th class="header-{{field}} {% if view|field_orderable:field %}header {% if field == order %}{% if order_asc %}headerSortUp{% else %}headerSortDown{% endif %}{% endif %}{% endif %}" id="header-{{field}}">{% get_label field %}</th>
           {% endfor %}
-              
-          {% if page_obj.has_next %}
-              <a href="{{url_params|safe}}page={{page_obj.next_page_number}}"><li>&raquo;</li></a>
+        </tr>
+      </thead>
+      <tbody>
+        {% for obj in object_list %}
+        <tr class="{% cycle 'row2' 'row1' %} {% if not obj.is_active %}inactive{% endif %}">
+          {% for field in fields %}
+          <td class="value-{{field}} {% get_class field obj %}{% if field in link_fields %} clickable{% endif %}">
+            {% if field in link_fields %}<a {% if pjax %}data-pjax='{{ pjax }}'{% endif %} href="{% get_field_link field obj %}">{% endif %}{% get_value obj field %}{% if field in link_fields %}</a>{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% empty %}
+        <tr class="empty_list">
+          {% for field in fields %}
+          <td></td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+        {% block extra-rows %}
+        {% endblock extra-rows %}
+      </tbody>
+    </table>
+
+    {% block post-table %}{% endblock post-table %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="span7">
+    <div class="pagination-text">
+    {% if not paginator or paginator.num_pages <= 1 %}
+    {{ object_list|length }} result{% if object_list|length == 0 or object_list|length > 1 %}s{% endif %}
+    {% else %}
+    Results {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }}
+    {% endif %}
+    </div>
+  </div>
+  <div class="span7">
+    {% if paginator and paginator.num_pages > 1 %}
+    <div class="pagination pull-right">
+      <ul>
+        {% if page_obj.has_previous %}
+        <li class="prev"><a href="{{url_params|safe}}page={{page_obj.previous_page_number}}">&larr; Previous</a></li>
+        {% else %}
+        <li class="prev disabled"><a href="#">&larr; Previous</a></li>
+        {% endif %}
+
+        {% for page_num in paginator.page_range %}
+          {% if page_num < 10 %}
+            {% if not page_num == page_obj.number %}
+            <li><a href="{{url_params|safe}}page={{page_num}}">{{ page_num }}</a></li>
+            {% else %}
+            <li class="active"><a href="#">{{ page_num }}</a></li>
+            {% endif %}
           {% endif %}
-        </ul>
-      </div>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="next"><a href="{{url_params|safe}}page={{page_obj.next_page_number}}">Next &rarr;</a></li>
+        {% else %}
+        <li class="next disabled"><a href="#">Next &rarr;</a></li>
+        {% endif %}
+      </ul>
     </div>
     {% endif %}
   </div>
-  {% endblock %}
 </div>
-{% endblock %}
+</div>
+</div>
+{% endblock pjax %}
+{% endblock content %}
 
-{% block extrascript %}
+{% block extra-script %}
 {{ block.super }}
 
 <script>
-$(document).ready(function(){
-   $("th.orderable").click(function(evt){
-     // build up our ordering
-     var field = evt.target.id.substr(evt.target.id.indexOf("_")+1)
+  $(document).ready(function(){
+    $("th.header").click(function(evt){
+      // build up our ordering
+      var field = evt.target.id.substr(evt.target.id.indexOf("-")+1)
 
-     {% if order_asc %}
-     if (field == "{{order}}"){
+      {% if order_asc %}
+       if (field == "{{order}}"){
          field = "-" + field;
-     } 
-     {% endif %}
+       } 
+       {% endif %}
 
-     document.location = "{{url_params|safe}}_order=" + field;
-   });
-
-  $("th.orderable").hover(
-    function(evt){
-      this.style.cursor="pointer";
-      $(evt.target).children(".ordered").addClass("show_order");
-    },
-    function(evt){
-      $(evt.target).children(".ordered").removeClass("show_order");
+       document.location = "{{url_params|safe}}_order=" + field;
     });
   });
 </script>
 
 {% endblock %}
-
-{% block post-content %}
-{% endblock %}
-
-

@@ -2,53 +2,46 @@
 
 {% load smartmin %}
 
-{% block main-content %}
+{% block content %}
 {% block pjax %}
 
-<div id="pjax">
-<div class="content">
+<div id="pjax" id="read-view">
+  <div class="row">
+    <div class="span9 buttons">
 
-  <div class="form_view_top">
-    <div class="right">
-    {% block read-buttons %}
+      {% block read-buttons %}
       {% if view.edit_button %}
-      <a class="small button" href="../../update/{{ object.id }}/">edit</a>
+      <a class="btn primary pull-right" href="../../update/{{ object.id }}/">edit</a>
       {% endif %}
-    {% endblock %}
-    </div>
-    <div class="form_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
-  </div>
-
-  <div class="detail_view">
-    {% block beforefields %}
-    {% endblock %}
-
-    {% block fields %}
-    <div class="detail_table">
-      <table>
-        {% for field in fields %}
-        <tr class="detail_{{field}}">
-          <td class="detail_label">{% get_label field %}:</td>
-          <td class="detail_value">{% get_value object field %}&nbsp;</td>
-        </tr>
-        {% endfor %}
-      </table>
       {% endblock %}
     </div>
-
-    {% block extrafields %}
-    {% endblock %}
-
-    {% block afterfields %}
-    {% endblock %}
   </div>
 
-  {% block bottom %}
-  <div class="form_view_bottom rounded_bottom">
-    &nbsp;
+  <div class="row">
+    <div class="span9">
+      {% block pre-fields %}
+      {% endblock pre-fields %}
+
+      {% block fields %}
+      <table>
+        <tbody>
+          {% for field in fields %}
+          <tr class="detail_{{field}}">
+            <td class="detail_label">{% get_label field %}:</td>
+            <td class="detail_value">{% get_value object field %}&nbsp;</td>
+          </tr>
+          {% endfor %}
+
+        {% block extra-fields %}
+        {% endblock extra-fields %}
+        </tbody>
+      </table>
+      {% endblock fields %}
+
+      {% block post-fields %}
+      {% endblock %}
+    </div>
   </div>
-  {% endblock %}
-</div>
 </div>
 
 {% endblock %}

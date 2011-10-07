@@ -1,19 +1,14 @@
 <!doctype html>
-<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
-<!--[if lt IE 7 ]> <html class="no-js ie6"> <![endif]-->
-<!--[if IE 7 ]>    <html class="no-js ie7"> <![endif]-->
-<!--[if IE 8 ]>    <html class="no-js ie8"> <![endif]-->
-<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-
-  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-       Remove this if you use the .htaccess -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
   <title>{% block title %}Smartmin{% endblock %}</title>
   <meta name="description" content="">
   <meta name="author" content="">
+
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
 
   <!-- Mobile viewport optimized: j.mp/bplateviewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,107 +19,103 @@
   <!-- CSS: implied media="all" -->
   {# load compress #}
   {# compress css #}
-  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/reset.css">
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.css">
   <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/smartmin_styles.css">
   <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/styles.css">
-  {% block extrastyle %}{% endblock %}
+  {% block extra-style %}{% endblock %}
 
   {# endcompress #}
-
-  <!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
-  <script src="{{ STATIC_URL }}js/libs/modernizr-1.6.min.js"></script>
-
 </head>
 
-  <body lang="en">
-    <div id="container">
+<body>
 
-      <div id="main">
-
-        <div id="header">
-
+  <div class="topbar">
+    <div class="fill">
+      <div class="container">
+        <a class="brand" href="http://www.nyaruka.com/">Smartmin</a>
+        <ul class="nav">
+          <li><a href="/">Home</a></li>
+        </ul>
+        
         {% block login %}
-        <div id="login">
-          <div>
+        <div class="nav secondary-nav">          
           {% if request.user and request.user.is_authenticated %}
-          Welcome {{ request.user.username }} | <a href="{% url users.user_logout %}?go=/">logout</a>
+          <a href="{% url users.user_logout %}?go=/">Welcome {{ request.user.username }} | logout</a>
           {% else %}
           <a href="{% url users.user_login %}">Login</a>
           {% endif %}
-          </div>
         </div>
         {% endblock %}
+      </div>
+    </div>
+  </div>
+</div>
 
-        {% block logo %}
-	<div id="logo">
-          <a href="/"><img border="0" src="{{ STATIC_URL }}img/smartmin.png"/></a>
-        </div>
-        {% endblock %}
-        </div>
-
-        {% load smartmin %}
+<div class="container">
+  {% load smartmin %}
       
-        {% block messages %}
-        {% if messages %}
-        <ul class="messages">
-          {% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %}
-        {% endblock %}
+  {% block content-div %}
+  <div class="content">
+    {% block messages %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert-message success fade in" data-alert="alert">
+      <a class="close" href="#">×</a>
+      <p>{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endblock messages %}
 
-        {% block content %}{% endblock %}
+    {% block pre-content %}
+    {% endblock %}
 
-        <div id="footer">
-          {% block footer %}
-          <a href="http://www.nyaruka.com">
-            <a href="http://www.nyaruka.com/"><div class="right" id="nyaruka_footer"></div></a>
-          </a>
-          {% endblock %}
-        </div><!-- end of #footer -->
-      </div><!-- end of #main -->
-    </div> <!-- end of #container -->
+    {% block content %}
+    {% endblock %}
 
-  <!-- JavaScript at the bottom for fast page loading, conditional based on whether we are serving locally -->
-  <script>
+    {% block post-content %}
+    {% endblock %}
+  </div>
+  {% endblock %}
+
+  <footer>
+    {% block footer %}
+    <a href="http://www.nyaruka.com/"><div class="right" id="footer"></div></a>
+    {% endblock %}
+  </footer>
+  
+</div> <!-- /container -->
+
+<!-- JavaScript at the bottom for fast page loading, conditional based on whether we are serving locally -->
+<script>
   if (window.location.hostname == "localhost"){
-    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.5.0.js"%3E%3C/script%3E'));
+  document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.5.0.js"%3E%3C/script%3E'));
   } else {
-    document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"%3E%3C/script%3E'));
+  document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"%3E%3C/script%3E'));
   }
-  </script>
+</script>
 
-  {# compress js #}
+{# compress js #}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.pjax.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/scripts.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-alerts.js"></script>
 
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.pjax.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/scripts.js"></script>
+{# media associated with any form we are displaying #}
+{% if form %}
+{{ form.media }}
+{% endif %}
 
-  {# media associated with any form we are displaying #}
-  {% if form %}
-  {{ form.media }}
-  {% endif %}
+{% block extra-script %}{% endblock %}
+{% block script %}{% endblock %}
+{# endcompress #}
 
-  {% block extrascript %}{% endblock %}
-  {% block script %}{% endblock %}
-
-  {# endcompress #}
-
-  <!-- end scripts-->
-
-  <!--[if lt IE 7 ]>
-    <script src="{{ STATIC_URL }}js/libs/dd_belatedpng.js"></script>
-    <script>DD_belatedPNG.fix('img, .png_bg'); // Fix any <img> or .png_bg bg-images. Also, please read goo.gl/mZiyb </script>
-  <![endif]-->
-
-
-  <!-- mathiasbynens.be/notes/async-analytics-snippet Change UA-XXXXX-X to be your site's ID -->
-  <!--script type="text/javascript">
+<!-- mathiasbynens.be/notes/async-analytics-snippet Change UA-XXXXX-X to be your site's ID -->
+<!--script type="text/javascript">
     var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
     g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
     s.parentNode.insertBefore(g,s)}(document,'script'));
-  </script-->
+    </script-->
 
 </body>
 </html>

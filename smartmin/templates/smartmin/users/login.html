@@ -5,44 +5,35 @@
 {% block login %}{% endblock %}
 
 {% block content %}
-<div id="login_box">
-<form method="post">
-<div class="login_header rounded_top">
-Login
-</div>
-<table class="form_table login" cellspacing="0">
-{% for field, errors in form.errors.items %}
-{% if field == '__all__' %}
-<tr>
-  <td colspan='2' class="errors form_errors">
-    <ul class="errorlist">
-    {% for error in errors %}
-    <li>{{ error }}</li>
-    {% endfor %}
-    </ul>
-  </td>
-</tr>
-    
-{% endif %}
-{% endfor %}
+<div class="row">
 
-{% for field in form %}
-<tr>
-  <td class="label">{{ field.label }}</td>
-  <td class="value">
-    {{ field }}
-    {% if field.errors %}
-    {{ field.errors }}
-    {% endif %}
-  </td>
-</tr>
-{% endfor %}
-</table>
-<div class="login_footer rounded_bottom">
-  {% csrf_token %}
-  <input class="button" type="submit" value="Login"></input></td></tr>
-</div>
+  <div class="span6 offset4">
+    <div class="page-header"><h3>Sign in</h3></div>
 
-</form>
+    <form method="post" class="form-stacked" id="login-form">
+      {% for field, errors in form.errors.items %}
+      {% if field == '__all__' %}
+      <div class="alert-message error form-errors">
+        {{ errors }}
+      </div>
+      {% endif %}
+      {% endfor %}
+      
+      <fieldset>
+        {% for field in form %}
+        <div class="clearfix {% if field.error %}error{% endif %}">
+          <label for="{{ field.name }}">{{ field.label }}</label>
+          <div class="input">{{ field }}</div>
+          {% if field.error %}
+          <span class="help-inline">{{ field.error }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% csrf_token %}
+        <input type="submit" class="btn primary" value="Login">
+      </fieldset>
+    </form>
+  </div>
+
 </div>
 {% endblock %}
