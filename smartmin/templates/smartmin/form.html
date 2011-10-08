@@ -62,10 +62,13 @@
     {% endblock post-fields %}
 
     {% csrf_token %}
+
+    {% block form-buttons %}
     <div class="actions">
       <input type="submit" class="btn primary" value="Save Changes">
       <a class="btn" onclick="javascript:history.go(-1)">Cancel</a>
     </div>
+    {% endblock %}
   </form>
 
   {% block post-form %}{% endblock post-form %}

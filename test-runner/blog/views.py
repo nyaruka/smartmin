@@ -6,7 +6,7 @@ class PostCRUDL(SmartCRUDL):
     permissions = True
 
     class List(SmartListView):
-        fields = ('title', 'tags', 'created_by')
+        fields = ('title', 'tags', 'created_on', 'created_by')
         search_fields = ('title__icontains', 'body__icontains')
         default_order = 'title'
 

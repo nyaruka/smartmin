@@ -172,6 +172,10 @@ PERMISSIONS = {
           'list'),  # can view a list of the objects
 }
 
+ANONYMOUS_PERMISSIONS = (
+    'blog.post_read',
+)
+
 # assigns the permissions that each group should have, here creating an Administrator group with 
 # authority to create and change users
 GROUP_PERMISSIONS = {
