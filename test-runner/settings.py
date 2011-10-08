@@ -11,10 +11,10 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'blog.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'tnsglass',                      # Or path to database file if using sqlite3.
+        'USER': 'tnsglass',                      # Not used with sqlite3.
+        'PASSWORD': 'nyaruka',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -152,6 +152,10 @@ LOGGING = {
     }
 }
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 # create the smartmin CRUDL permissions on all objects
 PERMISSIONS = {
@@ -162,11 +166,16 @@ PERMISSIONS = {
           'list'),  # can view a list of the objects
 }
 
+# permissions for users that aren't logged in
+ANONYMOUS_PERMISSIONS = (
+    'blog.post_read',
+)
+
 # assigns the permissions that each group should have, here creating an Administrator group with 
 # authority to create and change users
 GROUP_PERMISSIONS = {
     "Administrator": ('auth.user.*',),
-    "Readers": ('blog.post_read',),
+    "Editors": ('blog.post_update',),
     "Authors": ('blog.post.*',),
 }
 

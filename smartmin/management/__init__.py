@@ -1,7 +1,9 @@
 from django.db.models.signals import post_syncdb
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Permission, Group, User
 from django.conf import settings
+from guardian.shortcuts import assign, remove_perm
+from guardian.utils import get_anonymous_user
 import sys
 
 def is_last_model(kwargs):
@@ -10,12 +12,12 @@ def is_last_model(kwargs):
     """
     return kwargs['app'].__name__ == settings.INSTALLED_APPS[-1] + ".models"
 
-def check_group_permissions(group, permissions):
+def check_role_permissions(role, permissions, current_permissions):
     """
-    Checks the the passed in group has all the passed in permissions, granting them
-    if necessary.
+    Checks the the passed in role (can be user, group or AnonymousUser)  has all the passed 
+    in permissions, granting them if necessary.
     """
-    group_permissions = []
+    role_permissions = []
     
     # get all the current permissions, we'll remove these as we verify they should still be granted
     for permission in permissions:
@@ -45,23 +47,22 @@ def check_group_permissions(group, permissions):
             continue                            
 
         for codename in codenames:
-            # this marks all the permissions which should remain
-            group_permissions.append("%s.%s" % (app, codename))
+            # the full codename for this permission
+            full_codename = "%s.%s" % (app, codename)
             
-            if not group.permissions.filter(codename=codename, content_type__app_label=app):
-                try:
-                    group.permissions.add(Permission.objects.get(codename=codename, content_type__app_label=app))
-#                    sys.stderr.write(" ++ added %s to %s group\n" % (codename, group.name))
-                except Permission.DoesNotExist:
-                    pass
-#                    sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
+            # this marks all the permissions which should remain
+            role_permissions.append(full_codename)
+
+            try:
+                assign(full_codename, role)
+            except Permission.DoesNotExit:
+                sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
 
     # remove any that are extra
-    for permission in group.permissions.all():
+    for permission in current_permissions:
         key = "%s.%s"  % (permission.content_type.app_label, permission.codename)
-        if not key in group_permissions:
-            group.permissions.remove(permission)
-#            sys.stderr.write(" -- removed %s from %s group\n" % (key, group.name))            
+        if not key in role_permissions:
+            remove_perm(key, role)
 
 def check_all_group_permissions(sender, **kwargs):
     """
@@ -80,8 +81,19 @@ def check_all_group_permissions(sender, **kwargs):
             pass
 #            sys.stderr.write("Added %s group\n" % name)
 
-        check_group_permissions(group, permissions)
+        check_role_permissions(group, permissions, group.permissions.all())
 
+def check_all_anon_permissions(sender, **kwargs):
+    """
+    Checks that all our anonymous permissions have been granted
+    """
+    if not is_last_model(kwargs):
+        return
+
+    permissions = getattr(settings, 'ANONYMOUS_PERMISSIONS', [])
+    anon_user = get_anonymous_user()
+
+    check_role_permissions(anon_user, permissions, anon_user.get_all_permissions())
 
 def add_permission(content_type, permission):
     """
@@ -135,3 +147,4 @@ def check_all_permissions(sender, **kwargs):
 
 post_syncdb.connect(check_all_permissions)
 post_syncdb.connect(check_all_group_permissions)
+post_syncdb.connect(check_all_anon_permissions)

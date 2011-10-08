@@ -12,9 +12,9 @@ class SmartminTest(TestCase):
         # no groups
         self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'plain')
 
-        # part of the Reader group
-        self.reader = User.objects.create_user('reader', 'reader@group.com', 'reader')
-        self.reader.groups.add(Group.objects.get(name="Readers"))
+        # part of the editor group
+        self.editor = User.objects.create_user('editor', 'editor@group.com', 'editor')
+        self.editor.groups.add(Group.objects.get(name="Editors"))
 
         # part of the Author group
         self.author = User.objects.create_user('author', 'author@group.com', 'author')
@@ -53,27 +53,41 @@ class SmartminTest(TestCase):
         response = self.client.get(create_url)
         self.assertIsLogin(response)
 
-        # logged in as reader, still can't create
+        # logged in as editor, still can't create
         self.assertNoAccess(self.plain, create_url)
-        self.assertNoAccess(self.reader, create_url)
+        self.assertNoAccess(self.editor, create_url)
 
         # authors and superusers can create posts
         self.assertHasAccess(self.author, create_url)
         self.assertHasAccess(self.superuser, create_url)
 
-        # now test reading posts
-        read_url = reverse('blog.post_read', args=[self.post.id])
+        # updating posts 
+        update_url = reverse('blog.post_update', args=[self.post.id])
 
         # if not logged in can't read
         self.client.logout()
-        response = self.client.get(read_url)
+        response = self.client.get(update_url)
         self.assertIsLogin(response)
         
-        # not part of any group, can't read either
-        self.assertNoAccess(self.plain, read_url)
+        # plain user can't see it either
+        self.assertNoAccess(self.plain, update_url)
 
-        # readers can view posts, as can authors and superusers
-        self.assertHasAccess(self.reader, read_url)
+        # but editors can, as can authors and superusers
+        self.assertHasAccess(self.editor, update_url)
+        self.assertHasAccess(self.author, update_url)
+        self.assertHasAccess(self.superuser, update_url)
+
+        # now test reading posts
+        read_url = reverse('blog.post_read', args=[self.post.id])
+
+        # if not logged in can still read
+        self.client.logout()
+        response = self.client.get(read_url)
+        self.assertEquals(200, response.status_code)
+        
+        # everybody else can read too
+        self.assertHasAccess(self.plain, read_url)
+        self.assertHasAccess(self.editor, read_url)
         self.assertHasAccess(self.author, read_url)
         self.assertHasAccess(self.superuser, read_url)
 

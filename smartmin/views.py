@@ -5,7 +5,7 @@ from django.views.generic.edit import FormMixin, ModelFormMixin, UpdateView, Cre
 from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
 import django.forms.models as model_forms
-from guardian.decorators import permission_required
+from guardian.utils import get_anonymous_user
 from django.utils.http import urlquote
 from django.db.models import Q
 from django.conf import settings
@@ -73,16 +73,21 @@ class SmartView(object):
         """
         Figures out if the current user has permissions for this view.
         """
+        self.kwargs = kwargs
+        self.args = args
+        self.request = request
+
         if not self.permission:
             return True
         else:
-            # we first check to see if we have full permission
-            has_perm = request.user.has_perm(self.permission)
+            # first check our anonymous permissions
+            real_anon = get_anonymous_user()
+            has_perm = real_anon.has_perm(self.permission)            
 
-            self.kwargs = kwargs
-            self.args = args
-            self.request = request
-            
+            # if not, then check our real permissions
+            if not has_perm:
+                has_perm = request.user.has_perm(self.permission)
+
             # if not, perhaps we have it per object
             if not has_perm:
                 has_perm = self.has_object_permission('get_object')
