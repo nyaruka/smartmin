@@ -470,7 +470,10 @@ class SmartListView(SmartView, ListView):
 
     @classmethod
     def derive_url_pattern(cls, path, action):
-        return r'^%s/$' % (path)
+        if action == 'list':
+            return r'^%s/$' % (path)
+        else:
+            return r'^%s/%s/$' % (path, action)
 
     def derive_title(self):
         """
@@ -614,7 +617,11 @@ class SmartListView(SmartView, ListView):
         """
         order = self.derive_ordering()
         if order:
-            queryset = queryset.order_by(order)
+            # if our order is a single string, convert to a simple list
+            if isinstance(order, (str, unicode)):
+                order = (order,)
+
+            queryset = queryset.order_by(*order)
 
         return queryset
 
