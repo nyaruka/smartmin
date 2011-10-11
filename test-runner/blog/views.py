@@ -4,6 +4,7 @@ from .models import *
 class PostCRUDL(SmartCRUDL):
     model = Post
     permissions = True
+    actions = ('create', 'read', 'update', 'delete', 'list', 'author')
 
     class List(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')
@@ -15,6 +16,10 @@ class PostCRUDL(SmartCRUDL):
                 return obj.body
             else:
                 return " ".join(obj.body.split(" ")[0:10]) + ".."
+
+    class Author(SmartListView):
+        fields = ('title', 'tags', 'created_on', 'created_by')
+        default_order = ('created_by__username', 'order')
 
     class Update(SmartUpdateView):
         success_message = "Your blog post has been updated."
