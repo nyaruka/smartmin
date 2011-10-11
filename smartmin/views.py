@@ -1303,6 +1303,10 @@ class SmartCRUDL(object):
         else:
             options = dict(model=self.model)
 
+            # if this is an update or create, and we have a list view, then set the default to that
+            if action == 'update' or action == 'create' and 'list' in self.actions:
+                options['success_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+
             # set permissions if appropriate
             if self.permissions:
                 options['permission'] = self.permission_for_action(action)
