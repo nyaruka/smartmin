@@ -126,13 +126,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_nose',
 
     'guardian',
     'smartmin',
     'smartmin.users',
 
     'blog',
-    
+
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -170,6 +171,7 @@ PERMISSIONS = {
           'update', # can update an object
           'delete', # can delete an object,
           'list'),  # can view a list of the objects
+    'blog.post': ('author',)
 }
 
 ANONYMOUS_PERMISSIONS = (
@@ -186,3 +188,10 @@ GROUP_PERMISSIONS = {
 
 ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
+
+#-----------------------------------------------------------------------------------
+# Django-Nose config
+#-----------------------------------------------------------------------------------
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
