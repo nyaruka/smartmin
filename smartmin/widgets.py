@@ -58,10 +58,14 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         self.height = thumb_height 
         super(ImageThumbnailWidget, self).__init__({}) 
 
-    def render(self, name, value, attrs=None): 
-        thumb_html = '' 
+    def render(self, name, value, attrs=None):
+        thumb_html = '<table><tr>'
         if value and hasattr(value, "url"): 
-            thumb_html = '<img src="%s" width="%s" width="%s"style="float:left;padding-right:10px;" />' % (value.url, self.width, self.height) 
-        return mark_safe("%s%s" % (thumb_html,
-                                   super(ImageThumbnailWidget, self).render(name, value, attrs)))        
+            thumb_html += '<td><img src="%s" width="%s" width="%s" /></td>' % (value.url, self.width, self.height) 
+
+        thumb_html += '<td><input type="checkbox" name="%s-clear" /> Clear' % name
+        thumb_html += '<input type="file" name="%s" /></td>' % name
+        thumb_html += '</tr></table>'
+
+        return mark_safe(unicode('<div class="image-picker">%s</div>' % thumb_html))
 

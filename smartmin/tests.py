@@ -139,7 +139,23 @@ class SmartminTest(TestCase):
         self.assertEquals(post4, posts[3])
         self.assertEquals(post2, posts[4])
         
+    def test_success_url(self):
+        self.client.login(username='author', password='author')
+        
+        post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
+        response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
+        
+        self.assertEquals(reverse('blog.post_list'), response.request['PATH_INFO'])
         
         
+        
+        
+
+
+
+
+
+
+
 
 
