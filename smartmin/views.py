@@ -657,6 +657,7 @@ class SmartFormMixin(object):
     field_config = { 'modified_blurb': dict(label="Modified"),
                      'created_blurb': dict(label="Created")    }
     success_message = None
+    submit_button_name = "Submit"
 
     def derive_title(self):
         """
@@ -887,11 +888,16 @@ class SmartFormMixin(object):
         kwargs['initial'] = self.derive_initial()
         return kwargs
 
-    def derive_button_name(self):
+    def derive_submit_button_name(self):
         """
         Returns the name for our button
         """
-        return "Submit"
+        return self.submit_button_name
+
+    def get_context_data(self, **kwargs):
+        context = super(SmartFormMixin, self).get_context_data(**kwargs)
+        context['submit_button_name'] = self.derive_submit_button_name()
+        return context
 
 class SmartFormView(SmartFormMixin, SmartView, FormView):
     template_name = 'smartmin/form.html'
@@ -969,6 +975,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
 class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = 'smartmin/update.html'
     exclude = ('created_by', 'modified_by')
+    submit_button_name = "Save Changes"
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
@@ -986,9 +993,6 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
             return self.success_message
         else:
             return "Your %s has been updated." % self.model._meta.verbose_name
-
-    def derive_button_name(self):
-        return "Save"
 
     def pre_save(self, obj):
         # auto populate modified_by if it is present
@@ -1059,6 +1063,7 @@ class SmartMultiFormView(SmartView, TemplateView):
 class SmartCreateView(SmartModelFormView, CreateView):
     default_template = 'smartmin/create.html'
     exclude = ('created_by', 'modified_by', 'is_active')
+    submit_button_name = "Create"
 
     def pre_save(self, obj):
         # auto populate created_by if it is present
@@ -1077,9 +1082,6 @@ class SmartCreateView(SmartModelFormView, CreateView):
             return self.success_message
         else:
             return "Your new %s has been saved." % self.model._meta.verbose_name
-
-    def derive_button_name(self):
-        return "Create"
 
     def derive_title(self):
         """

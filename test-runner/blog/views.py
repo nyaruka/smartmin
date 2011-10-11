@@ -19,3 +19,6 @@ class PostCRUDL(SmartCRUDL):
     class Update(SmartUpdateView):
         success_message = "Your blog post has been updated."
 
+    class Create(SmartCreateView):
+        submit_button_name = "Create New Post"
+

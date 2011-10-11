@@ -146,6 +146,12 @@ class SmartminTest(TestCase):
         response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
         
         self.assertEquals(reverse('blog.post_list'), response.request['PATH_INFO'])
+
+    def test_submit_button_name(self):
+        self.client.login(username='author', password='author')
+
+        response = self.client.get(reverse('blog.post_create'))
+        self.assertContains(response, "Create New Post")
         
         
         
