@@ -87,3 +87,15 @@ tr.inactive td {
 tr.inactive td a {
     color: #ccc;
 }
+
+.image-picker table td {
+    border: 0px;
+    padding: 0px;
+    vertical-align: bottom;
+}
+
+.image-picker table {
+    border: 0px;
+    margin-bottom: 0px;
+}
+
