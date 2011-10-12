@@ -198,6 +198,70 @@ class SmartminTest(TestCase):
         
         
 
+class UserTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.superuser = User.objects.create_user('superuser', 'superuser@group.com', 'superuser')
+        self.superuser.is_superuser = True
+        self.superuser.save()
+
+    def test_crudl(self):
+        self.client.login(username='superuser', password='superuser')
+
+        post_data = dict(username='steve',
+                         new_password='apple',
+                         first_name='Steve',
+                         last_name='Jobs',
+                         groups=Group.objects.get(name='Administrator').id,
+                         email='steve@apple.com')
+
+        response = self.client.post(reverse('smartmin.user_create'), post_data, follow=True)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue('form' not in response.context)
+
+        # make sure the user was created
+        steve = User.objects.get(username='steve')
+
+        # create another user manually, make him inactive
+        woz = User.objects.create_user('woz', 'woz@apple.com', 'woz')
+        woz.is_active = False
+        woz.save()
+
+        # list our users
+        response = self.client.get(reverse('smartmin.user_list'))
+        users = response.context['user_list']
+
+        # results should be sorted by username
+        self.assertEquals(2, len(users))
+        self.assertEquals(steve, users[0])
+        self.assertEquals(woz, users[1])
+
+        # check our content too
+        self.assertContains(response, 'woz')
+        self.assertContains(response, 'steve')
+
+        # update steve, put him in a different group and change his password
+        post_data['groups'] = Group.objects.get(name='Editors').id
+        post_data['new_password'] = 'google'
+
+        # need is active here or steve will be marked inactive
+        post_data['is_active'] = '1'
+
+        response = self.client.post(reverse('smartmin.user_update', args=[steve.id]), post_data, follow=True)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue('form' not in response.context)
+
+        # check that steve's group changed
+        steve = User.objects.get(pk=steve.id)
+        groups = steve.groups.all()
+        self.assertEquals(1, len(groups))
+        self.assertEquals(Group.objects.get(name='Editors'), groups[0])
+
+        # assert steve can login with 'google' now
+        self.assertTrue(self.client.login(username='steve', password='google'))
+
+
 
 
 
