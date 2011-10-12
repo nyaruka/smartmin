@@ -99,3 +99,18 @@ tr.inactive td a {
     margin-bottom: 0px;
 }
 
+.input ul li {
+    display: inline-block;
+}
+
+.input ul li label {
+    text-align: left;
+    padding-right: 10px;
+}
+
+.input ul {
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
