@@ -53,7 +53,8 @@
       {% else %}
       <div class="clearfix form-field">
         <label for="{{ field.name }}">{% get_label field %}</label>
-        <div class="input">{% get_value_from_view field %}
+        <div class="input">
+          <span class="uneditable-input">{% get_value_from_view field %}</span>
           {% with view|field_help:field as help %}
           {% if help %}
           <span class="help-block">{{ help }}</span>
