@@ -25,7 +25,7 @@ class SmartminTest(TestCase):
         self.superuser.is_superuser = True
         self.superuser.save()
 
-        self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post", tags="testing",
+        self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post", tags="testing", order=0,
                                         created_by=self.author, modified_by=self.author)
 
     def assertRedirect(self, response, url):
@@ -94,7 +94,7 @@ class SmartminTest(TestCase):
     def test_create(self):
         self.client.login(username='author', password='author')
         
-        post_data = dict(title="New Post", body="This is a new post", tags="post")
+        post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
 
         # get the last post
@@ -109,7 +109,7 @@ class SmartminTest(TestCase):
     def test_messaging(self):
         self.client.login(username='author', password='author')
         
-        post_data = dict(title="New Post", body="This is a new post", tags="post")
+        post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
 
         post = list(Post.objects.all())[-1]
@@ -117,13 +117,65 @@ class SmartminTest(TestCase):
         self.assertEquals(200, response.status_code)
         self.assertContains(response, "Your new post has been saved.")
 
-        post_data = dict(title="New Post", body="Updated post content", tags="post")
+        post_data = dict(title="New Post", body="Updated post content", order=1, tags="post")
         response = self.client.post(reverse('blog.post_update', args=[post.id]), post_data, follow=True)
 
         self.assertEquals(200, response.status_code)
         self.assertContains(response, "Your blog post has been updated.")
+
+    def test_ordering(self):
+        post1 = Post.objects.create(title="A First Post", body="Post Body", order=3, tags="post", 
+                                    created_by=self.author, modified_by=self.author)
+        post2 = Post.objects.create(title="A Second Post", body="Post Body", order=5, tags="post", 
+                                    created_by=self.superuser, modified_by=self.superuser)
+        post3 = Post.objects.create(title="A Third Post", body="Post Body", order=1, tags="post", 
+                                    created_by=self.author, modified_by=self.author)
+        post4 = Post.objects.create(title="A Fourth Post", body="Post Body", order=3, tags="post", 
+                                    created_by=self.superuser, modified_by=self.superuser)
+
+        self.client.login(username='author', password='author')
+
+        response = self.client.get(reverse('blog.post_list'))
+        posts = response.context['post_list']
+
+        self.assertEquals(post1, posts[0])
+        self.assertEquals(post4, posts[1])
+        self.assertEquals(post2, posts[2])
+        self.assertEquals(post3, posts[3])
+        self.assertEquals(self.post, posts[4])
+
+        response = self.client.get(reverse('blog.post_author'))
+        posts = response.context['post_list']
+
+        self.assertEquals(self.post, posts[0])
+        self.assertEquals(post3, posts[1])
+        self.assertEquals(post1, posts[2])
+        self.assertEquals(post4, posts[3])
+        self.assertEquals(post2, posts[4])
+        
+    def test_success_url(self):
+        self.client.login(username='author', password='author')
+        
+        post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
+        response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
+        
+        self.assertEquals(reverse('blog.post_list'), response.request['PATH_INFO'])
+
+    def test_submit_button_name(self):
+        self.client.login(username='author', password='author')
+
+        response = self.client.get(reverse('blog.post_create'))
+        self.assertContains(response, "Create New Post")
         
         
         
+        
+
+
+
+
+
+
+
 
 

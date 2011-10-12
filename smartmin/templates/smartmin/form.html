@@ -2,125 +2,97 @@
 
 {% load smartmin %}
 
-{% block main-content %}
+{% block content %}
 {% block pjax %}
+<div class="row" id="pjax">
+  <div class="span9">
+  {% block pre-form %}{% endblock %}
 
-<div id="pjax">
-  <div class="content">
-    <div class="form_view">
-      <form id="smartmin_form" method="post" enctype="multipart/form-data">
+  <form class="smartmin-form" method="post" enctype="multipart/form-data">
+    {% block pre-form-errors %}
+    {% endblock pre-form-errors %}
 
-        <div class="form_view_top">
-          <div style="float:right;margin-top:3px">{% block table_header_buttons %}{% endblock %}</div>
-
-          <div class="form_view_title">{% block table_title %}{{ title }}{% endblock %}</div>
-        </div>
-
-        {% block beforefields %}{% endblock %}
-
-        <table class="form_table" cellspacing="0" border="1">
-          {% block fields %}
-
-          {% block beforeformerrors %}
-          {% endblock %}
-
-          {% if form.non_field_errors %}
-            <tr><td class="label"></td>
-              <td colspan=2 class="form_errors">
-                {{ form.non_field_errors }}
-            </td></tr>
-          {% endif %}
-
-          {% block afterformerrors %}
-          {% endblock %}
-
-          {% for field in fields %}
-          {% with form|field:field as form_field %}
-
-          {% getblock "before_field_" field %}
-
-          {% if form_field and form_field.is_hidden %}
-            {{ form_field }}
-          {% else %}
-            <tr class="{% get_class field %}">
-              <td class="label {% if form_field and not form_field.field.required%}optional{% endif %}">
-                <label>{% get_label field %}:
-                </label>
-              </td>
-              <td class="value {% if form_field %}field{% else %}readonly{% endif %}">
-                {% if form_field %}
-                  {{ form_field }}
-                {% else %}
-
-                  {% if object %}
-                    {% get_value object field %}
-                  {% else %}
-                    {% get_value_from_view field %}
-                  {% endif %}
-                {% endif %}
-                
-                {% with view|field_help:field as help %}
-                {% if help %}
-                <div class="help">{{ help }}</div>
-                {% endif %}
-                {% endwith %}
-              </td>
-              <td class="errors">
-                {% if form_field %}
-                {{ form_field.errors }}
-                {% endif %}
-              </td>
-            </tr>
-          {% endif %}
-
-          {% getblock "after_field_" field %}
-
-          {% endwith %}
-          {% endfor %}
-
-          {% endblock fields %}
-
-          {% block extrafields %}
-          {% endblock %}
-        </table>
-        {% csrf_token %}
-
-        {% block afterfields %}
-        {% endblock %}
-
-        {% block save %}
-        <div class="form_buttons">
-          <input class="button" type="submit" value="{{ view.derive_button_name }}"></input>
-        </div>
-        {% endblock %}
-
-        {% block afterform %}
-        {% endblock %}
-
-        <div class="rounded_bottom">&nbsp;</div>
-      </form>
-
+    {% if form.non_field_errors %}
+    <div class="alert-message error form-errors">
+      {{ form.non_field_errors }}
     </div>
-  </div>
-{% endblock pjax %}
-{% endblock main-content %}
-
-{% block extrascript %}
-    {{ block.super }}
-    {% if javascript_submit %}
-        <script>
-            // attach a submit handler to the form
-            $("#smartmin_form").submit(function(event) {
-
-                // stop form from submitting normally
-                event.preventDefault();
-                event.stopPropagation();
-
-                // get some values from elements on the page:
-                var form = $(this);
-                var data = form.serialize();
-                {{ javascript_submit }}(form, data);
-            });
-        </script>
     {% endif %}
+
+    {% block post-form-errors %}
+    {% endblock post-form-errors %}
+
+    {% block pre-fields %}
+    {% endblock %}
+
+    <legend>{% block form-help %}{% endblock form-help %}</legend>
+
+    {% block fields %}
+    <fieldset>
+    {% for field in fields %}
+    {% with form|field:field as form_field %}
+    {% getblock "before_field_" field %}
+
+    {% if form_field and form_field.is_hidden %}
+    {{ form_field }}
+    {% else %}
+    <div class="clearfix form-field {% if form_field.errors %}error{% endif %}">
+      <label for="{{ field.name }}">{{ form_field.label }}</label>
+      <div class="input">{{ form_field }}
+        {% with view|field_help:field as help %}
+        {% if help %}
+        <span class="help-block">{{ help }}</span>
+        {% endif %}
+        {% endwith %}
+        
+        {% if form_field.errors %}
+        <span class="help-block field-errors">{{ form_field.errors }}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% getblock "after_field_" field %}
+
+    {% endwith %}
+    {% endfor %}
+    </fieldset>
+    {% endblock fields %}
+
+    {% block post-fields %}
+    {% endblock post-fields %}
+
+    {% csrf_token %}
+
+    {% block form-buttons %}
+    <div class="actions">
+      <input type="submit" class="btn primary" value="{{ submit_button_name }}">
+      <a class="btn" onclick="javascript:history.go(-1)">Cancel</a>
+    </div>
+    {% endblock %}
+  </form>
+
+  {% block post-form %}{% endblock post-form %}
+</div>
+</div>
+{% endblock pjax %}
+{% endblock content %}
+
+{% block extra-script %}
+{{ block.super }}
+{% if javascript_submit %}
+<script>
+  // attach a submit handler to the form
+  $("#smartmin_form").submit(function(event) {
+  
+  // stop form from submitting normally
+  event.preventDefault();
+  event.stopPropagation();
+
+  // get some values from elements on the page:
+  var form = $(this);
+  var data = form.serialize();
+  {{ javascript_submit }}(form, data);
+  });
+</script>
+{% endif %}
 {% endblock %}

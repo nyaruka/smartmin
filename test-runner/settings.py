@@ -100,6 +100,16 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',    
+    'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.request',
+)
+
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
@@ -116,13 +126,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_nose',
 
     'guardian',
     'smartmin',
     'smartmin.users',
 
     'blog',
-    
+
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -164,6 +175,7 @@ PERMISSIONS = {
           'update', # can update an object
           'delete', # can delete an object,
           'list'),  # can view a list of the objects
+    'blog.post': ('author',)
 }
 
 # permissions for users that aren't logged in
@@ -181,3 +193,10 @@ GROUP_PERMISSIONS = {
 
 ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
+
+#-----------------------------------------------------------------------------------
+# Django-Nose config
+#-----------------------------------------------------------------------------------
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+

@@ -2,34 +2,19 @@
 
 {% load smartmin %}
 
-{% block extrastyle %}
-  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/smartmin_styles.css?v=2">
-{% endblock %}
-
-{% block content %}
-
 {% block pre-content %}
+<div class="page-header"><h2>{{ title }}</h2></div>
 {% endblock %}
 
-{% block buttons %}
-{% endblock %}
-
-{% block main-content %}
-{% endblock %}
-
-{% block post-content %}
-{% endblock %}
-
-</div>
-{% endblock %}
-
-{% block extrascript %}
+{% block extra-script %}
 
 {# placeholder form for posterizer href's.. href's with a posterize class will be converted to POSTs #}
 <form id="posterizer" method="post">
   {% csrf_token %}
 </form>
+
 <script type="text/javascript" src="{{ STATIC_URL }}js/libs/jquery.url.js"></script>
+
 <script>
   $("td.clickable").hover(function(){
     this.style.cursor='pointer'
