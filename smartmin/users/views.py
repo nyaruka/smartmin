@@ -43,6 +43,7 @@ class UserCRUDL(SmartCRUDL):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
         fields = ('active', 'username', 'name', 'group', 'last_login')
         link_fields = ('username', 'name')
+        default_order = 'username'
         add_button = True
 
         field_config = {
@@ -68,6 +69,7 @@ class UserCRUDL(SmartCRUDL):
     class Create(SmartCreateView):
         form_class = UserForm
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups')
+        success_message = "New user created successfully."
 
         field_config = {
             'groups': dict(help="Users will only get those permissions that are allowed for their group."),
@@ -87,7 +89,7 @@ class UserCRUDL(SmartCRUDL):
         
     class Update(SmartUpdateView):
         form_class = UserUpdateForm
-
+        success_message = "User saved successfully."
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active', 'last_login')
         field_config = {
             'last_login': dict(readonly=True),
