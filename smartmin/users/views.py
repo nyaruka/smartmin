@@ -41,23 +41,13 @@ class UserCRUDL(SmartCRUDL):
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
-        fields = ('is_active', 'username', 'name', 'group', 'last_login')
+        fields = ('username', 'name', 'group', 'last_login')
         link_fields = ('username', 'name')
         default_order = 'username'
         add_button = True
 
-        field_config = {
-            'active': dict(label=""),
-        }
-
         def get_group(self, obj):
             return ", ".join([group.name for group in obj.groups.all()])
-
-        def get_is_active(self, obj):
-            if obj.is_active:
-                return '<div class="active_icon"></div>'
-            else:
-                return ''
 
         def get_queryset(self, **kwargs):
             queryset = super(UserCRUDL.List, self).get_queryset(**kwargs)
