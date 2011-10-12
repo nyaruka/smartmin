@@ -175,7 +175,7 @@ PERMISSIONS = {
           'update', # can update an object
           'delete', # can delete an object,
           'list'),  # can view a list of the objects
-    'blog.post': ('author',)
+    'blog.post': ('author', 'exclude', 'exclude2', 'readonly', 'readonly2')
 }
 
 # permissions for users that aren't logged in

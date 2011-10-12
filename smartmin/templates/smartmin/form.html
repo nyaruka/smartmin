@@ -35,20 +35,32 @@
     {% if form_field and form_field.is_hidden %}
     {{ form_field }}
     {% else %}
-    <div class="clearfix form-field {% if form_field.errors %}error{% endif %}">
-      <label for="{{ field.name }}">{{ form_field.label }}</label>
-      <div class="input">{{ form_field }}
-        {% with view|field_help:field as help %}
-        {% if help %}
-        <span class="help-block">{{ help }}</span>
-        {% endif %}
-        {% endwith %}
+      {% if form_field %}
+      <div class="clearfix form-field {% if form_field.errors %}error{% endif %}">
+        <label for="{{ field.name }}">{% get_label field %}</label>
+        <div class="input">{{ form_field }}
+          {% with view|field_help:field as help %}
+          {% if help %}
+          <span class="help-block">{{ help }}</span>
+          {% endif %}
+          {% endwith %}
         
-        {% if form_field.errors %}
-        <span class="help-block field-errors">{{ form_field.errors }}</span>
-        {% endif %}
+          {% if form_field.errors %}
+          <span class="help-block field-errors">{{ form_field.errors }}</span>
+          {% endif %}
+        </div>
       </div>
-    </div>
+      {% else %}
+      <div class="clearfix form-field">
+        <label for="{{ field.name }}">{% get_label field %}</label>
+        <div class="input">{% get_value_from_view field %}
+          {% with view|field_help:field as help %}
+          {% if help %}
+          <span class="help-block">{{ help }}</span>
+          {% endif %}
+          {% endwith %}
+        </div>
+      {% endif %}
     {% endif %}
 
     {% getblock "after_field_" field %}

@@ -25,7 +25,7 @@ class SmartminTest(TestCase):
         self.superuser.is_superuser = True
         self.superuser.save()
 
-        self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post", tags="testing", order=0,
+        self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post", tags="testing_tag", order=0,
                                         created_by=self.author, modified_by=self.author)
 
     def assertRedirect(self, response, url):
@@ -166,6 +166,33 @@ class SmartminTest(TestCase):
 
         response = self.client.get(reverse('blog.post_create'))
         self.assertContains(response, "Create New Post")
+
+    def test_excludes(self):
+        self.client.login(username='author', password='author')
+
+        # this view excludes tags with the default form
+        response = self.client.get(reverse('blog.post_exclude', args=[self.post.id]))
+        self.assertEquals(0, response.content.count('tags'))
+
+        # this view excludes tags included in a custom form
+        response = self.client.get(reverse('blog.post_exclude2', args=[self.post.id]))
+        self.assertEquals(0, response.content.count('tags'))
+
+    def test_readonly(self):
+        self.client.login(username='author', password='author')
+
+        # this view should exclude any form input for tags
+        response = self.client.get(reverse('blog.post_readonly', args=[self.post.id]))
+        self.assertEquals(1, response.content.count('testing_tag'))
+        self.assertEquals(1, response.content.count('Tags'))
+        self.assertEquals(0, response.content.count('input id="id_tags"'))
+
+        # this view excludes tags included in a custom form
+        response = self.client.get(reverse('blog.post_readonly2', args=[self.post.id]))
+        self.assertEquals(1, response.content.count('testing_tag'))
+        self.assertEquals(1, response.content.count('Tags'))
+        self.assertEquals(0, response.content.count('input id="id_tags"'))
+
         
         
         

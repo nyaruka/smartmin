@@ -23,7 +23,11 @@ def get_value_from_view(context, field):
     on the object, then finally treats it as an attribute.
     """
     view = context['view']
-    value = view.lookup_field_value(context, None, field)
+    obj = None
+    if 'object' in context:
+        obj = context['object']
+
+    value = view.lookup_field_value(context, obj, field)
     if type(value) == datetime:
         return value.strftime("%b %d, %Y %H:%M")
 
