@@ -181,13 +181,13 @@ class SmartminTest(TestCase):
     def test_readonly(self):
         self.client.login(username='author', password='author')
 
-        # this view should exclude any form input for tags
+        # this view should have our tags field be readonly
         response = self.client.get(reverse('blog.post_readonly', args=[self.post.id]))
         self.assertEquals(1, response.content.count('testing_tag'))
         self.assertEquals(1, response.content.count('Tags'))
         self.assertEquals(0, response.content.count('input id="id_tags"'))
 
-        # this view excludes tags included in a custom form
+        # this view should also have our tags field be readonly, but it does so on a custom form
         response = self.client.get(reverse('blog.post_readonly2', args=[self.post.id]))
         self.assertEquals(1, response.content.count('testing_tag'))
         self.assertEquals(1, response.content.count('Tags'))
