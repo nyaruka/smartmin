@@ -91,7 +91,7 @@ class UserCRUDL(SmartCRUDL):
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active', 'last_login')
         field_config = {
             'last_login': dict(readonly=True),
-            'is_active': dict(help="Whether this user is allowed to log into the Nuru site."),
+            'is_active': dict(help="Whether this user is allowed to log into the site."),
             'groups': dict(help="Users will only get those permissions that are allowed for their group."),
             'new_password': dict(help="You can reset the user's password by entering a new password here."),
         }
