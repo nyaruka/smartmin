@@ -107,7 +107,6 @@ def field_help(view, field):
     """
     return view.lookup_field_help(field)
 
-
 @register.filter
 def get(dictionary, key):
     """

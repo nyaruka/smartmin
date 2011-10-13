@@ -72,8 +72,9 @@ class UserCRUDL(SmartCRUDL):
             """
             Make sure our groups are up to date
             """
-            for group in self.form.cleaned_data['groups']:
-                obj.groups.add(group)
+            if 'groups' in self.form.cleaned_data:
+                for group in self.form.cleaned_data['groups']:
+                    obj.groups.add(group)
 
             return obj
         
@@ -92,9 +93,10 @@ class UserCRUDL(SmartCRUDL):
             """
             Make sure our groups are up to date
             """
-            obj.groups.clear()
-            for group in self.form.cleaned_data['groups']:
-                obj.groups.add(group)
+            if 'groups' in self.form.cleaned_data:
+                obj.groups.clear()
+                for group in self.form.cleaned_data['groups']:
+                    obj.groups.add(group)
 
             return obj
 
