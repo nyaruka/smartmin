@@ -8,6 +8,7 @@ import django.forms.models as model_forms
 from guardian.utils import get_anonymous_user
 from django.utils.http import urlquote
 from django.db.models import Q
+from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
@@ -944,13 +945,19 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
     def form_valid(self, form):
         self.object = form.save(commit=False)
 
-        self.object = self.pre_save(self.object)
-        self.save(self.object)
-        self.object = self.post_save(self.object)
+        try:
+            self.object = self.pre_save(self.object)
+            self.save(self.object)
+            self.object = self.post_save(self.object)
+        
+            messages.success(self.request, self.derive_success_message())
+            return HttpResponseRedirect(self.get_success_url())
 
-        messages.success(self.request, self.derive_success_message())
-
-        return HttpResponseRedirect(self.get_success_url())
+        except IntegrityError as e:
+            message = str(e).capitalize()
+            errors = self.form._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.util.ErrorList())
+            errors.append(message)
+            return self.render_to_response(self.get_context_data(form=form))
 
     def save_m2m(self):
         """
