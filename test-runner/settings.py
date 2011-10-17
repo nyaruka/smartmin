@@ -188,7 +188,7 @@ ANONYMOUS_PERMISSIONS = (
 GROUP_PERMISSIONS = {
     "Administrator": ('auth.user.*',),
     "Editors": ('blog.post_update',),
-    "Authors": ('blog.post.*',),
+    "Authors": ('blog.post.*','blog.category.*'),
 }
 
 ANONYMOUS_USER_ID = -1

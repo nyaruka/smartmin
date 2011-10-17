@@ -12,3 +12,9 @@ class Post(SmartModel):
     
     def __unicode__(self):
         return self.title
+
+
+class Category(SmartModel):
+    name = models.SlugField(max_length=64, unique=True,
+                            help_text="The name of this category")
+

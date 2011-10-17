@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from blog.models import Post
+from blog.models import Post, Category
 
 class SmartminTest(TestCase):
 
@@ -193,10 +193,20 @@ class SmartminTest(TestCase):
         self.assertEquals(1, response.content.count('Tags'))
         self.assertEquals(0, response.content.count('input id="id_tags"'))
 
+
+    def test_integrity_error(self):
+        self.client.login(username='author', password='author')
+
+        first_category = Category.objects.create(name="History", created_by=self.author, modified_by=self.author)
+
+        post_data = dict(name="History")
+        response = self.client.post(reverse('blog.category_create'), post_data)
+
+        # should get a plain 200
+        self.assertEquals(200, response.status_code)
         
-        
-        
-        
+        # should have one error (our integrity error)
+        self.assertEquals(1, len(response.context['form'].errors))
 
 class UserTest(TestCase):
 

@@ -8,6 +8,22 @@ class ExcludeForm(forms.ModelForm):
         model = Post
         fields = ('title', 'body', 'order', 'tags')
 
+
+class CategoryForm(forms.ModelForm):
+
+    def clean(self):
+        return self.cleaned_data
+
+    class Meta:
+        model = Category
+
+class CategoryCRUDL(SmartCRUDL):
+    model = Category
+    permissions = True
+
+    class Create(SmartCreateView):
+        form_class = CategoryForm
+
 class PostCRUDL(SmartCRUDL):
     model = Post
     permissions = True
