@@ -3,6 +3,9 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
 from blog.models import Post, Category
+from smartmin.management import check_role_permissions
+from django.utils import simplejson
+from .views import PostCRUDL
 
 class SmartminTest(TestCase):
 
@@ -152,6 +155,14 @@ class SmartminTest(TestCase):
         self.assertEquals(post1, posts[2])
         self.assertEquals(post4, posts[3])
         self.assertEquals(post2, posts[4])
+
+        # get our view as json
+        response = self.client.get(reverse('blog.post_list') + "?_format=json")
+
+        # parse the json
+        json_list = simplejson.loads(response.content)
+        self.assertEquals(5, len(json_list))
+        self.assertEquals(post1.title, json_list[0]['title'])
         
     def test_success_url(self):
         self.client.login(username='author', password='author')
@@ -207,6 +218,43 @@ class SmartminTest(TestCase):
         
         # should have one error (our integrity error)
         self.assertEquals(1, len(response.context['form'].errors))
+
+    def test_version(self):
+        # TODO: for whatever reason coverage refuses to belief this covers the __init__.py in smartmin
+        import smartmin
+        self.assertEquals('0.0.3', smartmin.__version__)
+
+    def test_management(self):
+        authors = Group.objects.get(name="Authors")
+        
+        # reduce our permission set to not include categories
+        permissions =  ('blog.post.*', 'blog.post.too.many.dots', 'blog.category.not_valid_either', 'blog.', 'blog.foo.*')
+
+        self.assertEquals(15, authors.permissions.all().count())
+
+        # check that they are reassigned
+        check_role_permissions(authors, permissions, authors.permissions.all())
+
+        # removing all category actions should bring us to 10
+        self.assertEquals(10, authors.permissions.all().count())
+
+
+    def test_smart_model(self):
+        p1 = Post.objects.create(title="First Post", body="First Post body", order=1, tags="first",
+                                 created_by=self.author, modified_by=self.author)
+        p2 = Post.objects.create(title="Second Post", body="Second Post body", order=1, tags="second",
+                                 created_by=self.author, modified_by=self.author)
+
+        self.assertEquals(3, Post.objects.all().count())
+        self.assertEquals(3, Post.active.all().count())
+
+        # make p2 inactive
+        p2.is_active = False
+        p2.save()
+
+        self.assertEquals(3, Post.objects.all().count())
+        self.assertEquals(2, Post.active.all().count())
+
 
 class UserTest(TestCase):
 
@@ -272,9 +320,50 @@ class UserTest(TestCase):
         self.assertTrue(self.client.login(username='steve', password='google'))
 
 
+class TagTestCase(TestCase):
 
+    def setUp(self):
+        self.crudl = PostCRUDL()
+        self.list_view = self.crudl.view_for_action('list')()
+        self.read_view = self.crudl.view_for_action('read')()
 
+        self.author = User.objects.create_user('author', 'author@group.com', 'author')
+        self.author.groups.add(Group.objects.get(name="Authors"))
 
+        self.post = Post.objects.create(title="First Post", body="My First Post", tags="first", order=1,
+                                        created_by=self.author, modified_by=self.author)
+
+    def test_value_from_view(self):
+        from smartmin.templatetags.smartmin import get_value_from_view
+
+        context = dict(view=self.read_view, object=self.post)
+        self.assertEquals(self.post.title, get_value_from_view(context, 'title'))
+        self.assertEquals(self.post.created_on.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, 'created_on'))
+
+    def test_view_as_json(self):
+        from smartmin.templatetags.smartmin import view_as_json
+
+        self.list_view.object_list = Post.objects.all()
+        context = dict(view=self.list_view)
+
+        foo = view_as_json(context)
+        json = simplejson.loads(view_as_json(context))
+        self.assertEquals(1, len(json))
+        self.assertEquals(self.post.title, json[0]['title'])
+
+    def test_get(self):
+        from smartmin.templatetags.smartmin import get
+
+        test_dict = dict(key="value")
+
+        self.assertEquals("value", get(test_dict, 'key'))
+        self.assertEquals("", get(test_dict, 'not_there'))
+
+    def test_map(self):
+        from smartmin.templatetags.smartmin import map
+        self.assertEquals("title: First Post id: 1", map("title: %(title)s id: %(id)d", self.post))
+        
+        
 
 
 

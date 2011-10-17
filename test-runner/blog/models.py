@@ -1,5 +1,5 @@
 from django.db import models
-from smartmin.models import SmartModel
+from smartmin.models import SmartModel, ActiveManager
 
 class Post(SmartModel):
     title = models.CharField(max_length=128,
@@ -9,6 +9,9 @@ class Post(SmartModel):
     tags = models.CharField(max_length=128,
                             help_text="Any tags for this post")
 
+
+    objects = models.Manager()
+    active = ActiveManager()
     
     def __unicode__(self):
         return self.title

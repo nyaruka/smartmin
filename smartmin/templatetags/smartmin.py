@@ -79,11 +79,7 @@ def get_field_link(context, field, obj=None):
 @register.simple_tag(takes_context=True)
 def view_as_json(context):
     """
-    Responsible for figuring out the right label for the passed in field.
-
-    The order of precedence is:
-       1) if the view has a field_config and a label specified there, use that label
-       2) check for a form in the view, if it contains that field, use it's value
+    Returns our view serialized as json
     """
     view = context['view']
     return simplejson.dumps(view.as_json(context))
@@ -112,7 +108,10 @@ def get(dictionary, key):
     """
     Simple dict lookup using two variables
     """
-    return dictionary[key]
+    if key in dictionary:
+        return dictionary[key]
+    else:
+        return ''
 
 @register.filter
 def field_orderable(view, field):
@@ -131,7 +130,6 @@ class PDBNode(template.Node):
 @register.tag
 def pdb(parser, token):
     return PDBNode()
-
 
 @register.simple_tag(takes_context=True)
 def getblock(context, prefix, suffix=None):
