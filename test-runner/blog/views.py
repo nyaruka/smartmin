@@ -8,6 +8,24 @@ class ExcludeForm(forms.ModelForm):
         model = Post
         fields = ('title', 'body', 'order', 'tags')
 
+
+# We overload a normal CategoryForm to not call the super's clean method. By default
+# model forms will check for integrity checks.  We want to force a DB thrown IntegrityError
+# so we don't call the super, instead letting smartmin wrap the error
+class CategoryForm(forms.ModelForm):
+    def clean(self):
+        return self.cleaned_data
+
+    class Meta:
+        model = Category
+
+class CategoryCRUDL(SmartCRUDL):
+    model = Category
+    permissions = True
+
+    class Create(SmartCreateView):
+        form_class = CategoryForm
+
 class PostCRUDL(SmartCRUDL):
     model = Post
     permissions = True
