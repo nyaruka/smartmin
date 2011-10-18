@@ -6,6 +6,7 @@ from blog.models import Post, Category
 from smartmin.management import check_role_permissions
 from django.utils import simplejson
 from .views import PostCRUDL
+from smartmin.views import smart_url
 
 class SmartminTest(TestCase):
 
@@ -48,6 +49,12 @@ class SmartminTest(TestCase):
 
     def assertIsLogin(self, response):
         self.assertRedirect(response, reverse('users.user_login'))
+
+    def test_smart_url(self):
+        self.assertEquals(reverse('blog.post_create'), smart_url("@blog.post_create"))
+        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("id@blog.post_update", self.post.id))
+        self.assertEquals(reverse('blog.post_create'), smart_url("/blog/post/create/"))
+        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("/blog/post/update/%d/", self.post.id))
 
     def test_permissions(self):
         create_url = reverse('blog.post_create')

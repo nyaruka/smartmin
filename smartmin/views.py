@@ -36,7 +36,10 @@ def smart_url(url, id=None):
         else:
             return reverse(value)
     else:
-        return url % id
+        if id is None:
+            return url
+        else:
+            return url % id
 
 class SmartView(object):
     fields = None
@@ -1103,127 +1106,6 @@ class SmartCreateView(SmartModelFormView, CreateView):
             return "Create %s" % force_unicode(self.model._meta.verbose_name).title()
         else:
             return self.title
-
-class SmartListUpdateView(SmartListView, ListView, ModelFormMixin, ProcessFormView):
-    """
-    SmartListUpdateView operates just like a SmartListView except it allows the implementor
-    to wrap the entire list in a single form and declare which fields are mutable.
-    """
-    default_template = 'smartmin/list_update.html'
-
-    def post(self, request, *args, **kwargs):
-        """
-        Override post so we can use the proper formset on submission.
-        """
-        form_class = self.get_form()
-        self.form_post = form_class(request.POST)
-
-        if self.form_post.is_valid():
-            return self.form_valid(self.form_post)
-        else:
-
-            self.object_list = self.get_queryset()
-            allow_empty = self.get_allow_empty()
-            if not allow_empty and len(self.object_list) == 0:
-                raise Http404(_(u"Empty list and '%(class_name)s.allow_empty' is False.") % {'class_name': self.__class__.__name__})
-
-            context = self.get_context_data(object_list=self.object_list)
-            context['formset'] = self.form_post
-            return self.render_to_response(context)
-
-    def is_field_required(self, field):
-        """
-        Determine if field is optional
-        """
-        try:
-            if field.name in self.required_fields:
-                return True
-        except:
-            pass
-        
-        return False
-
-    def get_field_filter(self, field):
-        """
-        The filter to apply to a form field
-        """
-        return None
-
-    def get_context_data(self, **kwargs):
-        """
-        Override context data so we can stuff in our formset and update fields.
-        """
-        context = super(SmartListUpdateView, self).get_context_data(**kwargs)
-        form = self.get_form()
-        context['formset'] = form(queryset=self.get_queryset())
-
-        try:
-            context['update_fields'] = self.update_fields
-        except:
-            pass
-
-        return context
-
-    """
-    Apply custom field options if any are specified. This method is called when
-    the creates a FormSet based on our model for each field inside the model spec.
-    """
-    def formfield_options(self, field):
-        queryset = None
-        if self.update_fields and field.name in self.update_fields:
-            queryset = self.get_field_filter(field)
-
-        if queryset:
-            return field.formfield(queryset=queryset, required=self.is_field_required(field))
-        else:
-            return field.formfield(required=self.is_field_required(field))
-
-        # Nothing to do, return a field with default attributes
-        return field.formfield()
-
-    """
-    We override success url since we need to look inside our formset to get at
-    an instance variable to use the absolute url if the success url is undefined.
-    """
-    def get_success_url(self):
-        if self.success_url:
-            url = smart_url(self.success_url, self.object.pk)
-        else:
-            try:
-                if self.form_post.forms:
-                    url = self.form_post.forms[0].instance.get_absolute_url()
-            except AttributeError:
-                raise ImproperlyConfigured(
-                    "No URL to redirect to.  Either provide a url or define"
-                    " a get_absolute_url method on the Model.")
-        return url
-
-    """
-    Get a ModelFormSet for our specified model
-    """
-    def get_form(self):
-        # for now, we only work with models
-        if not self.model:
-            raise ImproperlyConfigured("SmartListUpdateView requires that a model be defined")
-
-        # infer what our formset should be from the model and any other
-        # provided configuration on our view
-
-        update_fields = ()
-
-        try:
-            if self.update_fields:
-                update_fields = self.update_fields
-        except:
-            pass
-
-        self.form = model_forms.modelformset_factory(
-            self.model,
-            fields=update_fields,
-            extra=0,
-            formfield_callback=self.formfield_options)
-
-        return self.form
 
 class SmartCRUDL(object):
     actions = ('create', 'read', 'update', 'delete', 'list')
