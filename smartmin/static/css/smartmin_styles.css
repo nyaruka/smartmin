@@ -114,3 +114,7 @@ tr.inactive td a {
     margin-bottom: 0px;
 }
 
+fieldset {
+    padding-top: 0px;
+}
+
