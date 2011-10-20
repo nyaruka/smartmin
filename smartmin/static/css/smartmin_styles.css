@@ -114,3 +114,25 @@ tr.inactive td a {
     margin-bottom: 0px;
 }
 
+fieldset.field-group legend {
+    background: white;
+    float: left;
+    margin: -25px 0 15px 140px;
+    padding: 0 10px;
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 1;
+    color: #333;
+}
+
+fieldset.field-group {
+    margin: 20px -20px -10px 0;
+    padding: 13px 20px 5px 0;
+    border-top: 1px solid #DDD;
+}
+
+fieldset.field-group div label {
+    clear: both;
+}
+
+
