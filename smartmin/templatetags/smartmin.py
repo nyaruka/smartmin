@@ -172,4 +172,25 @@ class SetBlockNode(template.Node):
 # register our tag
 setblock = register.tag(setblock)
 
+@register.inclusion_tag('smartmin/field.html', takes_context=True)
+def render_field(context, field):
+    form = context['form']
+    view = context['view']
+
+    readonly_fields = view.derive_readonly()
+
+    # check that this field exists in our form, either as a real field or as a readonly one
+    if not field in form.fields and not field in readonly_fields:
+        raise TemplateSyntaxError("Error: No field '%s' found in form to render" % field)
+
+    inclusion_context = dict(field = field,
+                             form = context['form'],
+                             view = context['view'],
+                             blocks = context['blocks'])
+    if 'object' in context:
+        inclusion_context['object'] = context['object']
+
+    return inclusion_context
+    
+
 
