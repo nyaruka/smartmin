@@ -135,6 +135,6 @@ fieldset.field-group {
     border-top: 1px solid #DDD;
 }
 
-fieldset.field-group div label {
+fieldset.field-group div.form-field {
     clear: both;
 }
