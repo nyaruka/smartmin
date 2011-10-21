@@ -442,13 +442,16 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
 
         return smart_url(self.cancel_url)
 
-    def pre_delete(self, request):
+    def pre_delete(self, object):
         pass
 
     def post(self, request, *args, **kwargs):
-        self.pre_delete(request)
-        self.get_object().delete()
-        return HttpResponseRedirect(self.get_redirect_url())
+        self.object = self.get_object()
+        self.pre_delete(self.object)
+        redirect_url = self.get_redirect_url()
+        self.object.delete()
+
+        return HttpResponseRedirect(redirect_url)
 
     def get_redirect_url(self, **kwargs):
         if not self.redirect_url:
