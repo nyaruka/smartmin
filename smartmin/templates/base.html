@@ -59,7 +59,7 @@
     {% block messages %}
     {% if messages %}
     {% for message in messages %}
-    <div class="alert-message success fade in" data-alert="alert">
+    <div class="alert-message {{ message.tags }} fade in" data-alert="alert">
       <a class="close" href="#">×</a>
       <p>{{ message }}</p>
     </div>

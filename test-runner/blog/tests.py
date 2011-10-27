@@ -34,7 +34,7 @@ class SmartminTest(TestCase):
 
     def assertRedirect(self, response, url):
         self.assertEquals(302, response.status_code)
-        self.assertTrue(response.get('Location', None).find(reverse('users.user_login')) != -1, 
+        self.assertTrue(response.get('Location', None).find(reverse('users.user_login')) != -1,
                         "Did not redirect to expected URL, expected: %s, got %s" % (url, response.get('Location', None)))
 
     def assertNoAccess(self, user, url):
@@ -78,7 +78,7 @@ class SmartminTest(TestCase):
         self.client.logout()
         response = self.client.get(update_url)
         self.assertIsLogin(response)
-        
+
         # plain user can't see it either
         self.assertNoAccess(self.plain, update_url)
 
@@ -94,7 +94,7 @@ class SmartminTest(TestCase):
         self.client.logout()
         response = self.client.get(read_url)
         self.assertEquals(200, response.status_code)
-        
+
         # everybody else can read too
         self.assertHasAccess(self.plain, read_url)
         self.assertHasAccess(self.editor, read_url)
@@ -103,7 +103,7 @@ class SmartminTest(TestCase):
 
     def test_create(self):
         self.client.login(username='author', password='author')
-        
+
         post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
 
@@ -118,7 +118,7 @@ class SmartminTest(TestCase):
 
     def test_messaging(self):
         self.client.login(username='author', password='author')
-        
+
         post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
 
@@ -133,14 +133,23 @@ class SmartminTest(TestCase):
         self.assertEquals(200, response.status_code)
         self.assertContains(response, "Your blog post has been updated.")
 
+    def test_message_tags(self):
+        self.client.login(username='author', password='author')
+        messages_url = reverse('blog.post_messages')
+        response = self.client.get(messages_url)
+        self.assertIn('<div class="alert-message error fade in" data-alert="alert">', response.content)
+        self.assertIn('<div class="alert-message success fade in" data-alert="alert">', response.content)
+        self.assertIn('<div class="alert-message info fade in" data-alert="alert">', response.content)
+        self.assertIn('<div class="alert-message warning fade in" data-alert="alert">', response.content)
+
     def test_ordering(self):
-        post1 = Post.objects.create(title="A First Post", body="Post Body", order=3, tags="post", 
+        post1 = Post.objects.create(title="A First Post", body="Post Body", order=3, tags="post",
                                     created_by=self.author, modified_by=self.author)
-        post2 = Post.objects.create(title="A Second Post", body="Post Body", order=5, tags="post", 
+        post2 = Post.objects.create(title="A Second Post", body="Post Body", order=5, tags="post",
                                     created_by=self.superuser, modified_by=self.superuser)
-        post3 = Post.objects.create(title="A Third Post", body="Post Body", order=1, tags="post", 
+        post3 = Post.objects.create(title="A Third Post", body="Post Body", order=1, tags="post",
                                     created_by=self.author, modified_by=self.author)
-        post4 = Post.objects.create(title="A Fourth Post", body="Post Body", order=3, tags="post", 
+        post4 = Post.objects.create(title="A Fourth Post", body="Post Body", order=3, tags="post",
                                     created_by=self.superuser, modified_by=self.superuser)
 
         self.client.login(username='author', password='author')
@@ -170,13 +179,13 @@ class SmartminTest(TestCase):
         json_list = simplejson.loads(response.content)
         self.assertEquals(5, len(json_list))
         self.assertEquals(post1.title, json_list[0]['title'])
-        
+
     def test_success_url(self):
         self.client.login(username='author', password='author')
-        
+
         post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
-        
+
         self.assertEquals(reverse('blog.post_list'), response.request['PATH_INFO'])
 
     def test_submit_button_name(self):
@@ -222,7 +231,7 @@ class SmartminTest(TestCase):
 
         # should get a plain 200
         self.assertEquals(200, response.status_code)
-        
+
         # should have one error (our integrity error)
         self.assertEquals(1, len(response.context['form'].errors))
 
@@ -233,17 +242,17 @@ class SmartminTest(TestCase):
 
     def test_management(self):
         authors = Group.objects.get(name="Authors")
-        
+
         # reduce our permission set to not include categories
         permissions =  ('blog.post.*', 'blog.post.too.many.dots', 'blog.category.not_valid_either', 'blog.', 'blog.foo.*')
 
-        self.assertEquals(15, authors.permissions.all().count())
+        self.assertEquals(16, authors.permissions.all().count())
 
         # check that they are reassigned
         check_role_permissions(authors, permissions, authors.permissions.all())
 
         # removing all category actions should bring us to 10
-        self.assertEquals(10, authors.permissions.all().count())
+        self.assertEquals(11, authors.permissions.all().count())
 
 
     def test_smart_model(self):
