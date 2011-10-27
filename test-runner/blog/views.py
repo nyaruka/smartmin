@@ -1,4 +1,3 @@
-
 from smartmin.views import *
 from .models import *
 from django import forms
@@ -19,6 +18,7 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
 
+
 class CategoryCRUDL(SmartCRUDL):
     model = Category
     permissions = True
@@ -26,11 +26,12 @@ class CategoryCRUDL(SmartCRUDL):
     class Create(SmartCreateView):
         form_class = CategoryForm
 
+
 class PostCRUDL(SmartCRUDL):
     model = Post
     permissions = True
-    actions = ('create', 'read', 'update', 'delete', 'list', 'author', 
-               'exclude', 'exclude2', 'readonly', 'readonly2')
+    actions = ('create', 'read', 'update', 'delete', 'list', 'author',
+               'exclude', 'exclude2', 'readonly', 'readonly2', 'messages')
 
     class List(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')
@@ -70,5 +71,10 @@ class PostCRUDL(SmartCRUDL):
         form_class = ExcludeForm
         readonly = ('tags',)
 
-
-
+    class Messages(SmartListView):
+        def pre_process(self, request, *args, **kwargs):
+            messages.error(request,"Error Messages")
+            messages.success(request,"Success Messages")
+            messages.info(request,"Info Messages")
+            messages.warning(request,"Warning Messages")
+            messages.debug(request,"Debug Messages")
