@@ -142,6 +142,11 @@ class SmartminTest(TestCase):
         self.assertIn('<div class="alert-message info fade in" data-alert="alert">', response.content)
         self.assertIn('<div class="alert-message warning fade in" data-alert="alert">', response.content)
 
+    def test_template_name(self):
+        self.client.login(username='author', password='author')
+        response = self.client.get(reverse('blog.post_list'))
+        self.assertEquals(['blog/post_list.html', 'smartmin/list.html'], response.template_name)
+
     def test_ordering(self):
         post1 = Post.objects.create(title="A First Post", body="Post Body", order=3, tags="post",
                                     created_by=self.author, modified_by=self.author)

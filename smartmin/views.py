@@ -48,6 +48,7 @@ class SmartView(object):
     title = None
     permission = None
     refresh = 0
+    template_name = None
 
     # set by our CRUDL
     url_name = None
@@ -289,10 +290,10 @@ class SmartView(object):
         Subclasses can override this by setting a 'template_name' variable on the class.
         """
         templates = []
-        if hasattr(self, 'template_name') and self.template_name:
+        if getattr(self, 'template_name', None):
             templates.append(self.template_name)
 
-        if hasattr(self, 'default_template'):
+        if getattr(self, 'default_template', None):
             templates.append(self.default_template)
         else:
             templates = super(SmartView, self).get_template_names()
@@ -912,7 +913,7 @@ class SmartFormMixin(object):
         return context
 
 class SmartFormView(SmartFormMixin, SmartView, FormView):
-    template_name = 'smartmin/form.html'
+    default_template = 'smartmin/form.html'
 
     def form_valid(self, form):
         # plug in our success message
@@ -1150,6 +1151,12 @@ class SmartCRUDL(object):
         """
         return "%s.%s_%s" % (self.app_name.lower(), self.model_name.lower(), action)
 
+    def template_for_action(self, action):
+        """
+        Returns the template to use for the passed in action
+        """
+        return "%s/%s_%s.html" % (self.app_name.lower(), self.model_name.lower(), action)
+
     def url_name_for_action(self, action):
         """
         Returns the permission to use for the passed in action
@@ -1256,6 +1263,10 @@ class SmartCRUDL(object):
 
         # set the url name for this view
         view.url_name = self.url_name_for_action(action)
+
+        # no template set for it?  set one based on our action and app name
+        if not getattr(view, 'template_name', None):
+            view.template_name = self.template_for_action(action)
 
         return view
 

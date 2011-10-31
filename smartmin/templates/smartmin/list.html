@@ -6,6 +6,7 @@
 {% block pjax %}
 <div id="pjax">
 
+{% block table-controls %}
 <div class="row">
   <div class="span10">
     {% if view.search_fields %}
@@ -30,6 +31,7 @@
     {% endblock table-buttons %}
   </div>
 </div>
+{% endblock %}
 
 <div class="row">
   <div class="span14">
