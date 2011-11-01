@@ -11,7 +11,7 @@ def is_last_model(kwargs):
     """
     Returns whether this is the last post_syncdb called in the application.
     """
-    return kwargs['app'].__name__ == settings.INSTALLED_APPS[-1] + ".models"
+    return kwargs['app'].__name__ == settings.INSTALLED_APPS[-1] + ".models" or kwargs['app'].__name__ == settings.INSTALLED_APPS[-2] + ".models"
 
 def check_role_permissions(role, permissions, current_permissions):
     """
@@ -121,7 +121,7 @@ def check_all_permissions(sender, **kwargs):
     """
     if not is_last_model(kwargs):
         return
-    
+
     config = getattr(settings, 'PERMISSIONS', dict())
 
     # for each of our items
