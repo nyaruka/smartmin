@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from guardian.shortcuts import assign, remove_perm
 from guardian.utils import get_anonymous_user
+from guardian.management import create_anonymous_user
 import sys
 
 def is_last_model(kwargs):
@@ -84,6 +85,15 @@ def check_all_group_permissions(sender, **kwargs):
 
         check_role_permissions(group, permissions, group.permissions.all())
 
+def get_or_create_anonymous_user():
+    try:
+        anon_user = get_anonymous_user()
+    except:
+        create_anonymous_user(None)
+        anon_user = get_anonymous_user()
+
+    return anon_user
+
 def check_all_anon_permissions(sender, **kwargs):
     """
     Checks that all our anonymous permissions have been granted
@@ -92,7 +102,7 @@ def check_all_anon_permissions(sender, **kwargs):
         return
 
     permissions = getattr(settings, 'ANONYMOUS_PERMISSIONS', [])
-    anon_user = get_anonymous_user()
+    anon_user = get_or_create_anonymous_user()
 
     check_role_permissions(anon_user, permissions, anon_user.get_all_permissions())
 
