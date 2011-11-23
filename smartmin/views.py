@@ -1181,7 +1181,7 @@ class SmartCRUDL(object):
                 view.model = self.model
 
             # no permission and we are supposed to set them, do so
-            if not getattr(view, 'permission', None) and self.permissions:
+            if not hasattr(view, 'permission') and self.permissions:
                 view.permission = self.permission_for_action(action)
 
             # set our link URL based on read and update
