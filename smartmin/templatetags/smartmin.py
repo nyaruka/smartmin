@@ -114,6 +114,14 @@ def get(dictionary, key):
         return ''
 
 @register.filter
+def is_smartobject(obj):
+    """
+    Returns whether the passed in object is a smart object
+    """
+    from smartmin.models import SmartObject
+    return isinstance(obj, SmartObject)
+
+@register.filter
 def field_orderable(view, field):
     """
     Returns whether the passed in field is orderable
