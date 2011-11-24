@@ -1100,7 +1100,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
         if self.success_message:
             return self.success_message
         else:
-            return "Your new %s has been saved." % self.model._meta.verbose_name
+            return "Your new %s has been created." % self.model._meta.verbose_name
 
     def derive_title(self):
         """
