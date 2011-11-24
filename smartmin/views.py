@@ -46,7 +46,6 @@ class SmartView(object):
     exclude = None
     field_config = {}
     title = None
-    permission = None
     refresh = 0
     template_name = None
 
@@ -82,7 +81,7 @@ class SmartView(object):
         self.args = args
         self.request = request
 
-        if not self.permission:
+        if not getattr(self, 'permission', None):
             return True
         else:
             # first check our anonymous permissions
@@ -118,7 +117,7 @@ class SmartView(object):
         if obj_getter:
             obj = obj_getter()
             if obj:
-                return self.request.user.has_perm(self.permission, obj)
+                return self.request.user.has_perm(getattr(self, 'permission', None), obj)
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -1181,7 +1180,7 @@ class SmartCRUDL(object):
                 view.model = self.model
 
             # no permission and we are supposed to set them, do so
-            if not getattr(view, 'permission', None) and self.permissions:
+            if not hasattr(view, 'permission') and self.permissions:
                 view.permission = self.permission_for_action(action)
 
             # set our link URL based on read and update
