@@ -7,6 +7,8 @@ from smartmin.management import check_role_permissions
 from django.utils import simplejson
 from .views import PostCRUDL
 from smartmin.views import smart_url
+from guardian.shortcuts import assign
+import settings
 
 class SmartminTest(TestCase):
 
@@ -100,6 +102,15 @@ class SmartminTest(TestCase):
         self.assertHasAccess(self.editor, read_url)
         self.assertHasAccess(self.author, read_url)
         self.assertHasAccess(self.superuser, read_url)
+
+        # now grant object level permission to update a single post for anonymous user
+        self.client.logout()
+        anon = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+        assign('blog.post_update', anon, self.post)
+
+        response = self.client.get(update_url)
+        self.assertEquals(200, response.status_code)
+
 
     def test_create(self):
         self.client.login(username='author', password='author')
