@@ -125,7 +125,7 @@ class SmartminTest(TestCase):
         post = list(Post.objects.all())[-1]
 
         self.assertEquals(200, response.status_code)
-        self.assertContains(response, "Your new post has been saved.")
+        self.assertContains(response, "Your new post has been created.")
 
         post_data = dict(title="New Post", body="Updated post content", order=1, tags="post")
         response = self.client.post(reverse('blog.post_update', args=[post.id]), post_data, follow=True)
