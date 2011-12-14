@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from guardian.shortcuts import get_objects_for_user, assign
 from django.core.exceptions import ImproperlyConfigured
 from django import forms
@@ -19,6 +19,8 @@ from django.utils import simplejson
 from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.contrib.auth.models import User
+
 import string
 import widgets
 
@@ -599,13 +601,18 @@ class SmartListView(SmartView, ListView):
         Gets our queryset.  This takes care of filtering if there are any
         fields to filter by.
         """
+
         queryset = self.derive_queryset(**kwargs)
 
         # if our list should be filtered by a permission as well, do so
         if self.list_permission:
             # only filter if this user doesn't have a global permission
             if not self.request.user.has_perm(self.list_permission):
-                queryset = queryset.filter(id__in=get_objects_for_user(self.request.user, self.list_permission))
+                user = self.request.user
+                # guardian only behaves with model users
+                if settings.ANONYMOUS_USER_ID and user.is_anonymous():
+                    user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+                queryset = queryset.filter(id__in=get_objects_for_user(user, self.list_permission))
 
         return self.order_queryset(queryset)
 
