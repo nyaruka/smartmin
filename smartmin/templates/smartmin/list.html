@@ -75,7 +75,7 @@
 
 {% block paginator %}
 <div class="row">
-  <div class="span7">
+  <div class="span3">
     <div class="pagination-text">
     {% if not paginator or paginator.num_pages <= 1 %}
     {{ object_list|length }} result{% if object_list|length == 0 or object_list|length > 1 %}s{% endif %}
@@ -84,7 +84,7 @@
     {% endif %}
     </div>
   </div>
-  <div class="span7">
+  <div class="span11">
     {% if paginator and paginator.num_pages > 1 %}
     <div class="pagination pull-right">
       <ul>
