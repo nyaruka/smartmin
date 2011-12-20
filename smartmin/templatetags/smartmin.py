@@ -86,11 +86,7 @@ def view_as_json(context):
 
 @register.filter
 def field(form, field):
-    for form_field in form:
-        if form_field.name == field:
-            return form_field
-
-    return None
+    return form[field]
 
 @register.filter
 def map(string, args):
