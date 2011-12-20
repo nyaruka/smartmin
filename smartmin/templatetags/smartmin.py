@@ -86,7 +86,10 @@ def view_as_json(context):
 
 @register.filter
 def field(form, field):
-    return form[field]
+    try:
+        return form[field]
+    except KeyError:
+        return None
 
 @register.filter
 def map(string, args):
