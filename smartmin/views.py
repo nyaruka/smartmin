@@ -671,6 +671,40 @@ class SmartListView(SmartView, ListView):
         else:
             return ''
 
+class SmartCsvView(SmartListView):
+
+    def derive_filename(self):
+        filename = getattr(self, 'filename', None)
+        if not filename:
+            filename = "%s.csv" % self.model._meta.verbose_name.lower()
+        return filename
+
+    def render_to_response(self, context, **response_kwargs):
+        import csv
+
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
+
+        writer = csv.writer(response)
+        
+        fields = self.derive_fields()
+
+        # build up our header row
+        header = []
+        for field in fields:
+            header.append(self.lookup_field_label(dict(), field))
+        writer.writerow(header)
+
+        # then our actual values
+        for obj in self.object_list:
+            row = []
+            for field in fields:
+                row.append(self.lookup_field_value(dict(), obj, field))
+        writer.writerow(row)
+
+        return response
+    
 class SmartFormMixin(object):
     readonly = ()
     field_config = { 'modified_blurb': dict(label="Modified"),
