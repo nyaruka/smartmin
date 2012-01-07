@@ -254,7 +254,7 @@ class SmartminTest(TestCase):
     def test_version(self):
         # TODO: for whatever reason coverage refuses to belief this covers the __init__.py in smartmin
         import smartmin
-        self.assertEquals('0.0.3', smartmin.__version__)
+        self.assertEquals('0.0.4', smartmin.__version__)
 
     def test_management(self):
         authors = Group.objects.get(name="Authors")
