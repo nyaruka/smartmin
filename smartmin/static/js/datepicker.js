@@ -230,7 +230,7 @@
 				}
 			},
 			parseDate = function (date, format) {
-				if (date.constructor == Date) {
+                if (date.constructor == Date) {
 					return new Date(date);
 				}
 				var parts = date.split(/\W+/);
@@ -241,14 +241,23 @@
 						case 'e':
 							d = parseInt(parts[i],10);
 							break;
-						case 'm':
+                        case 'B':
+                            var monthName = parts[0];
+                            for (var idx=0; idx<Date.prototype.months.length; idx++) {
+                                if (Date.prototype.months[idx] == monthName) {
+                                    m = idx;
+                                    break;
+                                }
+                            }
+                            break;
+                        case 'm':
 							m = parseInt(parts[i], 10)-1;
-							break;
+                            break;
 						case 'Y':
 						case 'y':
 							y = parseInt(parts[i], 10);
 							y += y > 100 ? 0 : (y < 29 ? 2000 : 1900);
-							break;
+                            break;
 						case 'H':
 						case 'I':
 						case 'k':
@@ -268,7 +277,8 @@
 							break;
 					}
 				}
-				return new Date(
+
+				date =  new Date(
 					y === undefined ? now.getFullYear() : y,
 					m === undefined ? now.getMonth() : m,
 					d === undefined ? now.getDate() : d,
@@ -276,6 +286,7 @@
 					min === undefined ? now.getMinutes() : min,
 					0
 				);
+                return date;
 			},
 			formatDate = function(date, format) {
 				var m = date.getMonth();
