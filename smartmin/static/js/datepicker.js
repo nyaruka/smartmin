@@ -2,9 +2,9 @@
  *
  * Date picker
  * Author: Stefan Petre www.eyecon.ro
- * 
+ *
  * Dual licensed under the MIT and GPL licenses
- * 
+ *
  */
 (function ($) {
 	var DatePicker = function () {
@@ -164,7 +164,7 @@
 						case 'datepickerViewYears':
 							dow = (date.getFullYear()-6) + ' - ' + (date.getFullYear()+5);
 							break;
-					} 
+					}
 					tblCal.find('thead tr:first th:eq(1) span').text(dow);
 					dow = date.getFullYear()-6;
 					data = {
@@ -229,65 +229,67 @@
 					tblCal.append(html);
 				}
 			},
-			parseDate = function (date, format) {
-                if (date.constructor == Date) {
-					return new Date(date);
-				}
-				var parts = date.split(/\W+/);
-				var against = format.split(/\W+/), d, m, y, h, min, now = new Date();
-				for (var i = 0; i < parts.length; i++) {
-					switch (against[i]) {
-						case 'd':
-						case 'e':
-							d = parseInt(parts[i],10);
-							break;
-                        case 'B':
-                            var monthName = parts[0];
-                            for (var idx=0; idx<Date.prototype.months.length; idx++) {
-                                if (Date.prototype.months[idx] == monthName) {
-                                    m = idx;
-                                    break;
-                                }
+	    parseDate = function (date, format) {
+		
+            if (date.constructor == Date) {
+                return new Date(date);
+            }
+            var parts = date.split(/\W+/);
+            var against = format.split(/\W+/), d, m, y, h, min, now = new Date();
+            for (var i = 0; i < parts.length; i++) {
+                switch (against[i]) {
+                    case 'd':
+                    case 'e':
+                        d = parseInt(parts[i],10);
+                        break;
+                    case 'B':
+                        var monthName = parts[0];
+                        for (var idx=0; idx<Date.prototype.months.length; idx++) {
+                            if (Date.prototype.months[idx] == monthName) {
+                                m = idx;
+                                break;
                             }
-                            break;
-                        case 'm':
-							m = parseInt(parts[i], 10)-1;
-                            break;
-						case 'Y':
-						case 'y':
-							y = parseInt(parts[i], 10);
-							y += y > 100 ? 0 : (y < 29 ? 2000 : 1900);
-                            break;
-						case 'H':
-						case 'I':
-						case 'k':
-						case 'l':
-							h = parseInt(parts[i], 10);
-							break;
-						case 'P':
-						case 'p':
-							if (/pm/i.test(parts[i]) && h < 12) {
-								h += 12;
-							} else if (/am/i.test(parts[i]) && h >= 12) {
-								h -= 12;
-							}
-							break;
-						case 'M':
-							min = parseInt(parts[i], 10);
-							break;
-					}
-				}
-
-				date =  new Date(
-					y === undefined ? now.getFullYear() : y,
-					m === undefined ? now.getMonth() : m,
-					d === undefined ? now.getDate() : d,
-					h === undefined ? now.getHours() : h,
-					min === undefined ? now.getMinutes() : min,
-					0
-				);
+                        }
+                        break;
+                    case 'm':
+                        m = parseInt(parts[i], 10)-1;
+                        break;
+                    case 'Y':
+                    case 'y':
+                        y = parseInt(parts[i], 10);
+                        y += y > 100 ? 0 : (y < 29 ? 2000 : 1900);
+                        break;
+                    case 'H':
+                    case 'I':
+                    case 'k':
+                    case 'l':
+                        h = parseInt(parts[i], 10);
+                        break;
+                    case 'P':
+                    case 'p':
+                        if (/pm/i.test(parts[i]) && h < 12) {
+                            h += 12;
+                        } else if (/am/i.test(parts[i]) && h >= 12) {
+                            h -= 12;
+                        }
+                        break;
+                    case 'M':
+                        min = parseInt(parts[i], 10);
+                        break;
+                    }
+                }
+		
+                date =  new Date(
+                    y === undefined ? now.getFullYear() : y,
+                    m === undefined ? now.getMonth() : m,
+                    d === undefined ? now.getDate() : d,
+                    h === undefined ? now.getHours() : h,
+                    min === undefined ? now.getMinutes() : min,
+                    0
+                );
+		
                 return date;
-			},
+            },
 			formatDate = function(date, format) {
 				var m = date.getMonth();
 				var d = date.getDate();
@@ -728,7 +730,7 @@
 							options.current = new Date();
 						} else {
 							options.current = parseDate(options.current, options.format);
-						} 
+						}
 						options.current.setDate(1);
 						options.current.setHours(0,0,0,0);
 						var id = 'datepicker_' + parseInt(Math.random() * 1000), cnt;
@@ -862,22 +864,22 @@
 
 (function(){
   var cache = {};
- 
+
   this.tmpl = function tmpl(str, data){
     // Figure out if we're getting a template, or if we need to
     // load the template - and be sure to cache the result.
     var fn = !/\W/.test(str) ?
       cache[str] = cache[str] ||
         tmpl(document.getElementById(str).innerHTML) :
-     
+
       // Generate a reusable function that will serve as a template
       // generator (and which will be cached).
       new Function("obj",
         "var p=[],print=function(){p.push.apply(p,arguments);};" +
-       
+
         // Introduce the data as local variables using with(){}
         "with(obj){p.push('" +
-       
+
         // Convert the template into pure JavaScript
         str
           .replace(/[\r\t\n]/g, " ")
@@ -888,7 +890,7 @@
           .split("%>").join("p.push('")
           .split("\r").join("\\'")
       + "');}return p.join('');");
-   
+
     // Provide some basic currying to the user
     return data ? fn( data ) : fn;
   };
