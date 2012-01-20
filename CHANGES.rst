@@ -1,5 +1,3 @@
-
-
 Version 0.0.2
 ==============
  * added datepicker widget as default for date fields

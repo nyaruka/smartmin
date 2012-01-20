@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from guardian.shortcuts import get_objects_for_user, assign
 from django.core.exceptions import ImproperlyConfigured
 from django import forms
@@ -19,6 +19,8 @@ from django.utils import simplejson
 from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.contrib.auth.models import User
+
 import string
 import widgets
 
@@ -599,13 +601,18 @@ class SmartListView(SmartView, ListView):
         Gets our queryset.  This takes care of filtering if there are any
         fields to filter by.
         """
+
         queryset = self.derive_queryset(**kwargs)
 
         # if our list should be filtered by a permission as well, do so
         if self.list_permission:
             # only filter if this user doesn't have a global permission
             if not self.request.user.has_perm(self.list_permission):
-                queryset = queryset.filter(id__in=get_objects_for_user(self.request.user, self.list_permission))
+                user = self.request.user
+                # guardian only behaves with model users
+                if settings.ANONYMOUS_USER_ID and user.is_anonymous():
+                    user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+                queryset = queryset.filter(id__in=get_objects_for_user(user, self.list_permission))
 
         return self.order_queryset(queryset)
 
@@ -664,6 +671,40 @@ class SmartListView(SmartView, ListView):
         else:
             return ''
 
+class SmartCsvView(SmartListView):
+
+    def derive_filename(self):
+        filename = getattr(self, 'filename', None)
+        if not filename:
+            filename = "%s.csv" % self.model._meta.verbose_name.lower()
+        return filename
+
+    def render_to_response(self, context, **response_kwargs):
+        import csv
+
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
+
+        writer = csv.writer(response)
+        
+        fields = self.derive_fields()
+
+        # build up our header row
+        header = []
+        for field in fields:
+            header.append(self.lookup_field_label(dict(), field))
+        writer.writerow(header)
+
+        # then our actual values
+        for obj in self.object_list:
+            row = []
+            for field in fields:
+                row.append(self.lookup_field_value(dict(), obj, field))
+        writer.writerow(row)
+
+        return response
+    
 class SmartFormMixin(object):
     readonly = ()
     field_config = { 'modified_blurb': dict(label="Modified"),

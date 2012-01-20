@@ -7,6 +7,8 @@ from smartmin.management import check_role_permissions
 from django.utils import simplejson
 from .views import PostCRUDL
 from smartmin.views import smart_url
+from guardian.shortcuts import assign
+import settings
 
 class SmartminTest(TestCase):
 
@@ -101,6 +103,15 @@ class SmartminTest(TestCase):
         self.assertHasAccess(self.author, read_url)
         self.assertHasAccess(self.superuser, read_url)
 
+        # now grant object level permission to update a single post for anonymous user
+        self.client.logout()
+        anon = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+        assign('blog.post_update', anon, self.post)
+
+        response = self.client.get(update_url)
+        self.assertEquals(200, response.status_code)
+
+
     def test_create(self):
         self.client.login(username='author', password='author')
 
@@ -125,7 +136,7 @@ class SmartminTest(TestCase):
         post = list(Post.objects.all())[-1]
 
         self.assertEquals(200, response.status_code)
-        self.assertContains(response, "Your new post has been saved.")
+        self.assertContains(response, "Your new post has been created.")
 
         post_data = dict(title="New Post", body="Updated post content", order=1, tags="post")
         response = self.client.post(reverse('blog.post_update', args=[post.id]), post_data, follow=True)
@@ -243,7 +254,7 @@ class SmartminTest(TestCase):
     def test_version(self):
         # TODO: for whatever reason coverage refuses to belief this covers the __init__.py in smartmin
         import smartmin
-        self.assertEquals('0.0.3', smartmin.__version__)
+        self.assertEquals('0.0.4', smartmin.__version__)
 
     def test_management(self):
         authors = Group.objects.get(name="Authors")
