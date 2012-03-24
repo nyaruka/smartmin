@@ -444,7 +444,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
 
         return smart_url(self.cancel_url)
 
-    def pre_delete(self, object):
+    def pre_delete(self, obj):
         pass
 
     def post(self, request, *args, **kwargs):
@@ -1170,6 +1170,8 @@ class SmartCRUDL(object):
             self.model_name = self.model._meta.object_name
 
         # derive our app name
+        # TODO: we should really be using the module name here, not the model's app name to allow
+        #       for apps to easily reuse objects from different apps.
         if not self.app_name:
             self.app_name = self.model._meta.app_label
 

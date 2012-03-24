@@ -2,6 +2,8 @@ from django import template
 from datetime import datetime
 from django.utils import simplejson
 from django.template import TemplateSyntaxError
+from django.conf import settings
+import pytz
 
 register = template.Library()
 
@@ -13,6 +15,20 @@ def get_list_class(context, list):
     """
     css = "list_%s_%s" % (list.model._meta.app_label, list.model._meta.module_name)
     return css
+
+def format_datetime(time):
+    """
+    Formats a date, converting the time to the user timezone if one is specified
+    """
+    # see if a USER_TIME_ZONE is specified
+    timezone = getattr(settings, 'USER_TIME_ZONE', None)
+    if timezone:
+        db_tz = pytz.timezone(settings.TIME_ZONE)
+        local_tz = pytz.timezone(settings.USER_TIME_ZONE)
+        time = time.replace(tzinfo=db_tz).astimezone(local_tz)
+
+    # print it out
+    return time.strftime("%b %d, %Y %H:%M")
 
 @register.simple_tag(takes_context=True)
 def get_value_from_view(context, field):
@@ -28,8 +44,10 @@ def get_value_from_view(context, field):
         obj = context['object']
 
     value = view.lookup_field_value(context, obj, field)
+
+    # it's a date
     if type(value) == datetime:
-        return value.strftime("%b %d, %Y %H:%M")
+        return format_datetime(value)
 
     return value
 
@@ -44,7 +62,7 @@ def get_value(context, obj, field):
     view = context['view']
     value = view.lookup_field_value(context, obj, field)
     if type(value) == datetime:
-        return value.strftime("%b %d, %Y %H:%M")
+        return format_datetime(value)
 
     return value
 
