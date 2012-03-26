@@ -6,7 +6,7 @@
 
 {% block table-controls %}
 <div class="row">
-  <div class="span4">
+  <div class="span6">
     {% if view.search_fields %}
     <form class="form-search">
       <input type="text" class="input-medium search-query" name="search" value="{{ search }}">
@@ -28,7 +28,7 @@
 {% block pjax %}
 <div id="pjax">
 <div class="row">
-  <div class="span10">
+  <div class="span12">
     {% block pre-table %}{% endblock %}
 
     {% block table %}

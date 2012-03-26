@@ -29,23 +29,43 @@
 
 <body>
 
-  <div class="topbar">
-    <div class="fill">
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
       <div class="container">
-        <a class="brand" href="http://www.nyaruka.com/">Smartmin</a>
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+
+        <a class="brand" href="/">Smartmin</a>
+
+        <div class="nav-collapse">
+
         <ul class="nav">
-          <li><a href="/">Home</a></li>
-        </ul>
-        
-        {% block login %}
-        <div class="nav secondary-nav">          
-          {% if request.user and request.user.is_authenticated %}
-          <a href="{% url users.user_logout %}?go=/">Welcome {{ request.user.username }} | logout</a>
-          {% else %}
-          <a href="{% url users.user_login %}">Login</a>
+          {% if perms.nsms.text_list %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Configuration<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              {% if perms.auth.user_list %}
+              <li><a href="/users/user/">Users</a></li>
+              {% endif %}
+            </ul>
+          </li>
           {% endif %}
+        </ul>
+
+        <ul class="nav pull-right">
+          {% block login %}
+          {% if request.user and request.user.is_authenticated %}
+          <li class="pull-right"><a href="{% url users.user_logout %}?go=/">{{ request.user.username }} | logout</a></li>
+          {% else %}
+          <li class="pull-right"><a href="{% url users.user_login %}">Login</a></li>
+          {% endif %}
+          {% endblock %}
+        </ul>
+
         </div>
-        {% endblock %}
       </div>
     </div>
   </div>
@@ -59,8 +79,8 @@
     {% block messages %}
     {% if messages %}
     {% for message in messages %}
-    <div class="alert-message {{ message.tags }} fade in" data-alert="alert">
-      <a class="close" href="#">×</a>
+    <div class="alert alert-block {{ message.tags }}">
+      <a class="close" data-dismiss="alert">×</a>
       <p>{{ message }}</p>
     </div>
     {% endfor %}
@@ -80,7 +100,7 @@
 
   <footer>
     {% block footer %}
-    <a href="http://www.nyaruka.com/"><div class="right" id="footer"></div></a>
+    <a href="http://www.nyaruka.com/"><div class="pull-right" id="footer"></div></a>
     {% endblock %}
   </footer>
   
@@ -89,16 +109,16 @@
 <!-- JavaScript at the bottom for fast page loading, conditional based on whether we are serving locally -->
 <script>
   if (window.location.hostname == "localhost"){
-  document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.5.0.js"%3E%3C/script%3E'));
+  document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.7.2.js"%3E%3C/script%3E'));
   } else {
-  document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"%3E%3C/script%3E'));
+  document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"%3E%3C/script%3E'));
   }
 </script>
 
 {# compress js #}
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.pjax.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/scripts.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-alerts.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
 
 {# media associated with any form we are displaying #}
 {% if form %}
