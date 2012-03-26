@@ -79,9 +79,9 @@
     {% block messages %}
     {% if messages %}
     {% for message in messages %}
-    <div class="alert alert-block {{ message.tags }}">
+    <div class="alert alert-{{ message.tags }}">
       <a class="close" data-dismiss="alert">×</a>
-      <p>{{ message }}</p>
+      {{ message }}
     </div>
     {% endfor %}
     {% endif %}

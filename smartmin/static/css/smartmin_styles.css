@@ -11,6 +11,14 @@ body {
 .container {
 }
 
+.table {
+    margin-bottom: 1px;
+}
+
+.form-horizontal .help-block {
+    margin-top: 3px;
+}
+
 table .headerSortUp, table .headerSortDown {
   background-color: rgba(141, 192, 219, 0.25);
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
@@ -101,7 +109,7 @@ form div.clearfix.form-field.error {
 }
 
 input, textarea, select, .uneditable-input {
-    width: 340px;
+    width: 500px;
 }
 
 .help-inline, .help-block {
