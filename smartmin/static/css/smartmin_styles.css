@@ -11,6 +11,31 @@ body {
 .container {
 }
 
+table .headerSortUp, table .headerSortDown {
+  background-color: rgba(141, 192, 219, 0.25);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+
+}
+
+table .headerSortDown {
+  background-image: url(../img/sort_dsc.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+}
+
+table .headerSortUp {
+  background-image: url(../img/sort_asc.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+}
+
+table .header:hover {
+  background-image: url(../img/sort.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+  cursor: pointer;
+}
+
 div.page-header {
     margin-top: 0px;
     margin-bottom: 17px;
