@@ -1197,7 +1197,7 @@ class SmartCRUDL(object):
         """
         Returns the template to use for the passed in action
         """
-        return "%s/%s_%s.html" % (self.app_name.lower(), self.model_name.lower(), action)
+        return "%s/%s_%s.html" % (self.module_name.lower(), self.model_name.lower(), action)
 
     def url_name_for_action(self, action):
         """

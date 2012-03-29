@@ -1,6 +1,7 @@
 from smartmin.views import *
 from .models import *
 from django import forms
+from django.contrib.auth.models import User
 
 class ExcludeForm(forms.ModelForm):
     class Meta:
@@ -17,6 +18,13 @@ class CategoryForm(forms.ModelForm):
 
     class Meta:
         model = Category
+
+# just tests that our reverse and permissions are based on the view.py app, not
+# the model app, the template should also be /blog/user_list.html for the List view
+class UserCRUDL(SmartCRUDL):
+    model = User
+    permissions = False
+    actions = ('list',)
 
 class CategoryCRUDL(SmartCRUDL):
     model = Category

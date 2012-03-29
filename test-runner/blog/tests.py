@@ -351,6 +351,16 @@ class UserTest(TestCase):
         # assert steve can login with 'google' now
         self.assertTrue(self.client.login(username='steve', password='google'))
 
+class UserTestCase(TestCase):
+
+    def test_reverse(self):
+        # the reverse tag here should be blog.user_list, not auth.user_list, since the 
+        # CRUDL objects is defined in the blog app
+        response = self.client.get(reverse('blog.user_list'))
+        self.assertEquals(200, response.status_code)
+
+        # also make sure the proper template is used (should be /blog/user_list.html)
+        self.assertContains(response, "Custom Pre-Content")
 
 class TagTestCase(TestCase):
 
