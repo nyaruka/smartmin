@@ -9,6 +9,16 @@ It is very opininated in how it works, if you don't agree, Smartmin may not be f
 - CRUDL operations at the object level, that is, Create, Read, Update, Delete and List, permissions and views are based around this
 - URL automapping via the the CRUDL objects, this should keep things very very DRY
 
+About Versions
+================
+
+Smartmin tries to stay in lock step with the latest Django versions.  With each new Django version a new Smartmin version will be released and we will save the major changes (possibly breaking backwards compatability) on these versions.  This includes updating to the latest version of Twitter Bootstrap.
+
+The latest version is the 1.4.* series which works against Django 1.4.*
+
+About
+======
+
 The full documentation can be found at:
   http://readthedocs.org/docs/smartmin/en/latest/
 
@@ -17,4 +27,5 @@ The official source code repository is:
 
 Built in Rwanda by Nyaruka Ltd:
   http://www.nyaruka.com
+
 
