@@ -18,18 +18,14 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
 
-
 class CategoryCRUDL(SmartCRUDL):
     model = Category
-    permissions = True
 
     class Create(SmartCreateView):
         form_class = CategoryForm
 
-
 class PostCRUDL(SmartCRUDL):
     model = Post
-    permissions = True
     actions = ('create', 'read', 'update', 'delete', 'list', 'author',
                'exclude', 'exclude2', 'readonly', 'readonly2', 'messages')
 

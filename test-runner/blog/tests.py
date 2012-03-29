@@ -148,10 +148,10 @@ class SmartminTest(TestCase):
         self.client.login(username='author', password='author')
         messages_url = reverse('blog.post_messages')
         response = self.client.get(messages_url)
-        self.assertIn('<div class="alert-message error fade in" data-alert="alert">', response.content)
-        self.assertIn('<div class="alert-message success fade in" data-alert="alert">', response.content)
-        self.assertIn('<div class="alert-message info fade in" data-alert="alert">', response.content)
-        self.assertIn('<div class="alert-message warning fade in" data-alert="alert">', response.content)
+        self.assertIn('<div class="alert alert-error">', response.content)
+        self.assertIn('<div class="alert alert-success">', response.content)
+        self.assertIn('<div class="alert alert-info">', response.content)
+        self.assertIn('<div class="alert alert-warning">', response.content)
 
     def test_template_name(self):
         self.client.login(username='author', password='author')
