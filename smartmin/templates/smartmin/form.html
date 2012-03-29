@@ -5,10 +5,11 @@
 {% block content %}
 {% block pjax %}
 <div class="row" id="pjax">
-  <div class="{% block form-span %}span9{% endblock %}">
+  <div class="{% block form-span %}span12{% endblock %}">
+
   {% block pre-form %}{% endblock %}
 
-  <form class="smartmin-form" method="post" enctype="multipart/form-data">
+  <form class="smartmin-form form-horizontal" method="post" enctype="multipart/form-data">
     {% block pre-form-errors %}
     {% endblock pre-form-errors %}
 
@@ -24,7 +25,7 @@
     {% block pre-fields %}
     {% endblock %}
 
-    <legend>{% block form-help %}{% endblock form-help %}</legend>
+    {% block form-help %}{% endblock form-help %}
 
     {% block fields %}
     <fieldset>
@@ -40,8 +41,8 @@
     {% csrf_token %}
 
     {% block form-buttons %}
-    <div class="actions">
-      <input type="submit" class="btn primary" value="{{ submit_button_name }}">
+    <div class="form-actions">
+      <input type="submit" class="btn btn-primary" value="{{ submit_button_name }}">
       <a class="btn" onclick="javascript:history.go(-1)">Cancel</a>
     </div>
     {% endblock %}

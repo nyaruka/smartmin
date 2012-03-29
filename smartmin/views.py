@@ -1158,7 +1158,7 @@ class SmartCRUDL(object):
     module_name = None
     path = None
     
-    permissions = False
+    permissions = True
 
     def __init__(self, model=None, path=None, actions=None):
         # set our model if passed in

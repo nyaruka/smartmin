@@ -7,12 +7,12 @@
 {{ form_field }}
 {% else %}
 {% if form_field %}
-<div class="clearfix form-field {% if form_field.errors %}error{% endif %}">
-  <label for="{{ field.name }}">{% get_label field %}</label>
-  <div class="input">{{ form_field }}
+<div class="control-group {% if form_field.errors %}error{% endif %}">
+  <label class="control-label" for="{{ field.name }}">{% get_label field %}</label>
+  <div class="controls">{{ form_field }}
     {% with view|field_help:field as help %}
     {% if help %}
-    <span class="help-block">{{ help }}</span>
+    <p class="help-block">{{ help }}</p>
     {% endif %}
     {% endwith %}
     
@@ -22,13 +22,13 @@
   </div>
 </div>
 {% else %}
-<div class="clearfix form-field">
-  <label for="{{ field.name }}">{% get_label field %}</label>
-  <div class="input">
+<div class="control-group">
+  <label class="control-label" for="{{ field.name }}">{% get_label field %}</label>
+  <div class="controls">
     <span class="uneditable-input">{% get_value_from_view field %}</span>
     {% with view|field_help:field as help %}
     {% if help %}
-    <span class="help-block">{{ help }}</span>
+    <p class="help-block">{{ help }}</p>
     {% endif %}
     {% endwith %}
   </div>

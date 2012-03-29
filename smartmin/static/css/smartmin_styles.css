@@ -9,14 +9,62 @@ body {
 }
 
 .container {
-    width: 820px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
 }
 
-/* The white background content wrapper */
+.table {
+    margin-bottom: 1px;
+}
+
+.form-horizontal .help-block {
+    margin-top: 3px;
+}
+
+table .headerSortUp, table .headerSortDown {
+  background-color: rgba(141, 192, 219, 0.25);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+
+}
+
+table .headerSortDown {
+  background-image: url(../img/sort_dsc.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+}
+
+table .headerSortUp {
+  background-image: url(../img/sort_asc.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+}
+
+table .header:hover {
+  background-image: url(../img/sort.png);
+  background-repeat: no-repeat;
+  background-position: 98% 50%;
+  cursor: pointer;
+}
+
+div.page-header {
+    margin-top: 0px;
+    margin-bottom: 17px;
+    padding-bottom: 0px;
+}
+
+div.controls ul {
+    margin-left: 0px;
+    margin-top: 3px;
+}
+
+div.controls ul li {
+    list-style: none;
+    margin-left: 0px;
+}
+
 .content {
     background-color: #fff;
     padding: 20px;
-    margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+    padding-top: 10px;
+    margin: 0 -20px; 
     -webkit-border-radius: 0 0 6px 6px;
     -moz-border-radius: 0 0 6px 6px;
     border-radius: 0 0 6px 6px;
@@ -61,7 +109,7 @@ form div.clearfix.form-field.error {
 }
 
 input, textarea, select, .uneditable-input {
-    width: 340px;
+    width: 500px;
 }
 
 .help-inline, .help-block {
