@@ -91,6 +91,14 @@ And if you want to see a Smartmin view in action, check out smartmin's user mana
 
 From here you can create, update and list users on the system, all using standard smartmin views.  The total code to create all this functionality is less than 30 lines of Python.
 
+Versioning:
+===========================================
+
+Smartmin will release major versions in step (or rather a bit behind) Django's major releases.  That is the version 1.3.* series are made to work with Django 1.3.  Version 1.4.* is made to work with Django 1.4.*.  Although we try not to rock the boat too much, Smartmin is still actively changing, so we don't guarantee any backwards compatability between major releases.
+
+At the onset of each new Django version we will upgrade Twitter Bootstrap to the current version.  Currently for 1.4, which targets Django 1.4, that means Twitter Bootstrap 2.
+
+
 Contents:
 ===========================================
 

@@ -1,3 +1,7 @@
+Version 1.3.0
+=============
+ * first release of Django 1.3 tree in preparation of branching
+
 Version 0.0.2
 ==============
  * added datepicker widget as default for date fields
