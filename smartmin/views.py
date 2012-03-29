@@ -298,7 +298,7 @@ class SmartView(object):
             templates.append(self.default_template)
         else:
             templates = super(SmartView, self).get_template_names()
-            
+
         return templates
 
     def derive_fields(self):
@@ -1170,8 +1170,6 @@ class SmartCRUDL(object):
             self.model_name = self.model._meta.object_name
 
         # derive our app name
-        # TODO: we should really be using the module name here, not the model's app name to allow
-        #       for apps to easily reuse objects from different apps.
         if not self.app_name:
             self.app_name = self.model._meta.app_label
 
@@ -1181,7 +1179,7 @@ class SmartCRUDL(object):
 
         # derive our module name from our class's module
         if not self.module_name:
-            self.module_name = self.__class__.__module__.split(".")[0]
+            self.module_name = self.__class__.__module__.split(".")[-2]
 
         # set our actions if set
         if actions:
@@ -1201,9 +1199,9 @@ class SmartCRUDL(object):
 
     def url_name_for_action(self, action):
         """
-        Returns the permission to use for the passed in action
+        Returns the reverse name for this action
         """
-        return "%s.%s_%s" % (self.module_name, self.model_name.lower(), action)        
+        return "%s.%s_%s" % (self.module_name.lower(), self.model_name.lower(), action)        
 
     def view_for_action(self, action):
         """
