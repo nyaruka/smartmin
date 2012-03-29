@@ -6,9 +6,10 @@ setup(
     license="BSD",
 
     install_requires = [
-        "django>=1.3",
+        "django>=1.4",
         "django-guardian>=1.0.2",
         "django_compressor",
+        "pytz",
     ],
 
     description="Scaffolding system for Django object management.",
