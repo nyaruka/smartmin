@@ -12,13 +12,15 @@
       <input type="text" class="input-medium search-query" name="search" value="{{ search }}">
       <button type="submit" class="btn">Search</button>
     </form>
+    {% else %}
+    &nbsp;
     {% endif %}
   </div>
 
   <div class="span6 buttons">
     {% block table-buttons %}
     {% if view.add_button %}
-    <a class="btn primary pull-right" href="./create/">Add</a>
+    <a class="btn btn-primary pull-right" href="./create/">Add</a>
     {% endif %}
     {% endblock table-buttons %}
   </div>
