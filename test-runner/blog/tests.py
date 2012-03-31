@@ -306,7 +306,7 @@ class UserTest(TestCase):
                          groups=Group.objects.get(name='Administrator').id,
                          email='steve@apple.com')
 
-        response = self.client.post(reverse('smartmin.user_create'), post_data, follow=True)
+        response = self.client.post(reverse('users.user_create'), post_data, follow=True)
         self.assertEquals(200, response.status_code)
         self.assertTrue('form' not in response.context)
 
@@ -319,7 +319,7 @@ class UserTest(TestCase):
         woz.save()
 
         # list our users
-        response = self.client.get(reverse('smartmin.user_list'))
+        response = self.client.get(reverse('users.user_list'))
         users = response.context['user_list']
 
         # results should be sorted by username
@@ -338,7 +338,7 @@ class UserTest(TestCase):
         # need is active here or steve will be marked inactive
         post_data['is_active'] = '1'
 
-        response = self.client.post(reverse('smartmin.user_update', args=[steve.id]), post_data, follow=True)
+        response = self.client.post(reverse('users.user_update', args=[steve.id]), post_data, follow=True)
         self.assertEquals(200, response.status_code)
         self.assertTrue('form' not in response.context)
 
