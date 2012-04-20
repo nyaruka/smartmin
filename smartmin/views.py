@@ -701,7 +701,7 @@ class SmartCsvView(SmartListView):
             row = []
             for field in fields:
                 row.append(self.lookup_field_value(dict(), obj, field))
-        writer.writerow(row)
+            writer.writerow(row)
 
         return response
     
