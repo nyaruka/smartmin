@@ -138,6 +138,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+
+    'smartmin.csv_imports',
+
+    'djcelery',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -203,3 +207,16 @@ LOGIN_URL = '/users/login/'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+
+#-----------------------------------------------------------------------------------                                    
+# Async tasks with django-celery                                                                                        
+#-----------------------------------------------------------------------------------                                    
+import djcelery
+djcelery.setup_loader()
+
+CELERY_RESULT_BACKEND = 'database'
+
+BROKER_BACKEND = 'redis'
+BROKER_HOST = 'localhost'
+BROKER_PORT = 6379
+BROKER_VHOST = '4'

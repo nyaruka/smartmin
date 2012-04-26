@@ -12,7 +12,12 @@ class Post(SmartModel):
 
     objects = models.Manager()
     active = ActiveManager()
-    
+
+    @classmethod
+    def pre_create_instance(cls, field_dict):
+        field_dict['body'] = "Body: %s" % field_dict['body']
+        return field_dict
+
     def __unicode__(self):
         return self.title
 

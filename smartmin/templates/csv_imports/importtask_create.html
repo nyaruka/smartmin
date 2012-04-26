@@ -1,0 +1,16 @@
+{% extends "smartmin/create.html" %}
+
+{% load smartmin %}
+
+{% block pre-form %}
+<div class="row">
+  <div class="span10">
+    <div class="alert-message block-message warning">
+      <p>You can import all the reports for a season using a properly formatted CSV file.</p>
+      <p><b>Note that imports will overwrite all existing report data for the season for the wetmills being imported.</b></p>
+      <p>It is recommended that you first <a class="posterize" href="{% url reportimports.reportimport_action %}?season={{season.id}}&template=template">download a sample file</a> for the {{ season.name }} season to get started.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

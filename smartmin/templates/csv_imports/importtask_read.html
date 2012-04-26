@@ -1,0 +1,47 @@
+{% extends "smartmin/read.html" %}
+
+{% block content %}
+{% block pjax %}
+<div id="pjax">
+<div class="row">
+  <div class="span10">
+    <table class="table table-striped">
+      <tbody>
+        <tr>
+          <td class="bold">Status</td>
+          <td>{{ object.status }}
+            {% if object.status == 'PENDING' or object.status == 'RUNNING' or object.status == 'STARTED' %}
+            <img class="pull-right" src="{{ STATIC_URL }}img/smartmin/loading.gif">
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="bold">File</td>
+          <td>{{ object.csv_file }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <pre>{{ object.import_log }}</pre>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+{% endblock %}
+
+{% block extra-style %}
+<style>
+  td.bold {
+    font-weight: bold;
+    text-align: right;
+  }
+
+  div.buttons {
+    padding-bottom: 5px;
+  }
+
+  div.loading {
+    padding-top: 10px;
+  }
+</style>
+{% endblock %}
