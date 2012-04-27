@@ -24,7 +24,6 @@ class ImportTask(SmartModel):
 
     def status(self):
         status = "PENDING"
-        print self.task_id
         if self.task_id:
             result = csv_import.AsyncResult(self.task_id)
             status = result.state

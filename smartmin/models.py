@@ -2,6 +2,7 @@ import csv
 import traceback
 from django.db import models
 from django.contrib.auth.models import User
+import codecs
 
 class SmartModel(models.Model):
     """
@@ -26,7 +27,7 @@ class SmartModel(models.Model):
         abstract = True
 
     @classmethod
-    def prepare_fields(cls, field_dict):
+    def prepare_fields(cls, field_dict, user=None):
         return field_dict
 
     @classmethod
@@ -36,10 +37,36 @@ class SmartModel(models.Model):
     @classmethod
     def import_csv(cls, file, user, log=None):
 
+        # our alternative codec, by default we are the crazy windows encoding
+        ascii_codec = 'cp1252'
+
+        # read the entire file, look for mac_roman characters
+        reader = open(file.name, "rb")
+        for byte in reader.read():
+            # these are latin accented characterse in mac_roman, if we see them then our alternative
+            # encoding should be mac_roman
+            if ord(byte) in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
+                ascii_codec = 'mac_roman'
+                break
+        reader.close()
+
         reader = open(file.name, "rU")
-        dialect = csv.Sniffer().sniff(reader.read(1024))
-        reader.seek(0)
-        reader = csv.reader(reader, dialect)
+
+        def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
+            csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
+            for row in csv_reader:
+                encoded = []
+                for cell in row:
+                    try: 
+                        cell = unicode(cell)
+                    except:
+                        cell = unicode(cell.decode(ascii_codec))
+                        
+                    encoded.append(cell)
+
+                yield encoded
+
+        reader = unicode_csv_reader(reader)
 
         # read in our header
         line_number = 0
@@ -56,6 +83,11 @@ class SmartModel(models.Model):
 
         records = []
         for row in reader:
+            # trim all our values
+            row = [val.strip() for val in row]
+
+            line_number += 1
+
             # make sure there are same number of fields
             if len(row) != len(header):
                 raise Exception("Line %d: The number of fields for this row is incorrect. Expected %d but found %d." % (line_number, len(header), len(row)))
@@ -64,14 +96,12 @@ class SmartModel(models.Model):
             field_values['created_by'] = user
             field_values['modified_by'] = user
             try:
-                field_values = cls.prepare_fields(field_values)
+                field_values = cls.prepare_fields(field_values, user)
                 records.append(cls.create_instance(field_values))
-            except Exception as e:
+            except Error as e:
                 if log:
-                    traceback.print_exc(log)
-                raise Exception("Line %d: %s" % (line_number, str(e)))
-
-            line_number += 1
+                    traceback.print_exc(100, log)
+                raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
 
         return records
 

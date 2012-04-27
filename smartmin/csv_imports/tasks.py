@@ -30,6 +30,8 @@ def csv_import(task):  #pragma: no cover
         transaction.commit()
 
     except Exception as e:
+        transaction.rollback()
+
         import traceback
         traceback.print_exc(e)
 
