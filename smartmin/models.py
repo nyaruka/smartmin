@@ -98,7 +98,7 @@ class SmartModel(models.Model):
             try:
                 field_values = cls.prepare_fields(field_values, user)
                 records.append(cls.create_instance(field_values))
-            except Error as e:
+            except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
                 raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
