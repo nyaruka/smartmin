@@ -3,7 +3,6 @@ from django.db import models, transaction
 from smartmin import class_from_string
 
 from smartmin.models import SmartModel
-from .tasks import csv_import
 
 class ImportTask(SmartModel):
     csv_file = models.FileField(upload_to="csv_imports", verbose_name="Import file", help_text="A comma delimited file of records to import")
@@ -12,17 +11,20 @@ class ImportTask(SmartModel):
     task_id = models.CharField(null=True, max_length=64)
 
     def start(self):
+        from .tasks import csv_import
         self.log("Queued import at %s" % datetime.datetime.now())
         result = csv_import.delay(self)
         self.task_id = result.task_id
         self.save()
 
     def done(self):
+        from .tasks import csv_import
         if self.task_id:
             result = csv_import.AsyncResult(self.task_id)
             return result.ready()
 
     def status(self):
+        from .tasks import csv_import
         status = "PENDING"
         if self.task_id:
             result = csv_import.AsyncResult(self.task_id)

@@ -185,3 +185,8 @@ fieldset.field-group {
 fieldset.field-group div.form-field {
     clear: both;
 }
+
+.table td.read-label {
+    font-weight: bold;
+    text-align: right;
+}
