@@ -23,7 +23,6 @@ from django.contrib.auth.models import User
 
 import string
 from smartmin.csv_imports.models import ImportTask
-from smartmin.csv_imports.tasks import csv_import
 import widgets
 
 def smart_url(url, id=None):
