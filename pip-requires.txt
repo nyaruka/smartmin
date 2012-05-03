@@ -1,4 +1,6 @@
 django>=1.4
 django-guardian>=1.0.2
 django_compressor
+django-celery
 pytz
+redis==2.4.9

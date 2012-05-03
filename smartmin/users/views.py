@@ -51,7 +51,7 @@ class UserCRUDL(SmartCRUDL):
 
         def get_queryset(self, **kwargs):
             queryset = super(UserCRUDL.List, self).get_queryset(**kwargs)
-            return queryset.filter(id__gt=0).exclude(is_staff=True).exclude(is_superuser=True)
+            return queryset.filter(id__gt=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
 
         def get_name(self, obj):
             return " ".join((obj.first_name, obj.last_name))
