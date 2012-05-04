@@ -35,7 +35,7 @@ class CategoryCRUDL(SmartCRUDL):
 class PostCRUDL(SmartCRUDL):
     model = Post
     actions = ('create', 'read', 'update', 'delete', 'list', 'author',
-               'exclude', 'exclude2', 'readonly', 'readonly2', 'messages')
+               'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import')
 
     class List(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')

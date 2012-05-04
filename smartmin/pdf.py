@@ -1,4 +1,3 @@
-import ho.pisa as pisa
 import StringIO
 from django.http import HttpResponse
 
@@ -12,6 +11,7 @@ from django.http import HttpResponse
 class PDFMixin(object):
 
     def render_to_response(self, context, **response_kwargs):
+        import ho.pisa as pisa
         response = super(PDFMixin, self).render_to_response(context, **response_kwargs)
         
         # do the actual rendering

@@ -1,0 +1,151 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Smartmin{% endblock %}</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  
+  <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <![endif]-->
+  
+  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Place favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+  <link rel="icon" type="image/x-icon" href="{{ STATIC_URL }}img/favicon.ico">
+  
+  <!-- CSS: implied media="all" -->
+  {# load compress #}
+  {# compress css #}
+  {% block styles %}
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.css">
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/smartmin_styles.css">
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/styles.css">
+  {% endblock %}
+
+  {% block extra-style %}{% endblock %}
+  
+  {# endcompress #}
+</head>
+
+<body>
+  
+  <div class="container">
+
+    {% block navbar %}
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          
+          {% block brand %}
+          <a class="brand" href="/">Smartmin</a>
+          {% endblock %}
+          
+          {% block navigation %}
+          <div class="nav-collapse">
+            
+            <ul class="nav">
+              {% if perms.nsms.text_list %}
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Configuration<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  {% if perms.auth.user_list %}
+                  <li><a href="/users/user/">Users</a></li>
+                  {% endif %}
+                </ul>
+              </li>
+              {% endif %}
+            </ul>
+            
+            <ul class="nav pull-right">
+              {% block login %}
+              {% if request.user and request.user.is_authenticated %}
+              <li class="pull-right"><a href="{% url users.user_logout %}?go=/">{{ request.user.username }} | logout</a></li>
+              {% else %}
+              <li class="pull-right"><a href="{% url users.user_login %}">Login</a></li>
+              {% endif %}
+              {% endblock %}
+            </ul>
+            
+          </div>
+          {% endblock %}
+          
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+    
+    {% load smartmin %}
+    
+    {% block content-div %}
+    <div class="content">
+      {% block messages %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        <a class="close" data-dismiss="alert">×</a>
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endblock messages %}
+      
+      {% block pre-content %}
+      {% endblock %}
+      
+      {% block content %}
+      {% endblock %}
+      
+      {% block post-content %}
+      {% endblock %}
+    </div>
+    {% endblock %}
+    
+    <footer>
+      {% block footer %}
+      <a href="http://www.nyaruka.com/"><div class="pull-right" id="footer"></div></a>
+      {% endblock %}
+    </footer>
+    
+  </div> <!-- /container -->
+  
+  <!-- JavaScript at the bottom for fast page loading, conditional based on whether we are serving locally -->
+  <script>
+    if (window.location.hostname == "localhost"){
+    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.7.2.js"%3E%3C/script%3E'));
+    } else {
+    document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"%3E%3C/script%3E'));
+    }
+  </script>
+  
+  {# compress js #}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.pjax.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/scripts.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+  
+  {# media associated with any form we are displaying #}
+  {% if form %}
+  {{ form.media }}
+  {% endif %}
+  
+  {% block extra-script %}{% endblock %}
+  {% block script %}{% endblock %}
+  {# endcompress #}
+  
+  <!-- mathiasbynens.be/notes/async-analytics-snippet Change UA-XXXXX-X to be your site's ID -->
+  <!--script type="text/javascript">
+      var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+      g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+      s.parentNode.insertBefore(g,s)}(document,'script'));
+      </script-->
+  
+</body>
+</html>

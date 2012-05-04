@@ -10,3 +10,7 @@ docs/_build
 build
 coverage-report
 
+/.DS_Store
+/smartmin/.DS_Store
+/smartmin/static/.DS_Store
+/smartmin/static/img/.DS_Store

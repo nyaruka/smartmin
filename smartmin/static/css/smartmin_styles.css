@@ -12,7 +12,7 @@ body {
 }
 
 .table {
-    margin-bottom: 1px;
+    margin-bottom: 8px;
 }
 
 .form-horizontal .help-block {
@@ -184,4 +184,9 @@ fieldset.field-group {
 
 fieldset.field-group div.form-field {
     clear: both;
+}
+
+.table td.read-label {
+    font-weight: bold;
+    text-align: right;
 }

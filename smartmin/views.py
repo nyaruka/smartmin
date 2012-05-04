@@ -22,6 +22,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 
 import string
+from smartmin.csv_imports.models import ImportTask
 import widgets
 
 def smart_url(url, id=None):
@@ -54,13 +55,16 @@ class SmartView(object):
     # set by our CRUDL
     url_name = None
 
+    # if we are part of a CRUDL, we keep a reference to it here, set by CRUDL
+    crudl = None
+
     def __init__(self, *args):
         """
         There are a few variables we want to mantain in the instance, not the
         class.
         """
         self.extra_context = {}
-        return super(SmartView, self).__init__(*args)
+        super(SmartView, self).__init__()
 
     def derive_title(self):
         """
@@ -1151,6 +1155,27 @@ class SmartCreateView(SmartModelFormView, CreateView):
         else:
             return self.title
 
+class SmartCSVImportView(SmartCreateView):
+    success_url = 'id@csv_imports.importtask_read'
+
+    fields = ('csv_file',)
+
+    def derive_title(self):
+        return "Import %s" % self.crudl.model._meta.verbose_name_plural.title()
+
+    def pre_save(self, obj):
+        obj = super(SmartCSVImportView, self).pre_save(obj)
+        obj.model_class = "%s.%s" % (self.crudl.model.__module__, self.crudl.model.__name__)
+        return obj
+
+    def post_save(self, task):
+        task = super(SmartCSVImportView, self).post_save(task)
+
+        # kick off our CSV import
+        task.start()
+
+        return task
+
 class SmartCRUDL(object):
     actions = ('create', 'read', 'update', 'delete', 'list')
     model_name = None
@@ -1256,32 +1281,32 @@ class SmartCRUDL(object):
             # set permissions if appropriate
             if self.permissions:
                 options['permission'] = self.permission_for_action(action)
-            
+
             if action == 'create':
                 view = type("%sCreateView" % self.model_name, (SmartCreateView,),
-                            options)
+                    options)
 
             elif action == 'read':
                 if 'update' in self.actions:
                     options['edit_button'] = True
 
                 view = type("%sReadView" % self.model_name, (SmartReadView,),
-                            options)
+                    options)
 
             elif action == 'update':
                 if 'delete' in self.actions:
                     options['delete_url'] = "id@%s.%s_delete" % (self.module_name, self.model_name.lower())
-                
+
                 view = type("%sUpdateView" % self.model_name, (SmartUpdateView,),
-                            options)
+                    options)
 
             elif action == 'delete':
                 if 'list' in self.actions:
                     options['cancel_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
                     options['redirect_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
-                
+
                 view = type("%sDeleteView" % self.model_name, (SmartDeleteView,),
-                            options)
+                    options)
 
             elif action == 'list':
                 if 'read' in self.actions:
@@ -1293,9 +1318,13 @@ class SmartCRUDL(object):
 
                 if 'create' in self.actions:
                     options['add_button'] = True
-                
+
                 view = type("%sListView" % self.model_name, (SmartListView,),
-                            options)
+                    options)
+
+            elif action == 'csv_import':
+                options['model'] = ImportTask
+                view = type("%sCSVImportView" % self.model_name, (SmartCSVImportView,), options)
 
         if not view:
             # couldn't find a view?  blow up
@@ -1307,6 +1336,8 @@ class SmartCRUDL(object):
         # no template set for it?  set one based on our action and app name
         if not getattr(view, 'template_name', None):
             view.template_name = self.template_for_action(action)
+
+        view.crudl = self
 
         return view
 
