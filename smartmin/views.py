@@ -421,6 +421,13 @@ class SmartReadView(SmartView, DetailView):
             fields = []
             for field in self.object._meta.fields:
                 fields.append(field.name)
+
+            # only exclude?  then remove those items there
+            exclude = self.derive_exclude()
+
+            # remove any excluded fields
+            fields = [field for field in fields if field not in exclude]
+
             return fields
 
     def get_modified_blurb(self, obj):
