@@ -697,7 +697,7 @@ class SmartCsvView(SmartListView):
         response = HttpResponse(mimetype='text/csv')
         response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
 
-        writer = csv.writer(response)
+        writer = csv.writer(response, quoting=csv.QUOTE_ALL)
         
         fields = self.derive_fields()
 
