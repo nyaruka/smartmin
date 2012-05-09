@@ -150,12 +150,18 @@ class _CRUDLTest(SmartminTest):
             self.login(self.getUser())
             response = self.client.get(url)
 
-        self.assertPageLoad(action, response)
+        fn = "assert%sGet" % action.capitalize()
+        self.assertPageGet(action, response)
+        if hasattr(self, fn):
+            getattr(self, fn)(response)
 
         if post_data is not None:
-            # print "posting %s : %s" % (url, post_data)
             response = self.client.post(url, data=post_data)
+
             self.assertPagePost(action, response)
+            fn = "assert%sPost" % action.capitalize()
+            if hasattr(self, fn):
+                getattr(self, fn)(response)
 
         return response
 
@@ -169,14 +175,10 @@ class _CRUDLTest(SmartminTest):
                     errors.append("%s=%s" % (k,v.as_text()))
                 self.fail("Create failed with form errors: %s" % ",".join(errors))
 
-    def assertPageLoad(self, action, response):
-
+    def assertPageGet(self, action, response):
         if response.status_code == 302:
             self.fail("'%s' resulted in an unexpected redirect to: %s" % (action, response.get('Location')))
-
         self.assertEquals(200, response.status_code, )
-        # print "assert load %s.%s" % (self.__class__.__name__, action)
 
     def assertPagePost(self, action, response):
         self.assertNoFormErrors(response)
-        # print "assert post %s.%s" % (self.__class__.__name__, action)
