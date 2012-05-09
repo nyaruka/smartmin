@@ -25,7 +25,8 @@ class SmartminTest(TestCase):
 
         # now try and give it a post
         if post_data is not None:
-            response = self.client.post(url, post_data=post_data)
+            response = self.client.post(url, data=post_data)
+            self.assertNoFormErrors(response, post_data)
             self.assertEquals(302, response.status_code)
 
         return response
@@ -46,6 +47,16 @@ class SmartminTest(TestCase):
 
     def login(self, user):
         self.assertTrue(self.client.login(username=user.username, password=user.username), "Couldn't login as %(user)s / %(user)s" % dict(user=user.username))
+
+    def assertNoFormErrors(self, response, post_data=None):
+        if response.status_code == 200 and 'form' in response.context:
+            form = response.context['form']
+
+            if not form.is_valid():
+                errors = []
+                for k,v in form.errors.iteritems():
+                    errors.append("%s=%s" % (k,v.as_text()))
+                self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
 
 class _CRUDLTest(SmartminTest):
 
@@ -165,15 +176,7 @@ class _CRUDLTest(SmartminTest):
 
         return response
 
-    def assertNoFormErrors(self, response):
-        if response.status_code == 200 and 'form' in response.context:
-            form = response.context['form']
 
-            if not form.is_valid():
-                errors = []
-                for k,v in form.errors.iteritems():
-                    errors.append("%s=%s" % (k,v.as_text()))
-                self.fail("Create failed with form errors: %s" % ",".join(errors))
 
     def assertPageGet(self, action, response):
         if response.status_code == 302:
