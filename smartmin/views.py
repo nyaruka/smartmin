@@ -694,7 +694,7 @@ class SmartCsvView(SmartListView):
         import csv
 
         # Create the HttpResponse object with the appropriate CSV header.
-        response = HttpResponse(mimetype='text/csv')
+        response = HttpResponse(mimetype='text/csv; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
 
         writer = csv.writer(response, quoting=csv.QUOTE_ALL)
@@ -704,15 +704,15 @@ class SmartCsvView(SmartListView):
         # build up our header row
         header = []
         for field in fields:
-            header.append(self.lookup_field_label(dict(), field))
-        writer.writerow(header)
+            header.append(unicode(self.lookup_field_label(dict(), field)))
+        writer.writerow([s.encode("utf-8") for s in header])
 
         # then our actual values
         for obj in self.object_list:
             row = []
             for field in fields:
-                row.append(self.lookup_field_value(dict(), obj, field))
-            writer.writerow(row)
+                row.append(unicode(self.lookup_field_value(dict(), obj, field)))
+            writer.writerow([s.encode("utf-8") for s in row])
 
         return response
     
