@@ -41,18 +41,21 @@ class UserProfileForm(UserForm):
 
     def clean_old_password(self):
         from django.contrib.auth import authenticate
-        user_cache = authenticate(username=self.instance.username, password=self.data['old_password'])
-        if(len(self.data['old_password']) > 0 and len(self.data['new_password']) > 0):
+        user_cache = authenticate(username=self.instance.username, password=self.cleaned_data['old_password'])
+        if(len(self.cleaned_data['old_password']) > 0 and len(self.cleaned_data['new_password']) > 0):
             if(user_cache is None):
                 raise forms.ValidationError("The old password is not correct.")
-        elif(len(self.data['old_password']) > 0 and len(self.data['new_password']) == 0):
+        elif(len(self.cleaned_data['old_password']) > 0 and len(self.cleaned_data['new_password']) == 0):
             raise forms.ValidationError("Fill new password for changes to take effect")
-        return self.data['old_password']
+        return self.cleaned_data['old_password']
 
-    def clean_new_password(self):
-        if(self.data['new_password'] != self.data['confirm_new_password']):
+    def clean_confirm_new_password(self):
+        if(len(self.cleaned_data['confirm_new_password']) == 0 and len(self.cleaned_data['new_password']) > 0):
+            raise forms.ValidationError("Confirm the new password by filling the this field")
+
+        if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
             raise forms.ValidationError("New password doesn't match with its confirmation")
-        return self.data['new_password']
+        return self.cleaned_data['new_password']
 
 class UserCRUDL(SmartCRUDL):
     model = User
@@ -155,14 +158,3 @@ class UserCRUDL(SmartCRUDL):
             fields.remove('groups')
             fields.remove('is_active')
             return fields
-
-        def post_save(self, obj):
-            """
-            Make sure our groups are up to date
-            """
-            if 'groups' in self.form.cleaned_data:
-                obj.groups.clear()
-                for group in self.form.cleaned_data['groups']:
-                    obj.groups.add(group)
-
-            return obj
