@@ -40,17 +40,17 @@ class UserProfileForm(UserForm):
     confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=False)
 
     def clean_old_password(self):
-        from django.contrib.auth import authenticate
-        user_cache = authenticate(username=self.instance.username, password=self.cleaned_data['old_password'])
-        if(len(self.cleaned_data['old_password']) > 0 and len(self.cleaned_data['new_password']) > 0):
-            if(user_cache is None):
+        user = self.instance
+
+        if(self.cleaned_data['old_password'] and self.cleaned_data['new_password']):
+            if(not user.check_password(self.cleaned_data['old_password'])):
                 raise forms.ValidationError("The old password is not correct.")
-        elif(len(self.cleaned_data['old_password']) > 0 and len(self.cleaned_data['new_password']) == 0):
-            raise forms.ValidationError("Fill new password for changes to take effect")
+        elif(self.cleaned_data['old_password'] and not self.cleaned_data['new_password']):
+            raise forms.ValidationError("Please enter a new password for changes to take effect")
         return self.cleaned_data['old_password']
 
     def clean_confirm_new_password(self):
-        if(len(self.cleaned_data['confirm_new_password']) == 0 and len(self.cleaned_data['new_password']) > 0):
+        if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
             raise forms.ValidationError("Confirm the new password by filling the this field")
 
         if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
@@ -127,10 +127,9 @@ class UserCRUDL(SmartCRUDL):
         form_class = UserProfileForm
         success_message = "User profile saved successfully."
         fields = ('username', 'old_password', 'new_password', 'confirm_new_password',
-                  'first_name', 'last_name', 'email', 'groups', 'is_active')
+                  'first_name', 'last_name', 'email')
         field_config = {
-            'is_active': dict(help="Whether this user is allowed to log into the site."),
-            'groups': dict(help="Users will only get those permissions that are allowed for their group."),
+            'username': dict(readonly=True),
             'old_password': dict(help="To reset your password first enter the old password here."),
             'new_password': dict(help="You can reset your password by entering a new password here."),
             'confirm_new_password': dict(help="Confirm your new password by entering exactly the new password here."),
@@ -147,14 +146,3 @@ class UserCRUDL(SmartCRUDL):
 
         def derive_title(self):
             return "Edit your profile"
-
-        def derive_field_config(self):
-            field_config = super(UserCRUDL.Profile, self).derive_field_config()
-            field_config['username'] = dict(readonly=True, help="You cannot edit your username, this right is reserved for the adminstrator")
-            return field_config
-
-        def derive_fields(self):
-            fields = super(UserCRUDL.Profile, self).derive_fields()
-            fields.remove('groups')
-            fields.remove('is_active')
-            return fields

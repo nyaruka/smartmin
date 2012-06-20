@@ -387,7 +387,7 @@ class UserTest(TestCase):
         # check if he can fill only an old password
         post_data = dict(old_password="plain")
         response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
-        self.assertIn("Fill new password for changes to take effect", response.content)
+        self.assertIn("Please enter a new password for changes to take effect", response.content)
 
         # check if he can fill a wrong old password
         post_data = dict(old_password="plainwrong", new_password="newpassword")

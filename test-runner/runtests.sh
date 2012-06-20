@@ -7,6 +7,6 @@ pip install coverage
 pip install django-celery
 
 cd test-runner
-python manage.py test blog --pdb --noinput --with-coverage --cover-package=smartmin --cover-html-dir=../coverage-report --cover-html
+python manage.py test blog -s --pdb --noinput --with-coverage --cover-package=smartmin --cover-html-dir=../coverage-report --cover-html
 
 
