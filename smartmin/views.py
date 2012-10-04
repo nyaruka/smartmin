@@ -86,7 +86,7 @@ class SmartView(object):
         self.kwargs = kwargs
         self.args = args
         self.request = request
-
+        
         if not getattr(self, 'permission', None):
             return True
         else:
@@ -1058,7 +1058,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
         return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def derive_success_message(self):
-        # first check whether a default message has been set
+        # First check whether a default message has been set
         if self.success_message:
             return self.success_message
         else:
