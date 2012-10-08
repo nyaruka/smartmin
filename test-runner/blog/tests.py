@@ -351,6 +351,59 @@ class UserTest(TestCase):
         # assert steve can login with 'google' now
         self.assertTrue(self.client.login(username='steve', password='google'))
 
+        # test user profile action
+        # logout first
+        self.client.logout()
+
+        # login as super user
+        self.assertTrue(self.client.login(username='superuser', password='superuser'))
+
+        # check is access his profile
+        response = self.client.get(reverse('users.user_profile', args=[self.superuser.id]))
+        self.assertEquals(200, response.status_code)
+        self.assertEquals(reverse('users.user_profile', args=[self.superuser.id]), response.request['PATH_INFO'])
+
+        # create just a plain  user
+        plain = User.objects.create_user('plain', 'plain@nogroups.com', 'plain')
+
+        # login as a simple plain user
+        self.assertTrue(self.client.login(username='plain', password='plain'))
+        
+        # check is access his profile
+        response = self.client.get(reverse('users.user_profile', args=[plain.id]))
+        self.assertEquals(200, response.status_code)
+        self.assertEquals(reverse('users.user_profile', args=[plain.id]), response.request['PATH_INFO'])
+        
+        # check if we are at the right form
+        self.assertEquals("UserProfileForm", type(response.context['form']).__name__)
+
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), {}, follow=True)
+        # check which field he have access to
+        self.assertEquals(6, len(response.context['form'].visible_fields()))
+
+        # doesn't include readonly fields on post
+        self.assertNotIn("username", response.context['form'].fields)
+
+        # check if he can fill only an old password
+        post_data = dict(old_password="plain")
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        self.assertIn("Please enter a new password for changes to take effect", response.content)
+
+        # check if he can fill a wrong old password
+        post_data = dict(old_password="plainwrong", new_password="newpassword")
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        self.assertIn("The old password is not correct", response.content)
+
+        # check if he can mismatch new password and its confirmation
+        post_data = dict(old_password="plain", new_password="newpassword", confirm_new_password="confirmnewpassword")
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+
+        # check if he can fill old and new password only without the confirm new password
+        post_data = dict(old_password="plain", new_password="newpassword")
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        self.assertIn("Confirm the new password by filling the this field", response.content)
+
+
 class UserTestCase(TestCase):
 
     def test_reverse(self):

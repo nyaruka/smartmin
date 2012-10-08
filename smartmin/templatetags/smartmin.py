@@ -135,8 +135,7 @@ def is_smartobject(obj):
     """
     Returns whether the passed in object is a smart object
     """
-    from smartmin.models import SmartObject
-    return isinstance(obj, SmartObject)
+    return hasattr(obj, 'is_active')
 
 @register.filter
 def field_orderable(view, field):

@@ -1,4 +1,4 @@
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 def class_from_string(class_name):
     """

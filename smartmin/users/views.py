@@ -34,10 +34,33 @@ class UserForm(forms.ModelForm):
 class UserUpdateForm(UserForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
 
+class UserProfileForm(UserForm):
+    old_password = forms.CharField(label="Old Password", widget=forms.PasswordInput, required=False)
+    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
+    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=False)
+
+    def clean_old_password(self):
+        user = self.instance
+
+        if(self.cleaned_data['old_password'] and self.cleaned_data['new_password']):
+            if(not user.check_password(self.cleaned_data['old_password'])):
+                raise forms.ValidationError("The old password is not correct.")
+        elif(self.cleaned_data['old_password'] and not self.cleaned_data['new_password']):
+            raise forms.ValidationError("Please enter a new password for changes to take effect")
+        return self.cleaned_data['old_password']
+
+    def clean_confirm_new_password(self):
+        if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
+            raise forms.ValidationError("Confirm the new password by filling the this field")
+
+        if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
+            raise forms.ValidationError("New password doesn't match with its confirmation")
+        return self.cleaned_data['new_password']
+
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update')
+    actions = ('create', 'list', 'update', 'profile')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -100,4 +123,26 @@ class UserCRUDL(SmartCRUDL):
 
             return obj
 
+    class Profile(SmartUpdateView):
+        form_class = UserProfileForm
+        success_message = "User profile saved successfully."
+        fields = ('username', 'old_password', 'new_password', 'confirm_new_password',
+                  'first_name', 'last_name', 'email')
+        field_config = {
+            'username': dict(readonly=True),
+            'old_password': dict(help="To reset your password first enter the old password here."),
+            'new_password': dict(help="You can reset your password by entering a new password here."),
+            'confirm_new_password': dict(help="Confirm your new password by entering exactly the new password here."),
+        }
 
+        def has_permission(self, request, *args, **kwargs):
+            has_perm = super(UserCRUDL.Profile, self).has_permission(request, *args, **kwargs)
+            user = request.user
+
+            if (not has_perm):
+                if(user.pk == int(self.kwargs['pk']) and user.is_authenticated()):
+                    return True
+            return has_perm
+
+        def derive_title(self):
+            return "Edit your profile"
