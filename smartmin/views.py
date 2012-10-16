@@ -1211,7 +1211,12 @@ class SmartCRUDL(object):
 
         # derive our module name from our class's module
         if not self.module_name:
-            self.module_name = self.__class__.__module__.split(".")[-2]
+            parts = self.__class__.__module__.split(".")
+            self.module_name = parts[-2]
+
+            # deal with special case of views subdirectories, we need to go up one more to find the real module
+            if self.module_name == 'views' and len(parts) >= 3:
+                self.module_name = parts[-3]
 
         # set our actions if set
         if actions:

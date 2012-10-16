@@ -12,6 +12,13 @@ def is_last_model(kwargs):
     """
     Returns whether this is the last post_syncdb called in the application.
     """
+    # If the application specifies it, use their permissions app. This app should be 
+    # the last app needs to be the last app in INSTALLED_APPS which uses smartmin permissions.
+    permissions_app = getattr(settings, 'PERMISSIONS_APP', None)
+    if permissions_app:
+        return kwargs['app'].__name__ == "%s.models" % permissions_app
+
+    # Otherwise, run it for each of the last five apps in INSTALLED_APPS
     return kwargs['app'].__name__ in ["%s.models" % app for app in settings.INSTALLED_APPS[-5:]]
 
 def check_role_permissions(role, permissions, current_permissions):
