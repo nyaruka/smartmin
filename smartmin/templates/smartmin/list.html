@@ -8,10 +8,12 @@
 <div class="row">
   <div class="span6">
     {% if view.search_fields %}
+    {% block search-form %}
     <form class="form-search">
       <input type="text" class="input-medium search-query" name="search" value="{{ search }}">
       <button type="submit" class="btn">Search</button>
     </form>
+    {% endblock %}
     {% else %}
     &nbsp;
     {% endif %}

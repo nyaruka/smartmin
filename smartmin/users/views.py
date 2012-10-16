@@ -68,12 +68,25 @@ class UserCRUDL(SmartCRUDL):
         link_fields = ('username', 'name')
         default_order = 'username'
         add_button = True
+        template_name = "smartmin/users/user_list.html"
+
+        def get_context_data(self, **kwargs):
+            context = super(UserCRUDL.List, self).get_context_data(**kwargs)
+            context['groups'] = Group.objects.all()
+            context['group_id'] = int(self.request.REQUEST.get('group_id', 0))
+            return context
 
         def get_group(self, obj):
             return ", ".join([group.name for group in obj.groups.all()])
 
         def get_queryset(self, **kwargs):
             queryset = super(UserCRUDL.List, self).get_queryset(**kwargs)
+            group_id = int(self.request.REQUEST.get('group_id', 0))
+
+            # filter by the group
+            if group_id:
+                queryset = queryset.filter(groups=group_id)
+
             return queryset.filter(id__gt=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
 
         def get_name(self, obj):
