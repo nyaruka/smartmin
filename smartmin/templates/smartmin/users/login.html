@@ -12,7 +12,8 @@
     <form method="post" class="form-stacked" id="login-form">
       {% for field, errors in form.errors.items %}
       {% if field == '__all__' %}
-      <div class="alert-message error form-errors">
+      <div class="alert alert-error form-errors">
+        <h4>Error</h4>
         {{ errors }}
       </div>
       {% endif %}

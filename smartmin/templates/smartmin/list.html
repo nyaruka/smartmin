@@ -6,7 +6,7 @@
 
 {% block table-controls %}
 <div class="row">
-  <div class="span6">
+  <div class="span8">
     {% if view.search_fields %}
     {% block search-form %}
     <form class="form-search">
@@ -19,7 +19,7 @@
     {% endif %}
   </div>
 
-  <div class="span6 buttons">
+  <div class="span4 buttons">
     {% block table-buttons %}
     {% if view.add_button %}
     <a class="btn btn-primary pull-right" href="./create/">Add</a>
@@ -73,7 +73,7 @@
 
 {% block paginator %}
 <div class="row">
-  <div class="span4">
+  <div class="span3">
     <div class="pagination-text">
     {% if not paginator or paginator.num_pages <= 1 %}
     {{ object_list|length }} result{% if object_list|length == 0 or object_list|length > 1 %}s{% endif %}
@@ -82,7 +82,7 @@
     {% endif %}
     </div>
   </div>
-  <div class="span8">
+  <div class="span9">
     {% if paginator and paginator.num_pages > 1 %}
     <div class="pagination pagination-right">
       <ul>

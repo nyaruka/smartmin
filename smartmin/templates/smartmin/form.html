@@ -32,6 +32,9 @@
     {% for field in fields %}
     {% render_field field %}
     {% endfor %}
+
+    {% block extra-fields %}
+    {% endblock %}
     </fieldset>
     {% endblock fields %}
 
