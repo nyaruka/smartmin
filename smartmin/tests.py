@@ -6,7 +6,7 @@ from django.test.testcases import TestCase
 
 class SmartminTest(TestCase):
 
-    def fetch_protected(self, url, user, post_data=None):
+    def fetch_protected(self, url, user, post_data=None, failOnFormValidation=True):
         """
         Fetches the given url. Fails if it can be fetched without first logging in as given user
         """
@@ -20,14 +20,16 @@ class SmartminTest(TestCase):
         self.login(user)
 
         # but now we can!
-        response = self.client.get(url)
-        self.assertEquals(200, response.status_code)
-
-        # now try and give it a post
-        if post_data is not None:
+        if not post_data:
+            response = self.client.get(url)
+            self.assertEquals(200, response.status_code)
+        else:
             response = self.client.post(url, data=post_data)
-            self.assertNoFormErrors(response, post_data)
-            self.assertEquals(302, response.status_code)
+            self.assertNotRedirect(response, reverse("users.user_login"), msg="Unexpected redirect to login")
+
+            if failOnFormValidation:
+                self.assertNoFormErrors(response, post_data)
+                self.assertEquals(302, response.status_code)
 
         return response
 
@@ -35,6 +37,11 @@ class SmartminTest(TestCase):
         self.assertEquals(302, response.status_code, msg=msg)
         segments = urlparse(response.get('Location', None))
         self.assertEquals(segments.path, url, msg=msg)
+
+    def assertNotRedirect(self, response, url, msg=None):
+        if response.status_code == 302:
+            segments = urlparse(response.get('Location', None))
+            self.assertNotEqual(segments.path, url, msg=msg)
 
     def create_user(self, username, group_names=None):
         # Create a user to run our CRUDL tests
