@@ -746,25 +746,20 @@ class SmartFormMixin(object):
 
         fields = list(self.derive_fields())
 
-        # we specified our own form class, which means we need to apply any field filtering
-        # ourselves.. this is ugly but the only way to make exclude and fields work the same
-        # despite specifying your own form class
-        if self.form_class:
-            # only exclude?  then remove those items there
-            exclude = self.derive_exclude()
-            exclude += self.derive_readonly()
+        # apply our field filtering on our form class
+        exclude = self.derive_exclude()
+        exclude += self.derive_readonly()
 
-            # remove any excluded fields
-            for field in exclude:
-                if field in self.form.fields:
-                    del self.form.fields[field]
+        # remove any excluded fields
+        for field in exclude:
+            if field in self.form.fields:
+                del self.form.fields[field]
             
-            if fields:
-                # filter out our form fields
-                for name, field in self.form.fields.items():
-                    if not name in fields:
-                        del self.form.fields[name]
-
+        if fields:
+            # filter out our form fields
+            for name, field in self.form.fields.items():
+                if not name in fields:
+                    del self.form.fields[name]
 
         # stuff in our referer as the default location for where to return
         location = forms.CharField(widget=forms.widgets.HiddenInput(), required=False)
