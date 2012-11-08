@@ -7,7 +7,7 @@ import random
 import string
 import datetime
 
-from djnago.template import loader, Context
+from django.template import loader, Context
 from smartmin.views import *
 
 class UserForm(forms.ModelForm):
