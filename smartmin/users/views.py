@@ -205,12 +205,12 @@ range(32))
                 email_template = loader.get_template('smartmin/users/user_email.txt')
                 context = Context(dict(website='http://%s' % self.request.META['HTTP_HOST'],
                                        link='http://%s/users/user/recover/%s/' % (self.request.META['HTTP_HOST'],token)))
-                user.email_user("Password Recover Request Mail", email_template.render(context)\
+                user.email_user("Password Recovery", email_template.render(context)\
  ,"website@klab.rw")
             except:
                 email_template = loader.get_template('smartmin/users/no_user_email.txt')
                 context = Context(dict(website=self.request.META['HTTP_HOST']))
-                send_mail('Invalid Password Recover Request', email_template.render(context), 'website@klab.rw', [email], fail_silently=False)
+                send_mail('Password Recovery Request', email_template.render(context), 'website@klab.rw', [email], fail_silently=False)
 
             messages.success(self.request, self.derive_success_message())
             return super(UserCRUDL.Forget, self).form_valid(form)
