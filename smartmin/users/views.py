@@ -1,6 +1,13 @@
 from django.contrib.auth.models import User, Group
 from django import forms
+from .models import *
 
+from django.core.mail import send_mail
+import random
+import string
+import datetime
+
+from djnago.template import loader, Context
 from smartmin.views import *
 
 class UserForm(forms.ModelForm):
@@ -57,10 +64,25 @@ class UserProfileForm(UserForm):
             raise forms.ValidationError("New password doesn't match with its confirmation")
         return self.cleaned_data['new_password']
 
+class UserForgetForm(forms.Form):
+    email = forms.EmailField(label="Your Email",)
+    
+class UserRecoverForm(UserForm):
+    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=True, help_text="You can reset your password by entering a new password here.")
+    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=True, help_text="Confirm your new password by entering exactly the new password here.")
+
+    def clean_confirm_new_password(self):
+        if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
+            raise forms.ValidationError("Confirm your new password by entering it here")
+
+        if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
+            raise forms.ValidationError("New password doesn't match with its confirmation")
+        return self.cleaned_data['new_password']
+
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -69,7 +91,7 @@ class UserCRUDL(SmartCRUDL):
         default_order = 'username'
         add_button = True
         template_name = "smartmin/users/user_list.html"
-
+        
         def get_context_data(self, **kwargs):
             context = super(UserCRUDL.List, self).get_context_data(**kwargs)
             context['groups'] = Group.objects.all()
@@ -86,9 +108,9 @@ class UserCRUDL(SmartCRUDL):
             # filter by the group
             if group_id:
                 queryset = queryset.filter(groups=group_id)
-
+                
             return queryset.filter(id__gt=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
-
+        
         def get_name(self, obj):
             return " ".join((obj.first_name, obj.last_name))
 
@@ -159,3 +181,53 @@ class UserCRUDL(SmartCRUDL):
 
         def derive_title(self):
             return "Edit your profile"
+
+
+    class Forget(SmartFormView):
+        form_class = UserForgetForm
+        permission = None
+        success_message = "An Email has beeen sent to your account."
+        success_url = "users.user_login"
+        fields = ('email', )
+
+        def get_success_url(self):
+            return reverse(self.success_url)
+
+        def form_valid(self, form):
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+                
+                RecoveryToken.objects.filter(user=user).delete()
+                token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in \
+range(32))
+                RecoveryToken.objects.create(token=token,user=user)
+                email_template = loader.get_template('smartmin/users/user_email.txt')
+                context = Context(dict(website='http://%s' % self.request.META['HTTP_HOST'],
+                                       link='http://%s/users/user/recover/%s/' % (self.request.META['HTTP_HOST'],token)))
+                user.email_user("Password Recover Request Mail", email_template.render(context)\
+ ,"website@klab.rw")
+            except:
+                email_template = loader.get_template('smartmin/users/no_user_email.txt')
+                context = Context(dict(website=self.request.META['HTTP_HOST']))
+                send_mail('Invalid Password Recover Request', email_template.render(context), 'website@klab.rw', [email], fail_silently=False)
+
+            messages.success(self.request, self.derive_success_message())
+            return super(UserCRUDL.Forget, self).form_valid(form)
+
+
+    class Recover(SmartUpdateView):
+        form_class = UserRecoverForm
+        permission = None
+        success_message = "User Password Updated Successfully. Now you can login using the new password."
+        success_url = '@users.user_login'
+        fields = ('new_password', 'confirm_new_password')
+        title = "Reset your Password"
+        
+        def get_object(self, queryset=None):
+            token = self.kwargs.get('token')
+            recovery_token= RecoveryToken.objects.get(token=token)
+            return recovery_token.user
+
+
+
