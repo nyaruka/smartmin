@@ -196,16 +196,14 @@ class UserCRUDL(SmartCRUDL):
             email = form.cleaned_data['email']
             try:
                 user = User.objects.get(email=email)
-                
+
                 RecoveryToken.objects.filter(user=user).delete()
-                token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in \
-range(32))
+                token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
                 context = Context(dict(website='http://%s' % self.request.META['SERVER_NAME'],
-                                       link='http://%s/users/user/recover/%s/' % (self.request.META['HTTP_HOST'],token)))
-                user.email_user("Password Recovery", email_template.render(context)\
- ,"website@klab.rw")
+                                       link='http://%s/users/user/recover/%s/' % (self.request.META['SERVER_NAME'],token)))
+                user.email_user("Password Recovery", email_template.render(context) ,"website@klab.rw")
             except:
                 email_template = loader.get_template('smartmin/users/no_user_email.txt')
                 context = Context(dict(website=self.request.META['SERVER_NAME']))
@@ -218,7 +216,7 @@ range(32))
     class Recover(SmartUpdateView):
         form_class = UserRecoverForm
         permission = None
-        success_message = "User Password Updated Successfully. Now you can login using the new password."
+        success_message = "Password Updated Successfully. Now you can login using the new password."
         success_url = '@users.user_login'
         fields = ('new_password', 'confirm_new_password')
         title = "Reset your Password"
@@ -227,6 +225,4 @@ range(32))
             token = self.kwargs.get('token')
             recovery_token= RecoveryToken.objects.get(token=token)
             return recovery_token.user
-
-
 

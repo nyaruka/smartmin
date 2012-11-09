@@ -417,7 +417,7 @@ class UserTest(TestCase):
 
         # test our user can log in
         self.assertTrue(self.client.login(username='user1', password='user1'))
-
+        self.client.logout()
         # initialise the process of recovering password by clicking the forget
         # password link and fill the form with the email associated with the account
         forget_url = reverse('users.user_forget')
@@ -436,20 +436,11 @@ class UserTest(TestCase):
 
         # still the user can login with usual password and cannot login with the new password test
         self.assertTrue(self.client.login(username='user1', password='user1'))
+        self.client.logout()
         self.assertFalse(self.client.login(username='user1', password='user1_newpasswd'))
-
+        self.client.logout()
         # user click the link provided in mail
-
-        # if the token in invalid we get 500 status code in the response
-        recover_url = reverse('users.user_recover', args=[recovery_token.token[:-1]])
         
-        post_data = dict()
-        post_data['new_password'] = 'user1_newpasswd'
-        post_data['confirm_new_password'] = 'user1_newpasswd'
-
-        response = self.client.post(recover_url, post_data, follow=True)
-        self.assertEquals(500,response.status_code)
-
         # if the token is valid we get a form to fill with new password
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
         
@@ -463,8 +454,26 @@ class UserTest(TestCase):
         
         # now the user cannot login with the old password but can login with the new one
         self.assertFalse(self.client.login(username='user1', password='user1'))
+        self.client.logout()
         self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
+        self.client.logout()
 
+        # second click on the link
+        recover_url = reverse('users.user_recover', args=[recovery_token.token])
+        
+        post_data = dict()
+        post_data['new_password'] = 'user1_newpasswd_2'
+        post_data['confirm_new_password'] = 'user1_newpasswd_2'
+
+        response = self.client.post(recover_url, post_data, follow=True)
+        # form submitted successfull
+        self.assertEquals(200, response.status_code)
+        
+        # password must not change
+        self.assertFalse(self.client.login(username='user1', password='user1_newpasswd_2'))
+        self.client.logout()
+        self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
+        self.client.logout()
 
 class UserTestCase(TestCase):
 
