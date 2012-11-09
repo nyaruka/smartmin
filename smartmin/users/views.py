@@ -33,7 +33,6 @@ class UserForm(forms.ModelForm):
             if commit: user.save()
 
         return user
-
     class Meta:
         model = User
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active')
@@ -203,13 +202,13 @@ class UserCRUDL(SmartCRUDL):
 range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
-                context = Context(dict(website='http://%s' % self.request.META['HTTP_HOST'],
+                context = Context(dict(website='http://%s' % self.request.META['SERVER_NAME'],
                                        link='http://%s/users/user/recover/%s/' % (self.request.META['HTTP_HOST'],token)))
                 user.email_user("Password Recovery", email_template.render(context)\
  ,"website@klab.rw")
             except:
                 email_template = loader.get_template('smartmin/users/no_user_email.txt')
-                context = Context(dict(website=self.request.META['HTTP_HOST']))
+                context = Context(dict(website=self.request.META['SERVER_NAME']))
                 send_mail('Password Recovery Request', email_template.render(context), 'website@klab.rw', [email], fail_silently=False)
 
             messages.success(self.request, self.derive_success_message())

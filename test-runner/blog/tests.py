@@ -10,6 +10,9 @@ from smartmin.views import smart_url
 from guardian.shortcuts import assign
 import settings
 
+
+from smartmin.users.models import *
+
 class SmartminTest(TestCase):
 
     def setUp(self):
@@ -296,6 +299,7 @@ class UserTest(TestCase):
         self.superuser.is_superuser = True
         self.superuser.save()
 
+       
     def test_crudl(self):
         self.client.login(username='superuser', password='superuser')
 
@@ -402,6 +406,64 @@ class UserTest(TestCase):
         post_data = dict(old_password="plain", new_password="newpassword")
         response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
         self.assertIn("Confirm the new password by filling the this field", response.content)
+
+
+    def test_token(self):
+        # create a user user1 with password user1 and email user1@user1.com
+        user1 = User.objects.create_user("user1", 'user1@user1.com', 'user1')
+ 
+        # be sure no one is logged in
+        self.client.logout()
+
+        # test our user can log in
+        self.assertTrue(self.client.login(username='user1', password='user1'))
+
+        # initialise the process of recovering password by clicking the forget
+        # password link and fill the form with the email associated with the account
+        forget_url = reverse('users.user_forget')
+
+        post_data = dict()
+        post_data['email'] = 'user1@user1.com'
+        
+        response = self.client.post(forget_url, post_data, follow=True)
+        
+        # email form submitted successfully
+        self.assertEquals(200, response.status_code)
+
+        # now there is a token generated
+        recovery_token = RecoveryToken.objects.get(user=user1)
+        self.assertNotEquals(None,recovery_token.token)
+
+        # still the user can login with usual password and cannot login with the new password test
+        self.assertTrue(self.client.login(username='user1', password='user1'))
+        self.assertFalse(self.client.login(username='user1', password='user1_newpasswd'))
+
+        # user click the link provided in mail
+
+        # if the token in invalid we get 500 status code in the response
+        recover_url = reverse('users.user_recover', args=[recovery_token.token[:-1]])
+        
+        post_data = dict()
+        post_data['new_password'] = 'user1_newpasswd'
+        post_data['confirm_new_password'] = 'user1_newpasswd'
+
+        response = self.client.post(recover_url, post_data, follow=True)
+        self.assertEquals(500,response.status_code)
+
+        # if the token is valid we get a form to fill with new password
+        recover_url = reverse('users.user_recover', args=[recovery_token.token])
+        
+        post_data = dict()
+        post_data['new_password'] = 'user1_newpasswd'
+        post_data['confirm_new_password'] = 'user1_newpasswd'
+
+        response = self.client.post(recover_url, post_data, follow=True)
+        # form submitted successfull
+        self.assertEquals(200, response.status_code)
+        
+        # now the user cannot login with the old password but can login with the new one
+        self.assertFalse(self.client.login(username='user1', password='user1'))
+        self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
 
 
 class UserTestCase(TestCase):
