@@ -197,7 +197,7 @@ class UserCRUDL(SmartCRUDL):
             try:
                 user = User.objects.get(email=email)
 
-                RecoveryToken.objects.filter(user=user).delete()
+                #RecoveryToken.objects.filter(user=user).delete()
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
@@ -223,6 +223,11 @@ class UserCRUDL(SmartCRUDL):
         
         def get_object(self, queryset=None):
             token = self.kwargs.get('token')
-            recovery_token= RecoveryToken.objects.get(token=token)
-            return recovery_token.user
+            recovery_token= RecoveryToken.objects.filter(token=token)
+            if recovery_token:
+                return recovery_token[0].user
 
+        def post_save(self, obj):
+            obj = super(UserCRUDL.Recover, self).post_save(obj)
+            RecoveryToken.objects.filter(user=obj).delete()
+            return obj
