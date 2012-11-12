@@ -14,5 +14,6 @@ urlpatterns = patterns('',
 
 urlpatterns += UserCRUDL().as_urlpatterns()
 urlpatterns += patterns('/^users/', url(r'/recover/(?P<token>\w+)/$', recovery, name='users.user_recover'),)
+urlpatterns += patterns('/^users/', url(r'/expired/$', expired, name='users.user_expired'),)
 
 

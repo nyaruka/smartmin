@@ -424,7 +424,7 @@ class UserTest(TestCase):
         
         # invalid user 
         forget_url = reverse('users.user_forget')
-
+    
         post_data = dict()
         post_data['email'] = 'nouser@nouser.com'
         

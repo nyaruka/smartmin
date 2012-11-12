@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User, Group
 from django import forms
 from .models import *
+from django.http import HttpResponseRedirect
 
+from django.shortcuts import render
 from django.core.mail import send_mail
 import random
 import string
@@ -9,6 +11,9 @@ import datetime
 
 from django.template import loader, Context
 from smartmin.views import *
+
+validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
+
 
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput)
@@ -220,14 +225,27 @@ class UserCRUDL(SmartCRUDL):
         success_url = '@users.user_login'
         fields = ('new_password', 'confirm_new_password')
         title = "Reset your Password"
+
+        def pre_process(self, request, *args, **kwargs):
+            token = self.kwargs.get('token')
+            recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time).filter(token=token)
+            if not recovery_token:
+                return HttpResponseRedirect(reverse("users.user_expired"))
+            return super(UserCRUDL.Recover, self).pre_process(request, args, kwargs)
+
         
         def get_object(self, queryset=None):
             token = self.kwargs.get('token')
-            recovery_token= RecoveryToken.objects.filter(token=token)
-            if recovery_token:
-                return recovery_token[0].user
+            recovery_token= RecoveryToken.objects.filter(created_on__gte=validity_time).get(token=token)
+            return recovery_token.user
 
+ 
         def post_save(self, obj):
             obj = super(UserCRUDL.Recover, self).post_save(obj)
             RecoveryToken.objects.filter(user=obj).delete()
+            RecoveryToken.objects.filter(created_on__lt=validity_time).delete()
             return obj
+
+
+def expired(request):
+    return render(request, 'smartmin/users/user_expired.html', dict())
