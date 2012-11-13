@@ -1,0 +1,12 @@
+Hi,
+
+Someone has requested that the password at {{website}} for this e-mail address be reset.
+
+However, we don't have an account associated with your email registered at our website.
+
+If you did not request this don't worry because this email has been sent to you only.
+
+Thank you,
+
+
+Please do not reply to this email.

@@ -1,0 +1,16 @@
+Hi,
+
+Someone has requested that the password at {{website}} for this e-mail address be reset.
+
+If you did not request this, don't worry, you can still use your password or just click on the link provided and change your password.
+
+{{link}}
+
+You will need to sign in to the website again using your new password. We HIGHLY recommend changing the password to something you will remember on the User Login page.
+
+
+
+Thank you,
+
+
+Please do not reply to this email.
