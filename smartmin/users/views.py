@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User, Group
 from django import forms
+from django.conf import settings
 from .models import *
 from django.http import HttpResponseRedirect
 
@@ -11,9 +12,6 @@ import datetime
 
 from django.template import loader, Context
 from smartmin.views import *
-
-
-
 
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput)
@@ -191,31 +189,29 @@ class UserCRUDL(SmartCRUDL):
         form_class = UserForgetForm
         permission = None
         success_message = "An Email has beeen sent to your account."
-        success_url = "users.user_login"
+        success_url = "@users.user_login"
         fields = ('email', )
-
-        def get_success_url(self):
-            return reverse(self.success_url)
 
         def form_valid(self, form):
             email = form.cleaned_data['email']
             try:
                 user = User.objects.get(email=email)
 
-                #RecoveryToken.objects.filter(user=user).delete()
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
-                context = Context(dict(website='http://%s' % self.request.META['SERVER_NAME'],
-                                       link='http://%s/users/user/recover/%s/' % (self.request.META['SERVER_NAME'],token)))
+
+                hostname = getattr(settings, 'HOSTNAME', 'hostname')
+                context = Context(dict(website='http://%s' % hostname,
+                                       link='http://%s/users/user/recover/%s/' % (hostname,token)))
                 user.email_user("Password Recovery", email_template.render(context) ,"website@klab.rw")
             except:
                 email_template = loader.get_template('smartmin/users/no_user_email.txt')
-                context = Context(dict(website=self.request.META['SERVER_NAME']))
+                context = Context(dict(website=hostname))
                 send_mail('Password Recovery Request', email_template.render(context), 'website@klab.rw', [email], fail_silently=False)
 
-            messages.success(self.request, self.derive_success_message())
-            return super(UserCRUDL.Forget, self).form_valid(form)
+            response = super(UserCRUDL.Forget, self).form_valid(form)
+            return response
 
 
     class Recover(SmartUpdateView):

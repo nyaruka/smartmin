@@ -736,7 +736,7 @@ class SmartFormMixin(object):
         """
         Returns a message to display when this form is successfully saved
         """
-        self.success_message
+        return self.success_message
     
     def get_form(self, form_class):
         """
@@ -928,7 +928,11 @@ class SmartFormMixin(object):
         form when it was created
         """
         if self.success_url:
-            return smart_url(self.success_url, self.object.pk)
+            # if our smart url references an object, pass that in
+            if self.success_url.find('@') > 0:
+                return smart_url(self.success_url, self.object.pk)
+            else:
+                return smart_url(self.success_url, None)
         
         elif 'loc' in self.form.cleaned_data:
             return self.form.cleaned_data['loc']
