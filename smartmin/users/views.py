@@ -12,7 +12,7 @@ import datetime
 from django.template import loader, Context
 from smartmin.views import *
 
-validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
+
 
 
 class UserForm(forms.ModelForm):
@@ -86,7 +86,7 @@ class UserRecoverForm(UserForm):
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover','expired')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -228,6 +228,7 @@ class UserCRUDL(SmartCRUDL):
 
         def pre_process(self, request, *args, **kwargs):
             token = self.kwargs.get('token')
+            validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
             recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time).filter(token=token)
             if not recovery_token:
                 return HttpResponseRedirect(reverse("users.user_expired"))
@@ -236,16 +237,18 @@ class UserCRUDL(SmartCRUDL):
         
         def get_object(self, queryset=None):
             token = self.kwargs.get('token')
-            recovery_token= RecoveryToken.objects.filter(created_on__gte=validity_time).get(token=token)
+            recovery_token= RecoveryToken.objects.get(token=token)
             return recovery_token.user
 
  
         def post_save(self, obj):
+            validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
             obj = super(UserCRUDL.Recover, self).post_save(obj)
             RecoveryToken.objects.filter(user=obj).delete()
             RecoveryToken.objects.filter(created_on__lt=validity_time).delete()
             return obj
 
 
-def expired(request):
-    return render(request, 'smartmin/users/user_expired.html', dict())
+    class Expired(SmartView, TemplateView):
+        permission = None
+        template_name = 'smartmin/users/user_expired.html'
