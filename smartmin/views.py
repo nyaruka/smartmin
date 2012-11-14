@@ -246,7 +246,7 @@ class SmartView(object):
             help = default
 
         # try to see if there is a description on our model
-        else:
+        elif hasattr(self, 'model'):
             for model_field in self.model._meta.fields:
                 if model_field.name == field:
                     help = model_field.help_text
