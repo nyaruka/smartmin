@@ -194,6 +194,8 @@ class UserCRUDL(SmartCRUDL):
 
         def form_valid(self, form):
             email = form.cleaned_data['email']
+            hostname = getattr(settings, 'HOSTNAME', 'hostname')
+
             try:
                 user = User.objects.get(email=email)
 
@@ -201,7 +203,6 @@ class UserCRUDL(SmartCRUDL):
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
 
-                hostname = getattr(settings, 'HOSTNAME', 'hostname')
                 context = Context(dict(website='http://%s' % hostname,
                                        link='http://%s/users/user/recover/%s/' % (hostname,token)))
                 user.email_user("Password Recovery", email_template.render(context) ,"website@klab.rw")
