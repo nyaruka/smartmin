@@ -21,7 +21,7 @@ def csv_import(task):  #pragma: no cover
         transaction.commit()
 
         model = class_from_string(task.model_class)
-        records = model.import_csv(task.csv_file.file, task.created_by, log)
+        records = model.import_csv(task, log)
 
         task.log(log.getvalue())
         task.log("Import finished at %s" % datetime.now())
