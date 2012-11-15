@@ -1,5 +1,6 @@
 import csv
 import traceback
+import simplejson
 from django.db import models
 from django.contrib.auth.models import User
 import codecs
@@ -27,7 +28,7 @@ class SmartModel(models.Model):
         abstract = True
 
     @classmethod
-    def prepare_fields(cls, field_dict, user=None):
+    def prepare_fields(cls, field_dict, import_params=None, user=None):
         return field_dict
 
     @classmethod
@@ -35,7 +36,14 @@ class SmartModel(models.Model):
         return cls.objects.create(**field_dict)
 
     @classmethod
-    def import_csv(cls, file, user, log=None):
+    def import_csv(cls, task, log=None):
+
+        file = task.csv_file.file
+        user = task.created_by
+
+        import_params = None
+        if task.import_params:
+            import_params = simplejson.loads(task.import_params)
 
         # our alternative codec, by default we are the crazy windows encoding
         ascii_codec = 'cp1252'
@@ -96,7 +104,7 @@ class SmartModel(models.Model):
             field_values['created_by'] = user
             field_values['modified_by'] = user
             try:
-                field_values = cls.prepare_fields(field_values, user)
+                field_values = cls.prepare_fields(field_values, import_params, user)
                 records.append(cls.create_instance(field_values))
             except Exception as e:
                 if log:

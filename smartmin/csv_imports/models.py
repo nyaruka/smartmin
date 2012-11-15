@@ -7,6 +7,7 @@ from smartmin.models import SmartModel
 class ImportTask(SmartModel):
     csv_file = models.FileField(upload_to="csv_imports", verbose_name="Import file", help_text="A comma delimited file of records to import")
     model_class = models.CharField(max_length=255, help_text="The model we are importing for")
+    import_params = models.TextField(help_text="JSON blob of form parameters on task creation")
     import_log = models.TextField()
     task_id = models.CharField(null=True, max_length=64)
 
