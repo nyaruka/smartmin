@@ -1177,6 +1177,8 @@ class SmartCSVImportView(SmartCreateView):
     def post_save(self, task):
         task = super(SmartCSVImportView, self).post_save(task)
 
+        task.import_params = simplejson.dumps(self.form.data)
+
         # kick off our CSV import
         task.start()
 
