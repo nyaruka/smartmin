@@ -10,6 +10,7 @@ setup(
         "django-guardian>=1.0.2",
         "django_compressor",
         "pytz",
+        "simplejson",
     ],
 
     description="Scaffolding system for Django object management.",
