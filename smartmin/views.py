@@ -1265,9 +1265,9 @@ class SmartCRUDL(object):
             # set our link URL based on read and update
             if not getattr(view, 'link_url', None):
                 if 'read' in self.actions:
-                    view.link_url = "id@%s.%s_read" % (self.module_name, self.model_name.lower())
+                    view.link_url = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
-                    view.link_url = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
+                    view.link_url = 'id@%s' % self.url_name_for_action('update')
                 else:
                     view.link_fields = ()
 
@@ -1281,7 +1281,7 @@ class SmartCRUDL(object):
 
             # if update or create, set success url if not set
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
-                view.success_url = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                view.success_url = '@%s' % self.url_name_for_action('list')
 
         # otherwise, use our defaults
         else:
@@ -1289,7 +1289,7 @@ class SmartCRUDL(object):
 
             # if this is an update or create, and we have a list view, then set the default to that
             if action == 'update' or action == 'create' and 'list' in self.actions:
-                options['success_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                options['success_url'] = '@%s' % self.url_name_for_action('list')
 
             # set permissions if appropriate
             if self.permissions:
@@ -1308,24 +1308,24 @@ class SmartCRUDL(object):
 
             elif action == 'update':
                 if 'delete' in self.actions:
-                    options['delete_url'] = "id@%s.%s_delete" % (self.module_name, self.model_name.lower())
+                    options['delete_url'] = 'id@%s' % self.url_name_for_action('delete')
 
                 view = type("%sUpdateView" % self.model_name, (SmartUpdateView,),
                     options)
 
             elif action == 'delete':
                 if 'list' in self.actions:
-                    options['cancel_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
-                    options['redirect_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                    options['cancel_url'] = '@%s' % self.url_name_for_action('list')
+                    options['redirect_url'] = '@%s' % self.url_name_for_action('list')
 
                 view = type("%sDeleteView" % self.model_name, (SmartDeleteView,),
                     options)
 
             elif action == 'list':
                 if 'read' in self.actions:
-                    options['link_url'] = "id@%s.%s_read" % (self.module_name, self.model_name.lower())
+                    options['link_url'] = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
-                    options['link_url'] = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
+                    options['link_url'] = 'id@%s' % self.url_name_for_action('update')
                 else:
                     options['link_fields'] = ()
 
