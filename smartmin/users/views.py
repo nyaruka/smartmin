@@ -13,9 +13,39 @@ import datetime
 from django.template import loader, Context
 from smartmin.views import *
 
+import re
+
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput)
     groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Group.objects.all())
+
+    def clean_new_password(self):
+        password = self.cleaned_data['new_password']
+
+        # if they specified a new password
+        if password:
+            has_caps = re.search('[A-Z]+', password)
+            has_lower = re.search('[a-z]+', password)
+            has_digit = re.search('[0-9]+', password)
+
+            # check the complexity of the password
+            if len(password) < 8 or (len(password) < 12 and (not has_caps or not has_lower or not has_digit)):
+                raise forms.ValidationError("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
+
+        return password
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        
+        if email:
+            email = email.strip()
+
+            # does another user exist with this email?
+            existing = User.objects.filter(email=email)
+            if existing and existing[0].pk != self.instance.pk:
+                raise forms.ValidationError("That email address is already in use by another user")
+
+        return email
 
     def save(self, commit=True):
         """
@@ -44,21 +74,22 @@ class UserUpdateForm(UserForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
 
 class UserProfileForm(UserForm):
-    old_password = forms.CharField(label="Old Password", widget=forms.PasswordInput, required=False)
+    old_password = forms.CharField(label="Password", widget=forms.PasswordInput, required=False)
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
-    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=False)
+    confirm_new_password = forms.CharField(label="Confirm Password", widget=forms.PasswordInput, required=False)
 
     def clean_old_password(self):
         user = self.instance
 
-        if(self.cleaned_data['old_password'] and self.cleaned_data['new_password']):
-            if(not user.check_password(self.cleaned_data['old_password'])):
-                raise forms.ValidationError("The old password is not correct.")
-        elif(self.cleaned_data['old_password'] and not self.cleaned_data['new_password']):
-            raise forms.ValidationError("Please enter a new password for changes to take effect")
+        if(not user.check_password(self.cleaned_data['old_password'])):
+            raise forms.ValidationError("Please enter your password to save changes.")
+
         return self.cleaned_data['old_password']
 
     def clean_confirm_new_password(self):
+        if not 'new_password' in self.cleaned_data:
+            return None
+
         if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
             raise forms.ValidationError("Confirm the new password by filling the this field")
 
@@ -70,15 +101,18 @@ class UserForgetForm(forms.Form):
     email = forms.EmailField(label="Your Email",)
     
 class UserRecoverForm(UserForm):
-    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=True, help_text="You can reset your password by entering a new password here.")
-    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=True, help_text="Confirm your new password by entering exactly the new password here.")
+    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=True, help_text="Your new password.")
+    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=True, help_text="Confirm your new password.")
 
     def clean_confirm_new_password(self):
+        if not 'new_password' in self.cleaned_data:
+            return None
+
         if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
             raise forms.ValidationError("Confirm your new password by entering it here")
 
         if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
-            raise forms.ValidationError("New password doesn't match with its confirmation")
+            raise forms.ValidationError("Mismatch between your new password and confirmation, try again")
         return self.cleaned_data['new_password']
 
 class UserCRUDL(SmartCRUDL):
@@ -144,9 +178,9 @@ class UserCRUDL(SmartCRUDL):
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active', 'last_login')
         field_config = {
             'last_login': dict(readonly=True),
-            'is_active': dict(help="Whether this user is allowed to log into the site."),
-            'groups': dict(help="Users will only get those permissions that are allowed for their group."),
-            'new_password': dict(help="You can reset the user's password by entering a new password here."),
+            'is_active': dict(help="Whether this user is allowed to log into the site"),
+            'groups': dict(help="Users will only get those permissions that are allowed for their group"),
+            'new_password': dict(help="You can reset the user's password by entering a new password here"),
         }
 
         def post_save(self, obj):
@@ -167,9 +201,9 @@ class UserCRUDL(SmartCRUDL):
                   'first_name', 'last_name', 'email')
         field_config = {
             'username': dict(readonly=True),
-            'old_password': dict(help="To reset your password first enter the old password here."),
-            'new_password': dict(help="You can reset your password by entering a new password here."),
-            'confirm_new_password': dict(help="Confirm your new password by entering exactly the new password here."),
+            'old_password': dict(help="Your password"),
+            'new_password': dict(help="If you want to set a new password, enter it here"),
+            'confirm_new_password': dict(help="Confirm your new password"),
         }
 
         def has_permission(self, request, *args, **kwargs):
@@ -184,32 +218,37 @@ class UserCRUDL(SmartCRUDL):
         def derive_title(self):
             return "Edit your profile"
 
-
     class Forget(SmartFormView):
+        title = "Password Recovery"
+        template_name = '/smartmin/users/user_forget.html'
         form_class = UserForgetForm
         permission = None
-        success_message = "An Email has beeen sent to your account."
+        success_message = "An Email has been sent to your account with further instructions."
         success_url = "@users.user_login"
         fields = ('email', )
 
         def form_valid(self, form):
             email = form.cleaned_data['email']
             hostname = getattr(settings, 'HOSTNAME', 'hostname')
+            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'user@hostname')
+            protocol = 'https' if self.request.is_secure() else 'http'
 
-            try:
-                user = User.objects.get(email=email)
+            user = User.objects.filter(email=email)
+            if user:
+                user = user[0]
 
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
 
-                context = Context(dict(website='http://%s' % hostname,
-                                       link='http://%s/users/user/recover/%s/' % (hostname,token)))
-                user.email_user("Password Recovery", email_template.render(context) ,"website@klab.rw")
-            except:
+                context = Context(dict(website=hostname,
+                                       link='%s://%s/users/user/recover/%s/' % (protocol, hostname, token)))
+                user.email_user("Password Recovery", email_template.render(context) , from_email)
+            else:
                 email_template = loader.get_template('smartmin/users/no_user_email.txt')
                 context = Context(dict(website=hostname))
-                send_mail('Password Recovery Request', email_template.render(context), 'website@klab.rw', [email], fail_silently=False)
+                send_mail('Password Recovery Request', email_template.render(context), from_email, 
+                          [email], fail_silently=False)
 
             response = super(UserCRUDL.Forget, self).form_valid(form)
             return response
@@ -218,7 +257,7 @@ class UserCRUDL(SmartCRUDL):
     class Recover(SmartUpdateView):
         form_class = UserRecoverForm
         permission = None
-        success_message = "Password Updated Successfully. Now you can login using the new password."
+        success_message = "Password Updated Successfully. Now you can log in using your new password."
         success_url = '@users.user_login'
         fields = ('new_password', 'confirm_new_password')
         title = "Reset your Password"

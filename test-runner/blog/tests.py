@@ -290,7 +290,6 @@ class SmartminTest(TestCase):
         self.assertEquals(3, Post.objects.all().count())
         self.assertEquals(2, Post.active.all().count())
 
-
 class UserTest(TestCase):
 
     def setUp(self):
@@ -312,10 +311,36 @@ class UserTest(TestCase):
 
         response = self.client.post(reverse('users.user_create'), post_data, follow=True)
         self.assertEquals(200, response.status_code)
+
+        # we should have failed due to our password not being long enough
+        self.assertTrue('new_password' in response.context['form'].errors)
+
+        # try with a longer password but without our requirements (8 chars)
+        post_data['new_password'] = 'password'
+        response = self.client.post(reverse('users.user_create'), post_data, follow=True)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue('new_password' in response.context['form'].errors)
+
+        # try with one capital letter
+        post_data['new_password'] = 'Password'
+        response = self.client.post(reverse('users.user_create'), post_data, follow=True)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue('new_password' in response.context['form'].errors)
+
+        # ok, finally with a zero in there too, this one should pass
+        post_data['new_password'] = 'Passw0rd'
+        response = self.client.post(reverse('users.user_create'), post_data, follow=True)
+        self.assertEquals(200, response.status_code)
         self.assertTrue('form' not in response.context)
 
         # make sure the user was created
         steve = User.objects.get(username='steve')
+
+        # can't create another with the same email though
+        post_data['username'] = 'steve2'
+        response = self.client.post(reverse('users.user_create'), post_data, follow=True)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue('email' in response.context['form'].errors)
 
         # create another user manually, make him inactive
         woz = User.objects.create_user('woz', 'woz@apple.com', 'woz')
@@ -337,10 +362,11 @@ class UserTest(TestCase):
 
         # update steve, put him in a different group and change his password
         post_data['groups'] = Group.objects.get(name='Editors').id
-        post_data['new_password'] = 'google'
+        post_data['new_password'] = 'googleIsNumber1'
 
         # need is active here or steve will be marked inactive
         post_data['is_active'] = '1'
+        post_data['username'] = 'steve'
 
         response = self.client.post(reverse('users.user_update', args=[steve.id]), post_data, follow=True)
         self.assertEquals(200, response.status_code)
@@ -353,7 +379,7 @@ class UserTest(TestCase):
         self.assertEquals(Group.objects.get(name='Editors'), groups[0])
 
         # assert steve can login with 'google' now
-        self.assertTrue(self.client.login(username='steve', password='google'))
+        self.assertTrue(self.client.login(username='steve', password='googleIsNumber1'))
 
         # test user profile action
         # logout first
@@ -382,31 +408,43 @@ class UserTest(TestCase):
         self.assertEquals("UserProfileForm", type(response.context['form']).__name__)
 
         response = self.client.post(reverse('users.user_profile', args=[plain.id]), {}, follow=True)
+
         # check which field he have access to
         self.assertEquals(6, len(response.context['form'].visible_fields()))
 
         # doesn't include readonly fields on post
         self.assertNotIn("username", response.context['form'].fields)
 
-        # check if he can fill only an old password
-        post_data = dict(old_password="plain")
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
-        self.assertIn("Please enter a new password for changes to take effect", response.content)
-
         # check if he can fill a wrong old password
-        post_data = dict(old_password="plainwrong", new_password="newpassword")
+        post_data = dict(old_password="plainwrong", new_password="NewPassword1")
         response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
-        self.assertIn("The old password is not correct", response.content)
+        self.assertTrue('old_password' in response.context['form'].errors)
 
         # check if he can mismatch new password and its confirmation
-        post_data = dict(old_password="plain", new_password="newpassword", confirm_new_password="confirmnewpassword")
+        post_data = dict(old_password="plain", new_password="NewPassword1", confirm_new_password="confirmnewpassword")
         response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
 
         # check if he can fill old and new password only without the confirm new password
-        post_data = dict(old_password="plain", new_password="newpassword")
+        post_data = dict(old_password="plain", new_password="NewPassword1")
         response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
         self.assertIn("Confirm the new password by filling the this field", response.content)
 
+        # actually change the password
+        post_data = dict(old_password="plain", new_password="NewPassword1", confirm_new_password="NewPassword1")
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+
+        # assert new password works
+        self.assertTrue(self.client.login(username='plain', password='NewPassword1'))
+
+        # see whether we can change our email without a password
+        post_data = dict(email="new@foo.com")
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        self.assertTrue('old_password' in response.context['form'].errors)
+
+        # but with the new password we can
+        post_data = dict(email="new@foo.com", old_password='NewPassword1')
+        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        self.assertTrue(User.objects.get(email='new@foo.com'))
 
     def test_token(self):
         # create a user user1 with password user1 and email user1@user1.com
@@ -471,8 +509,7 @@ class UserTest(TestCase):
         post_data['confirm_new_password'] = 'user1_passwd_dont_match'
 
         response = self.client.post(recover_url, post_data, follow=True)
-        self.assertIn("New password doesn&#39;t match with its confirmation", response.content)
-
+        self.assertIn('confirm_new_password', response.context['form'].errors)
 
         # if the token is valid we get a form to fill with new password
         recover_url = reverse('users.user_recover', args=[recovery_token.token])

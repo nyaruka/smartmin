@@ -7,13 +7,13 @@
 {% block content %}
 <div class="row">
   <div class="span7 offset2">
-    <div class="page-header"><h3>Sign in</h3></div>
+    <div class="page-header"><h2>Sign in</h2></div>
 
     <form method="post" class="form-stacked" id="login-form">
       {% for field, errors in form.errors.items %}
       {% if field == '__all__' %}
       <div class="alert alert-error form-errors">
-        <h4>Error</h4>
+        <h3>Error</h3>
         {{ errors }}
       </div>
       {% endif %}
@@ -31,6 +31,7 @@
         {% endfor %}
         {% csrf_token %}
         <input type="submit" class="btn primary" value="Login">
+        <span class="pull-right" style="padding-top:7px;padding-right:20px;"><a href="{% url users.user_forget %}">Forgot Password?</a></span>
       </fieldset>
     </form>
   </div>
