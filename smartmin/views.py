@@ -453,7 +453,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
         if not self.cancel_url:
             raise ImproperlyConfigured("DeleteView must define a cancel_url")
 
-        return smart_url(self.cancel_url)
+        return smart_url(self.cancel_url, self.object.id)
 
     def pre_delete(self, obj):
         pass

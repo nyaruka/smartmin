@@ -1,10 +1,16 @@
 {% extends "smartmin/form.html" %}
 
-{% block table_header_buttons %}
-{{ block.super }}
-{% if delete_url %}
-  <a href="{{ delete_url }}" class="button small destructive">Remove</a>
-{% endif %}
+
+{% block form-buttons %}
+<div class="form-actions">
+  <input type="submit" class="btn btn-primary" value="{{ submit_button_name }}">
+  <a class="btn" onclick="javascript:history.go(-1)">Cancel</a>
+  {% if delete_url %}
+  <a class="btn btn-danger pull-right" href="{{ delete_url }}">Remove</a>
+  {% endif %}
+</div>
 {% endblock %}
+
+
 
 
