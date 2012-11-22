@@ -1,8 +1,12 @@
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.views import login as django_login
 from django import forms
 from django.conf import settings
 from .models import *
 from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response, render
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth.forms import AuthenticationForm
 
 from django.shortcuts import render
 from django.core.mail import send_mail
@@ -14,6 +18,7 @@ from django.template import loader, Context
 from smartmin.views import *
 
 import re
+
 
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput)
@@ -118,7 +123,7 @@ class UserRecoverForm(UserForm):
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover','expired')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover','expired','failed')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -240,7 +245,7 @@ class UserCRUDL(SmartCRUDL):
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
-
+                FailedLogin.objects.filter(user=user).delete()
                 context = Context(dict(website=hostname,
                                        link='%s://%s/users/user/recover/%s/' % (protocol, hostname, token)))
                 user.email_user("Password Recovery", email_template.render(context) , from_email)
@@ -288,3 +293,37 @@ class UserCRUDL(SmartCRUDL):
     class Expired(SmartView, TemplateView):
         permission = None
         template_name = 'smartmin/users/user_expired.html'
+
+    class Failed(SmartView, TemplateView):
+        permission = None
+        template_name = 'smartmin/users/user_failed.html'
+
+def login(request, template_name='smartmin/users/login.html',
+          redirect_field_name=REDIRECT_FIELD_NAME,
+          authentication_form=AuthenticationForm,
+          current_app=None, extra_context=None):
+
+    time_interval = 10
+    limit_attempts = 5
+
+    if request.method == "POST":
+        if 'username' in request.REQUEST and 'password' in request.REQUEST:
+            username = request.REQUEST['username']
+            user = User.objects.get(username=username)
+            FailedLogin.objects.create(user=user)
+    
+            bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
+            failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
+
+            if len(failures) <= limit_attempts:
+                return django_login(request, template_name='smartmin/users/login.html',
+                                    redirect_field_name=REDIRECT_FIELD_NAME,
+                                    authentication_form=AuthenticationForm,
+                                    current_app=None, extra_context=None)
+    
+            return HttpResponseRedirect(reverse('users.user_failed'))
+
+    return django_login(request, template_name='smartmin/users/login.html',
+                        redirect_field_name=REDIRECT_FIELD_NAME,
+                        authentication_form=AuthenticationForm,
+                        current_app=None, extra_context=None)

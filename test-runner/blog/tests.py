@@ -545,6 +545,32 @@ class UserTest(TestCase):
         self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
 
+    def test_lockout(self):
+        # first create a user to use on the test
+        user2 = User.objects.create_user("user2", 'user2@user2.com', 'user2')
+
+        #be sure no user os logged in
+        self.client.logout()
+
+        # login page
+        login_url = reverse('users.user_login')
+
+        post_data = dict()
+        post_data['username'] = 'user2'
+        post_data['password'] = 'wrongpassword'
+
+        # five failed login
+        i = 1
+        for i in range(1,6):
+            response = self.client.post(login_url,post_data)
+            self.assertFalse( response.context['user'].is_authenticated())
+            i = i + 1
+
+        # get redirected to info page to wait 
+        response = self.client.post(login_url,post_data)
+        self.assertEquals(302, response.status_code)
+
+
 class UserTestCase(TestCase):
 
     def test_reverse(self):
