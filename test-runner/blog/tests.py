@@ -549,6 +549,9 @@ class UserTest(TestCase):
         # first create a user to use on the test
         user2 = User.objects.create_user("user2", 'user2@user2.com', 'user2')
 
+        #be sure no user os logged in
+        self.client.logout()
+
         # login page
         login_url = reverse('users.user_login')
 
@@ -560,12 +563,13 @@ class UserTest(TestCase):
         i = 1
         for i in range(1,6):
             response = self.client.post(login_url,post_data)
-            self.assertIn('username', response.context['form'].errors['__all__'][0])
+            self.assertFalse( response.context['user'].is_authenticated())
             i = i + 1
 
         # get redirected to info page to wait 
-        response = self.client.post(login_url,post_data, follow=True)
-        self.assertEquals('users.user_failed', response.context['view'].url_name)
+        response = self.client.post(login_url,post_data)
+        self.assertEquals(302, response.status_code)
+
 
 class UserTestCase(TestCase):
 
