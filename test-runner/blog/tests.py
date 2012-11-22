@@ -556,25 +556,12 @@ class UserTest(TestCase):
         post_data['username'] = 'user2'
         post_data['password'] = 'wrongpassword'
 
-        # first failed login
-        response = self.client.post(login_url,post_data)
-        self.assertIn('username', response.context['form'].errors['__all__'][0])
-
-        # second failed login
-        response = self.client.post(login_url,post_data)
-        self.assertIn('username', response.context['form'].errors['__all__'][0])
-
-        # third failed login
-        response = self.client.post(login_url,post_data)
-        self.assertIn('username', response.context['form'].errors['__all__'][0])
-        
-        #fourth failed login
-        response = self.client.post(login_url,post_data)
-        self.assertIn('username', response.context['form'].errors['__all__'][0])
-
-        # fifth failed login
-        response = self.client.post(login_url,post_data)
-        self.assertIn('username', response.context['form'].errors['__all__'][0])
+        # five failed login
+        i = 1
+        for i in range(1,6):
+            response = self.client.post(login_url,post_data)
+            self.assertIn('username', response.context['form'].errors['__all__'][0])
+            i = i + 1
 
         # get redirected to info page to wait 
         response = self.client.post(login_url,post_data, follow=True)
