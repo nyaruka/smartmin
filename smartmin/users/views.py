@@ -298,6 +298,14 @@ class UserCRUDL(SmartCRUDL):
         permission = None
         template_name = 'smartmin/users/user_failed.html'
 
+        def get_context_data(self, *args, **kwargs):
+            context = super(UserCRUDL.Failed, self).get_context_data(*args, **kwargs)
+
+            context['time_interval'] = 10
+            context['limit_attempts'] = 5
+
+            return context
+
 def login(request, template_name='smartmin/users/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
           authentication_form=AuthenticationForm,
