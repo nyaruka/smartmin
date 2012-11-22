@@ -7,7 +7,6 @@ class RecoveryToken(models.Model):
     token = models.CharField(max_length=32, unique=True, default=None, help_text="token to reset password")
     created_on = models.DateTimeField(auto_now_add=True)
 
-
-class FailureMarker(models.Model):
+class FailedLogin(models.Model):
     user = models.ForeignKey(User)
     failed_on = models.DateTimeField(auto_now_add=True)

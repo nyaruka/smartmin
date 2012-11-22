@@ -123,7 +123,7 @@ class UserRecoverForm(UserForm):
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover','expired')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover','expired','failed')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -245,7 +245,7 @@ class UserCRUDL(SmartCRUDL):
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token,user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
-                FailureMarker.objects.filter(user=user).delete()
+                FailedLogin.objects.filter(user=user).delete()
                 context = Context(dict(website=hostname,
                                        link='%s://%s/users/user/recover/%s/' % (protocol, hostname, token)))
                 user.email_user("Password Recovery", email_template.render(context) , from_email)
@@ -294,7 +294,9 @@ class UserCRUDL(SmartCRUDL):
         permission = None
         template_name = 'smartmin/users/user_expired.html'
 
-
+    class Failed(SmartView, TemplateView):
+        permission = None
+        template_name = 'smartmin/users/user_failed.html'
 
 def login(request, template_name='smartmin/users/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
@@ -305,18 +307,13 @@ def login(request, template_name='smartmin/users/login.html',
     limit_attempts = 5
 
     if request.method == "POST":
-        
         if 'username' in request.REQUEST and 'password' in request.REQUEST:
-
             username = request.REQUEST['username']
             user = User.objects.get(username=username)
-            FailureMarker.objects.create(user=user)
-
-        
-        
+            FailedLogin.objects.create(user=user)
     
             bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
-            failures = FailureMarker.objects.filter(user=user).filter(failed_on__gt=bad_interval)
+            failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
 
             if len(failures) <= limit_attempts:
                 return django_login(request, template_name='smartmin/users/login.html',
@@ -324,9 +321,7 @@ def login(request, template_name='smartmin/users/login.html',
                                     authentication_form=AuthenticationForm,
                                     current_app=None, extra_context=None)
     
-
-            return render(request, "smartmin/users/failure.html",dict(time_interval=time_interval,limit_attempts=limit_attempts))
-
+            return HttpResponseRedirect(reverse('users.user_failed'))
 
     return django_login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
