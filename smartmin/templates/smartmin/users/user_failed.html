@@ -7,8 +7,8 @@
   <div class="span7 offset2">
     <div class="alert alert-error">
     <div class="page-header"><h2>Login Failure</h2></div>
-    <p > Sorry, you cannot log in at this time because we received {{limit_attempts}} incorrect login attempts.</p> 
-    <p>Please wait {{time_interval}} minutes before to try log in again or fill out your email below to recover your password</p>
+    <p > Sorry, you cannot log in at this time because we received {{failed_login_limit}} incorrect login attempts.</p> 
+    <p>Please wait {{user_lockout_timeout}} minutes before to try log in again or fill out your email below to recover your password</p>
     </div>
   </div>
 </div>

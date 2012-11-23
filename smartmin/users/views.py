@@ -301,9 +301,11 @@ class UserCRUDL(SmartCRUDL):
         def get_context_data(self, *args, **kwargs):
             context = super(UserCRUDL.Failed, self).get_context_data(*args, **kwargs)
 
-            context['time_interval'] = 10
-            context['limit_attempts'] = 5
-
+            user_lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
+            failed_login_limit = getattr(settings, 'FAILED_LOGIN_LIMIT', 5)
+            context['user_lockout_timeout'] = user_lockout_timeout
+            context['failed_login_limit'] = failed_login_limit
+            
             return context
 
 def login(request, template_name='smartmin/users/login.html',
@@ -311,8 +313,8 @@ def login(request, template_name='smartmin/users/login.html',
           authentication_form=AuthenticationForm,
           current_app=None, extra_context=None):
 
-    time_interval = 10
-    limit_attempts = 5
+    user_lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
+    failed_login_limit = getattr(settings, 'FAILED_LOGIN_LIMIT', 5)
 
     if request.method == "POST":
         if 'username' in request.REQUEST and 'password' in request.REQUEST:
@@ -320,10 +322,10 @@ def login(request, template_name='smartmin/users/login.html',
             user = User.objects.get(username=username)
             FailedLogin.objects.create(user=user)
     
-            bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
+            bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=user_lockout_timeout)
             failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
 
-            if len(failures) <= limit_attempts:
+            if len(failures) <= failed_login_limit:
                 return django_login(request, template_name='smartmin/users/login.html',
                                     redirect_field_name=REDIRECT_FIELD_NAME,
                                     authentication_form=AuthenticationForm,
