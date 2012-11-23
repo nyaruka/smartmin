@@ -246,7 +246,7 @@ class SmartView(object):
             help = default
 
         # try to see if there is a description on our model
-        else:
+        elif hasattr(self, 'model'):
             for model_field in self.model._meta.fields:
                 if model_field.name == field:
                     help = model_field.help_text
@@ -453,7 +453,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
         if not self.cancel_url:
             raise ImproperlyConfigured("DeleteView must define a cancel_url")
 
-        return smart_url(self.cancel_url)
+        return smart_url(self.cancel_url, self.object.id)
 
     def pre_delete(self, obj):
         pass
@@ -736,7 +736,7 @@ class SmartFormMixin(object):
         """
         Returns a message to display when this form is successfully saved
         """
-        self.success_message
+        return self.success_message
     
     def get_form(self, form_class):
         """
@@ -746,25 +746,20 @@ class SmartFormMixin(object):
 
         fields = list(self.derive_fields())
 
-        # we specified our own form class, which means we need to apply any field filtering
-        # ourselves.. this is ugly but the only way to make exclude and fields work the same
-        # despite specifying your own form class
-        if self.form_class:
-            # only exclude?  then remove those items there
-            exclude = self.derive_exclude()
-            exclude += self.derive_readonly()
+        # apply our field filtering on our form class
+        exclude = self.derive_exclude()
+        exclude += self.derive_readonly()
 
-            # remove any excluded fields
-            for field in exclude:
-                if field in self.form.fields:
-                    del self.form.fields[field]
+        # remove any excluded fields
+        for field in exclude:
+            if field in self.form.fields:
+                del self.form.fields[field]
             
-            if fields:
-                # filter out our form fields
-                for name, field in self.form.fields.items():
-                    if not name in fields:
-                        del self.form.fields[name]
-
+        if fields:
+            # filter out our form fields
+            for name, field in self.form.fields.items():
+                if not name in fields:
+                    del self.form.fields[name]
 
         # stuff in our referer as the default location for where to return
         location = forms.CharField(widget=forms.widgets.HiddenInput(), required=False)
@@ -928,7 +923,11 @@ class SmartFormMixin(object):
         form when it was created
         """
         if self.success_url:
-            return smart_url(self.success_url, self.object.pk)
+            # if our smart url references an object, pass that in
+            if self.success_url.find('@') > 0:
+                return smart_url(self.success_url, self.object.pk)
+            else:
+                return smart_url(self.success_url, None)
         
         elif 'loc' in self.form.cleaned_data:
             return self.form.cleaned_data['loc']
@@ -1178,6 +1177,8 @@ class SmartCSVImportView(SmartCreateView):
     def post_save(self, task):
         task = super(SmartCSVImportView, self).post_save(task)
 
+        task.import_params = simplejson.dumps(self.form.data)
+
         # kick off our CSV import
         task.start()
 
@@ -1264,9 +1265,9 @@ class SmartCRUDL(object):
             # set our link URL based on read and update
             if not getattr(view, 'link_url', None):
                 if 'read' in self.actions:
-                    view.link_url = "id@%s.%s_read" % (self.module_name, self.model_name.lower())
+                    view.link_url = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
-                    view.link_url = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
+                    view.link_url = 'id@%s' % self.url_name_for_action('update')
                 else:
                     view.link_fields = ()
 
@@ -1280,7 +1281,7 @@ class SmartCRUDL(object):
 
             # if update or create, set success url if not set
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
-                view.success_url = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                view.success_url = '@%s' % self.url_name_for_action('list')
 
         # otherwise, use our defaults
         else:
@@ -1288,7 +1289,7 @@ class SmartCRUDL(object):
 
             # if this is an update or create, and we have a list view, then set the default to that
             if action == 'update' or action == 'create' and 'list' in self.actions:
-                options['success_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                options['success_url'] = '@%s' % self.url_name_for_action('list')
 
             # set permissions if appropriate
             if self.permissions:
@@ -1307,24 +1308,24 @@ class SmartCRUDL(object):
 
             elif action == 'update':
                 if 'delete' in self.actions:
-                    options['delete_url'] = "id@%s.%s_delete" % (self.module_name, self.model_name.lower())
+                    options['delete_url'] = 'id@%s' % self.url_name_for_action('delete')
 
                 view = type("%sUpdateView" % self.model_name, (SmartUpdateView,),
                     options)
 
             elif action == 'delete':
                 if 'list' in self.actions:
-                    options['cancel_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
-                    options['redirect_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                    options['cancel_url'] = '@%s' % self.url_name_for_action('list')
+                    options['redirect_url'] = '@%s' % self.url_name_for_action('list')
 
                 view = type("%sDeleteView" % self.model_name, (SmartDeleteView,),
                     options)
 
             elif action == 'list':
                 if 'read' in self.actions:
-                    options['link_url'] = "id@%s.%s_read" % (self.module_name, self.model_name.lower())
+                    options['link_url'] = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
-                    options['link_url'] = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
+                    options['link_url'] = 'id@%s' % self.url_name_for_action('update')
                 else:
                     options['link_fields'] = ()
 
