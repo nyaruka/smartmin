@@ -215,6 +215,16 @@ def render_field(context, field):
         inclusion_context['object'] = context['object']
 
     return inclusion_context
+
+@register.simple_tag
+def active(request, pattern):
+    """
+    Simple tag let us define a regex for the active navigation tab
+    """
+    import re
+    if re.search(pattern, request.path):
+        return 'active'
+    return ''
     
 
 

@@ -8,7 +8,7 @@
 {% block pjax %}
 <div class="confirmation">
 
-  <h3>Remove {{ object }}?</h3>
+  <h2>Remove Item?</h2>
   <p>Are you sure you want to remove <b>{{ object }}</b>?</p>
   <p>Once it is removed, it will be gone forever. There is no way to undo this operation.</p>
   
@@ -19,7 +19,7 @@
     <div class="buttons">
       <a class="btn" href="{{ cancel_url }}">Cancel</a>
       {% csrf_token %}
-        <input type="submit" class="btn danger" value="Remove"/>
+        <input type="submit" class="btn btn-danger" value="Remove"/>
     </div>
   </form>
 
