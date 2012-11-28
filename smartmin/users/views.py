@@ -234,8 +234,14 @@ class UserCRUDL(SmartCRUDL):
 
         def form_valid(self, form):
             email = form.cleaned_data['email']
-            hostname = getattr(settings, 'HOSTNAME', 'hostname')
-            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'user@hostname')
+            hostname = getattr(settings, 'HOSTNAME', self.request.get_host())
+
+            col_index = hostname.find(':')
+            if col_index > 0:
+                domain =  hostname[:col_index]
+
+            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
+
             protocol = 'https' if self.request.is_secure() else 'http'
 
             user = User.objects.filter(email=email)
