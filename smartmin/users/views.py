@@ -237,8 +237,7 @@ class UserCRUDL(SmartCRUDL):
             hostname = getattr(settings, 'HOSTNAME', self.request.get_host())
 
             col_index = hostname.find(':')
-            if col_index > 0:
-                domain =  hostname[:col_index]
+            domain = hostname[:col_index] if col_index > 0 else hostname
 
             from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
 
