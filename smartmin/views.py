@@ -612,7 +612,6 @@ class SmartListView(SmartView, ListView):
         Gets our queryset.  This takes care of filtering if there are any
         fields to filter by.
         """
-
         queryset = self.derive_queryset(**kwargs)
 
         # if our list should be filtered by a permission as well, do so
