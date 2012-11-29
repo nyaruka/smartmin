@@ -61,6 +61,12 @@
 {% endblock content %}
 
 {% block extra-script %}
+<script>
+$(function(){
+  $(".datepicker").pickadate();
+});
+</script>
+
 {{ block.super }}
 {% if javascript_submit %}
 <script>

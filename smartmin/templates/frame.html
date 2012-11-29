@@ -122,9 +122,9 @@
   <!-- JavaScript at the bottom for fast page loading, conditional based on whether we are serving locally -->
   <script>
     if (window.location.hostname == "localhost"){
-    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.7.2.js"%3E%3C/script%3E'));
+    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery.1.8.3.min.js"%3E%3C/script%3E'));
     } else {
-    document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"%3E%3C/script%3E'));
+    document.write(unescape('%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"%3E%3C/script%3E'));
     }
   </script>
   

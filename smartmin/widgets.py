@@ -33,7 +33,7 @@ class DatePickerWidget(widgets.Widget):
             value = datetime.datetime.now().date()
 
         str_value = "%s %d, %d" % (value.strftime("%B"), value.day, value.year)
-        html += '<input type="text" class="datepicker" name="%s" value="%s" readonly="readonly">' % (escape(name), escape(str_value))
+        html += '<input type="text" class="datepicker" name="%s" value="%s">' % (escape(name), escape(str_value))
         return mark_safe(html)
 
     def value_from_datadict(self, data, files, name):
@@ -48,8 +48,8 @@ class DatePickerWidget(widgets.Widget):
             return None
 
     class Media:
-       js = ('js/datepicker.js',)
-       css = { 'all': ('css/datepicker.css',) }
+       js = ('js/pickadate.min.js',)
+       css = { 'all': ('css/pickadate.css',) }
 
 class ImageThumbnailWidget(widgets.ClearableFileInput): 
 
