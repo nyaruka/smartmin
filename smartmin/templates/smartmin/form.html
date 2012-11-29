@@ -62,9 +62,12 @@
 
 {% block extra-script %}
 <script>
-$(function(){
-  $(".datepicker").pickadate();
-});
+
+  $(".datepicker").pickadate({
+    format: 'dddd, dd mmm, yyyy',
+    //format_submit: 'yyyy-mm-dd'
+})
+
 </script>
 
 {{ block.super }}
