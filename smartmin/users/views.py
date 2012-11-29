@@ -322,19 +322,27 @@ def login(request, template_name='smartmin/users/login.html',
     if request.method == "POST":
         if 'username' in request.REQUEST and 'password' in request.REQUEST:
             username = request.REQUEST['username']
-            user = User.objects.get(username=username)
-            FailedLogin.objects.create(user=user)
-    
-            bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
-            failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
+            user = User.objects.filter(username=username)
 
-            if len(failures) <= limit_attempts:
-                return django_login(request, template_name='smartmin/users/login.html',
-                                    redirect_field_name=REDIRECT_FIELD_NAME,
-                                    authentication_form=AuthenticationForm,
-                                    current_app=None, extra_context=None)
+            # this could be a valid login by a user
+            if user:
+                user = user[0]
+
+                # incorrect password?  create a failed login token
+                valid_password = user.check_password(request.REQUEST['password'])
+                if not valid_password:
+                    FailedLogin.objects.create(user=user)
     
-            return HttpResponseRedirect(reverse('users.user_failed'))
+                bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
+                failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
+
+                # if there are too many failed logins, take them to the failed page
+                if len(failures) >= limit_attempts:
+                    return HttpResponseRedirect(reverse('users.user_failed'))
+
+                # delete failed logins if the password is valid
+                elif valid_password:
+                    FailedLogin.objects.filter(user=user).delete()
 
     return django_login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
