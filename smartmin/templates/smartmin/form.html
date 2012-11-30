@@ -63,7 +63,10 @@
 {% block extra-script %}
 <script>
 
-  $(".datepicker").datepicker()
+  $(".datepicker").pickadate({
+  format: 'mmmm dd, yyyy',
+  year_selector: true
+})
 
 </script>
 
