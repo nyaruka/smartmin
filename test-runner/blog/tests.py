@@ -8,8 +8,8 @@ from django.utils import simplejson
 from .views import PostCRUDL
 from smartmin.views import smart_url
 from guardian.shortcuts import assign
+import datetime
 import settings
-
 
 from smartmin.users.models import *
 
@@ -559,17 +559,14 @@ class UserTest(TestCase):
         post_data['username'] = 'user2'
         post_data['password'] = 'wrongpassword'
 
-        # five failed login
-        i = 1
-        for i in range(1,6):
+        # try to log in four times
+        for i in range(4):
             response = self.client.post(login_url,post_data)
             self.assertFalse( response.context['user'].is_authenticated())
-            i = i + 1
 
-        # get redirected to info page to wait 
-        response = self.client.post(login_url,post_data)
+        # on the fifth failed login we get redirected
+        response = self.client.post(login_url, post_data)
         self.assertEquals(302, response.status_code)
-
 
 class UserTestCase(TestCase):
 
@@ -624,10 +621,110 @@ class TagTestCase(TestCase):
     def test_map(self):
         from smartmin.templatetags.smartmin import map
         self.assertEquals("title: First Post id: 1", map("title: %(title)s id: %(id)d", self.post))
-        
-        
 
 
+class UserLockoutTestCase(TestCase):
+
+    def setUp(self):
+        self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'plain')
+
+        self.superuser = User.objects.create_user('superuser', 'superuser@group.com', 'superuser')
+        self.superuser.is_superuser = True
+        self.superuser.save()
+
+    def doLockout(self):
+        # go to the login page
+        response = self.client.get(reverse('users.user_login'))
+
+        # make sure there is no reset link
+        self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+
+        # also make sure we can't actually do a reset
+        post_data = dict(email="nicpottier@gmail.com")
+        response = self.client.post(reverse('users.user_forget'), post_data)
+
+        self.assertTrue('email' in response.context['form'].errors)
+
+        # try logging in four times, get account locked
+        for i in range(4):
+            post_data = dict(username='plain', password='plain2')
+            response = self.client.post(reverse('users.user_login'), post_data)
+            self.assertTrue(response.context['form'].errors)
+
+        # on the fifth time it should fail
+        response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+        self.assertFalse(response.context['user'].is_authenticated())
+        self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+
+        # even with right password, no dice
+        post_data = dict(username='plain', password='plain')
+        response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+        self.assertFalse(response.context['user'].is_authenticated())
+        self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+
+    def testNoRecovery(self):
+        with self.settings(USER_ALLOW_EMAIL_RECOVERY=False):
+            self.doLockout()
+
+            post_data = dict(username='plain', password='plain')
+            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+
+            # should say something about 10 minutes
+            self.assertContains(response, "10 minutes")
+
+            # move all our lockout events to 11 minutes in the past
+            ten_minutes = datetime.timedelta(minutes=10)
+            for failed in FailedLogin.objects.filter(user=self.plain):
+                failed.failed_on = failed.failed_on - ten_minutes
+                failed.save()
+
+            # should now be able to log in
+            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+            self.assertTrue( response.context['user'].is_authenticated())
+
+    def testNoRecoveryNoTimeout(self):
+        with self.settings(USER_ALLOW_EMAIL_RECOVERY=False, USER_LOCKOUT_TIMEOUT=-1):
+            # get ourselves locked out
+            self.doLockout()
+
+            post_data = dict(lusername='plain', password='plain')
+            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+
+            # should say nothing about 10 minutes
+            self.assertTrue(response.content.find("10 minutes") == -1)
+
+            # move all our lockout events to 11 minutes in the past
+            ten_minutes = datetime.timedelta(minutes=10)
+            for failed in FailedLogin.objects.filter(user=self.plain):
+                failed.failed_on = failed.failed_on - ten_minutes
+                failed.save()
+
+            # should still have no dice on trying to log in
+            post_data = dict(username='plain', password='plain')
+            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+            self.assertContains(response, "cannot log")
+            self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+
+            # log in as superuser
+            response = self.client.post(reverse('users.user_login'), 
+                                        dict(username='superuser', password='superuser'))
 
 
+            # go edit our 'plain' user
+            response = self.client.get(reverse('users.user_update', args=[self.plain.id]))
 
+            # change the password
+            post_data = dict(new_password='Password1', username='plain', groups='1', is_active='1')
+            response = self.client.post(reverse('users.user_update', args=[self.plain.id]),
+                                        post_data)
+
+            # assert our lockouts got cleared
+            self.assertFalse(FailedLogin.objects.filter(user=self.plain))
+
+            # the user should be able to log in now
+            self.client.logout()
+
+            post_data = dict(username='plain', password='Password1')
+            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+            self.assertTrue(response.context['user'].is_authenticated())
+                                       
