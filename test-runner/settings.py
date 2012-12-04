@@ -200,6 +200,7 @@ GROUP_PERMISSIONS = {
 
 ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = "/blog/post/"
 
 #-----------------------------------------------------------------------------------
 # Django-Nose config

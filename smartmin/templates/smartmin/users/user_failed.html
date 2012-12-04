@@ -7,11 +7,22 @@
   <div class="span7 offset2">
     <div class="alert alert-error">
     <div class="page-header"><h2>Login Failure</h2></div>
-    <p > Sorry, you cannot log in at this time because we received {{limit_attempts}} incorrect login attempts.</p> 
-    <p>Please wait {{time_interval}} minutes before to try log in again or fill out your email below to recover your password</p>
+    <p > Sorry, you cannot log in at this time because we received {{failed_login_limit}} incorrect login attempts.</p> 
+
+    {% if lockout_timeout >= 0 %}
+    <p>Please wait {{lockout_timeout}} minutes before to try log in again.</p>
+    {% endif %}
+
+    {% if allow_email_recovery %}
+    <p>Alternatively, you can fill out the form below to have your password reset via e-mail.</p>
+    {% else %}
+    <p>Please contact the website administrator to have your password reset.</p>
+    {% endif %}
     </div>
   </div>
 </div>
+
+{% if allow_email_recovery %}
 <div class="row" >
   <div class="span7 offset2">
     <form class="form-inline" method="post" action="{% url users.user_forget %}">
@@ -24,6 +35,6 @@
     </form>
   </div>
 </div>
-
+{% endif %}
 
 {% endblock %}
