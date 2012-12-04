@@ -183,8 +183,6 @@ class _CRUDLTest(SmartminTest):
 
         return response
 
-
-
     def assertPageGet(self, action, response):
         if response.status_code == 302:
             self.fail("'%s' resulted in an unexpected redirect to: %s" % (action, response.get('Location')))

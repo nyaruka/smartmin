@@ -104,6 +104,15 @@ class UserProfileForm(UserForm):
 
 class UserForgetForm(forms.Form):
     email = forms.EmailField(label="Your Email",)
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+
+        allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
+        if not allow_email_recovery:
+            raise forms.ValidationError("E-mail recovery is not supported, please contact the website administrator to reset your password manually.")
+        
+        return email
     
 class UserRecoverForm(UserForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=True, help_text="Your new password.")
@@ -196,6 +205,10 @@ class UserCRUDL(SmartCRUDL):
                 obj.groups.clear()
                 for group in self.form.cleaned_data['groups']:
                     obj.groups.add(group)
+
+            # if a new password was set, reset our failed logins
+            if 'new_password' in self.form.cleaned_data and self.form.cleaned_data['new_password']:
+                FailedLogin.objects.filter(user=self.object).delete()
 
             return obj
 
@@ -306,9 +319,14 @@ class UserCRUDL(SmartCRUDL):
         def get_context_data(self, *args, **kwargs):
             context = super(UserCRUDL.Failed, self).get_context_data(*args, **kwargs)
 
-            context['time_interval'] = 10
-            context['limit_attempts'] = 5
+            lockout_timeout = getattr(settings, 'USER_USER_LOCKOUT_TIMEOUT', 10)
+            failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
+            allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
 
+            context['lockout_timeout'] = lockout_timeout
+            context['failed_login_limit'] = failed_login_limit
+            context['allow_email_recovery'] = allow_email_recovery
+            
             return context
 
 def login(request, template_name='smartmin/users/login.html',
@@ -316,12 +334,14 @@ def login(request, template_name='smartmin/users/login.html',
           authentication_form=AuthenticationForm,
           current_app=None, extra_context=None):
 
-    time_interval = 10
-    limit_attempts = 5
+    lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
+    failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
+    allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
 
     if request.method == "POST":
         if 'username' in request.REQUEST and 'password' in request.REQUEST:
             username = request.REQUEST['username']
+
             user = User.objects.filter(username=username)
 
             # this could be a valid login by a user
@@ -333,11 +353,15 @@ def login(request, template_name='smartmin/users/login.html',
                 if not valid_password:
                     FailedLogin.objects.create(user=user)
     
-                bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
-                failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
+                bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=lockout_timeout)
+                failures = FailedLogin.objects.filter(user=user)
+
+                # if the failures reset after a period of time, then limit our query to that interval
+                if lockout_timeout > 0:
+                    failures = failures.filter(failed_on__gt=bad_interval)
 
                 # if there are too many failed logins, take them to the failed page
-                if len(failures) >= limit_attempts:
+                if len(failures) >= failed_login_limit:
                     return HttpResponseRedirect(reverse('users.user_failed'))
 
                 # delete failed logins if the password is valid
@@ -347,4 +371,4 @@ def login(request, template_name='smartmin/users/login.html',
     return django_login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
                         authentication_form=AuthenticationForm,
-                        current_app=None, extra_context=None)
+                        current_app=None, extra_context=dict(allow_email_recovery=allow_email_recovery))
