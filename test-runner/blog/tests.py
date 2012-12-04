@@ -733,4 +733,104 @@ class UserLockoutTestCase(TestCase):
             post_data = dict(username='plain', password='Password1')
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
             self.assertTrue(response.context['user'].is_authenticated())
+
+class PasswordExpirationTestCase(TestCase):
+
+    def setUp(self):
+        self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'Password1')
+        self.plain.groups.add(Group.objects.get(name="Editors"))
+
+    def testNoExpiration(self):
+        # create a fake password set 90 days ago
+        ninety_days_ago = datetime.datetime.now() - datetime.timedelta(days=90)
+        history = PasswordHistory.objects.create(user=self.plain,
+                                                 password="asdfasdf")
+
+        history.set_on = ninety_days_ago
+        history.save()
+
+        # log in
+        self.client.logout()
+        post_data = dict(username='plain', password='Password1')
+        response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+        self.assertTrue(response.context['user'].is_authenticated())
+
+        # we shouldn't be on a page asking us for a new password
+        self.assertFalse('form' in response.context)
+
+    def testPasswordRepeat(self):
+        history = PasswordHistory.objects.create(user=self.plain,
+                                                 password=self.plain.password)        
+
+        with self.settings(USER_PASSWORD_REPEAT_WINDOW=365):
+            self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "anotherpassword"))
+
+            # move our history into the past
+            history.set_on = datetime.date.today() - datetime.timedelta(days=366)
+            history.save()
+
+            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+
+        with self.settings(USER_PASSWORD_REPEAT_WINDOW=-1):
+            history.set_on = datetime.date.today()
+            history.save()
+
+            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+
+    def testExpiration(self):
+        with self.settings(USER_PASSWORD_EXPIRATION=60, USER_PASSWORD_REPEAT_WINDOW=365):
+            # create a fake password set 90 days ago
+            ninety_days_ago = datetime.datetime.now() - datetime.timedelta(days=90)
+            history = PasswordHistory.objects.create(user=self.plain,
+                                                     password=self.plain.password)
+
+            history.set_on = ninety_days_ago
+            history.save()
+            
+            # log in
+            self.client.logout()
+            post_data = dict(username='plain', password='Password1')
+            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+
+            # assert we are being taken to our new password page
+            self.assertTrue('form' in response.context)
+            self.assertTrue('new_password' in response.context['form'].fields)
+
+            # try to go to a different page
+            response = self.client.get(reverse('blog.post_list'), follow=True)
+
+            # redirected again
+            self.assertTrue('form' in response.context)
+            self.assertTrue('new_password' in response.context['form'].fields)
+
+            # ok, set our new password
+            post_data = dict(old_password='Password1', new_password='Password1', confirm_new_password='Password1')
+            response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
+
+            # we should get a failure that our new password is a repeat
+            self.assertTrue('confirm_new_password' in response.context['form'].errors)
+
+            # use a different password
+            post_data = dict(old_password='Password1', new_password='Password2', confirm_new_password='Password2')
+            response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
+
+            # should be redirected to the normal redirect page
+            self.assertEquals(302, response.status_code)
+            self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)
+
+            # should now have two password histories
+            self.assertEquals(2, PasswordHistory.objects.filter(user=self.plain).count())
+
+            # should be able to log in normally
+            self.client.logout()
+
+            post_data = dict(username='plain', password='Password2')
+            response = self.client.post(reverse('users.user_login'), post_data)
+            
+            self.assertEquals(302, response.status_code)
+            self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)
+            
+
+
                                        
