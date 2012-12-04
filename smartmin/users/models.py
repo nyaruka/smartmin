@@ -39,8 +39,8 @@ class PasswordHistory(models.Model):
             return False
 
         # get all the passwords in the past year
-        one_year_ago = datetime.date.today() - datetime.timedelta(days=365)
-        previous_passwords = PasswordHistory.objects.filter(user=user, set_on__gte=one_year_ago)
+        window_ago = datetime.date.today() - datetime.timedelta(days=password_window)
+        previous_passwords = PasswordHistory.objects.filter(user=user, set_on__gte=window_ago)
         for previous in previous_passwords:
             if check_password(password, previous.password):
                 return True
