@@ -632,6 +632,13 @@ class UserLockoutTestCase(TestCase):
         self.superuser.is_superuser = True
         self.superuser.save()
 
+    def testBadLogin(self):
+        post_data = dict(email='foo', password='blah')
+        response = self.client.post(reverse('users.user_login'), post_data)
+
+        self.assertEquals(200, response.status_code)
+        self.assertTrue('username' in response.context['form'].errors)
+
     def doLockout(self):
         # go to the login page
         response = self.client.get(reverse('users.user_login'))
@@ -708,7 +715,6 @@ class UserLockoutTestCase(TestCase):
             # log in as superuser
             response = self.client.post(reverse('users.user_login'), 
                                         dict(username='superuser', password='superuser'))
-
 
             # go edit our 'plain' user
             response = self.client.get(reverse('users.user_update', args=[self.plain.id]))

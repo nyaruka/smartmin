@@ -1,0 +1,171 @@
+
+
+.pickadate__holder {
+    width: 100%;
+    height: 0;
+    position: absolute;
+    z-index: 10000;
+}
+
+.pickadate__calendar--wrap {
+    position: relative;
+    max-width: 320px;
+    min-width: 256px;
+    max-height: 0;
+    overflow-y: hidden;
+
+    -webkit-transition: all .15s ease-out;
+       -moz-transition: all .15s ease-out;
+            transition: all .15s ease-out;
+}
+
+.pickadate__holder--opened .pickadate__calendar--wrap {
+    top: .5em;
+    max-height: 25em;
+
+    -webkit-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
+       -moz-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
+            box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
+}
+
+.pickadate__calendar--box {
+    padding: 1em;
+    font-size: 1em;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+    border: 1px solid #ccc;
+
+    -webkit-border-radius: 6px;
+       -moz-border-radius: 6px;
+            border-radius: 6px;
+
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+}
+
+
+.pickadate__calendar {
+    text-align: center;
+    border-collapse: collapse;
+    border-spacing: 0;
+    table-layout: fixed;
+    width: 100%;
+    margin-top: 1em;
+}
+
+.pickadate__calendar--date {
+    padding: .33em 0 .25em;
+    font-weight: 100;
+
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+}
+
+
+.pickadate__weekday {
+    width: 14.285714286%; /* 100/7 */
+    font-size: .8em;
+    padding-bottom: .75em;
+    color: #999;
+    font-weight: 500;
+}
+
+
+.pickadate__day--infocus:hover,
+.pickadate__day--outfocus:hover,
+.pickadate__month--prev:hover,
+.pickadate__month--next:hover {
+    cursor: pointer;
+    color: #000;
+    background: #b1dcfb;
+}
+
+
+.pickadate__month--nav {
+    position: relative;
+}
+
+.pickadate__month--prev,
+.pickadate__month--next {
+    position: absolute;
+    top: 0;
+    padding: .5em;
+    margin: -.5em;
+    min-width: 16px;
+    height: 24px;
+    line-height: 28px;
+}
+
+.pickadate__month--prev {
+    left: 0;
+}
+.pickadate__month--next {
+    right: 0;
+}
+
+.pickadate__month--box,
+.pickadate__year--box {
+    text-align: center;
+}
+
+.pickadate__month {
+    font-weight: 500;
+}
+
+.pickadate__year {
+    font-size: .66em;
+    color: #999;
+    font-weight: bold;
+}
+
+.pickadate__month--selector,
+.pickadate__year--selector {
+    font-size: .8em;
+    border: 1px solid #ccc;
+    height: 32px;
+}
+
+.pickadate__month--selector {
+    margin-bottom: .5em;
+    width: 50%;
+}
+
+.pickadate__year--selector {
+    width: 32%;
+}
+
+
+.pickadate__day--outfocus {
+    color: #ccc;
+}
+
+.pickadate__day--today {
+    color: #0089ec;
+}
+
+.pickadate__day--selected,
+.pickadate__day--selected:hover {
+    background: #0089ec;
+    color: #fff;
+}
+
+.pickadate__day--disabled,
+.pickadate__day--disabled:hover {
+    background: #f5f5f5;
+    color: #ddd;
+    cursor: default;
+
+    -webkit-border-radius: 0;
+       -moz-border-radius: 0;
+            border-radius: 0;
+}
+
+
+
+
+
+
+
