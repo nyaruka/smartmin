@@ -770,6 +770,13 @@ class PasswordExpirationTestCase(TestCase):
             history.set_on = datetime.date.today() - datetime.timedelta(days=366)
             history.save()
 
+            # still a repeat because it is our current password
+            self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+
+            # change our password under the covers
+            self.plain.set_password("my new password")
+
+            # now this one is fine
             self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
 
         with self.settings(USER_PASSWORD_REPEAT_WINDOW=-1):
