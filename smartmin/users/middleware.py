@@ -16,9 +16,10 @@ class ChangePasswordMiddleware:
 
     def process_view(self, request, view, *args, **kwargs):
         newpassword_path = reverse('users.user_newpassword', args=[0])
+        logout_path = reverse('users.user_logout')
 
         if (self.password_expire < 0 or not request.user.is_authenticated() or 
-            view == django.views.static.serve or request.path == newpassword_path):
+            view == django.views.static.serve or request.path == newpassword_path or request.path == logout_path):
             return
 
         if PasswordHistory.is_password_expired(request.user):

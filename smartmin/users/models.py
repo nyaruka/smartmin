@@ -38,6 +38,10 @@ class PasswordHistory(models.Model):
         if password_window <= 0:
             return False
 
+        # check their current password
+        if check_password(password, user.password):
+            return True
+
         # get all the passwords in the past year
         window_ago = datetime.date.today() - datetime.timedelta(days=password_window)
         previous_passwords = PasswordHistory.objects.filter(user=user, set_on__gte=window_ago)
@@ -50,6 +54,7 @@ class PasswordHistory(models.Model):
     @classmethod
     def is_password_expired(cls, user):
         password_expiration = getattr(settings, 'USER_PASSWORD_EXPIRATION', -1)
+
         if password_expiration <= 0:
             return False
 
