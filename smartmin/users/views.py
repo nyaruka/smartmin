@@ -320,6 +320,14 @@ class UserCRUDL(SmartCRUDL):
         form_class = SetPasswordForm
         fields = ('old_password', 'new_password', 'confirm_new_password')
         title = "Pick a new password"
+        template_name = 'smartmin/users/user_newpassword.html'
+        success_message = "Your password has successfully been updated, thank you."
+
+        def get_context_data(self, *args, **kwargs):
+            context_data = super(UserCRUDL.Newpassword, self).get_context_data(*args, **kwargs)
+            context_data['expire_days'] = getattr(settings, 'USER_PASSWORD_EXPIRATION', -1)
+            context_data['window_days'] = getattr(settings, 'USER_PASSWORD_REPEAT_WINDOW', -1)
+            return context_data
 
         def has_permission(self, request, *args, **kwargs):
             return request.user.is_authenticated()
