@@ -693,7 +693,7 @@ class SmartListView(SmartView, ListView):
             return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
         # otherwise, return normally
         else:
-            return super(SmartView, self).render_to_response(context)
+            return super(SmartListView, self).render_to_response(context)
 
 class SmartCsvView(SmartListView):
 
