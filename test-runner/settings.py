@@ -98,6 +98,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'smartmin.users.middleware.ChangePasswordMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -194,19 +195,19 @@ ANONYMOUS_PERMISSIONS = (
 # authority to create and change users
 GROUP_PERMISSIONS = {
     "Administrator": ('auth.user.*',),
-    "Editors": ('blog.post_update',),
+    "Editors": ('blog.post_update', 'blog.post_list'),
     "Authors": ('blog.post.*','blog.category.*'),
 }
 
 ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = "/blog/post/"
 
 #-----------------------------------------------------------------------------------
 # Django-Nose config
 #-----------------------------------------------------------------------------------
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 
 #-----------------------------------------------------------------------------------                                    
 # Async tasks with django-celery                                                                                        

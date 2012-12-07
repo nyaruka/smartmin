@@ -19,7 +19,6 @@ from smartmin.views import *
 
 import re
 
-
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput)
     groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Group.objects.all())
@@ -28,14 +27,8 @@ class UserForm(forms.ModelForm):
         password = self.cleaned_data['new_password']
 
         # if they specified a new password
-        if password:
-            has_caps = re.search('[A-Z]+', password)
-            has_lower = re.search('[a-z]+', password)
-            has_digit = re.search('[0-9]+', password)
-
-            # check the complexity of the password
-            if len(password) < 8 or (len(password) < 12 and (not has_caps or not has_lower or not has_digit)):
-                raise forms.ValidationError("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
+        if password and not is_password_complex(password):
+            raise forms.ValidationError("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
 
         return password
 
@@ -78,6 +71,17 @@ class UserForm(forms.ModelForm):
 class UserUpdateForm(UserForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
 
+    def clean_new_password(self):
+        password = self.cleaned_data['new_password']
+
+        if password and not is_password_complex(password):
+            raise forms.ValidationError("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
+
+        if password and PasswordHistory.is_password_repeat(self.instance, password):
+            raise forms.ValidationError("You have used this password before in the past year, please use a new password.")
+
+        return password
+
 class UserProfileForm(UserForm):
     old_password = forms.CharField(label="Password", widget=forms.PasswordInput, required=False)
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=False)
@@ -100,14 +104,42 @@ class UserProfileForm(UserForm):
 
         if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
             raise forms.ValidationError("New password doesn't match with its confirmation")
+
+        password = self.cleaned_data['new_password']
+        if password and not is_password_complex(password):
+            raise forms.ValidationError("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
+
+        if password and PasswordHistory.is_password_repeat(self.instance, password):
+            raise forms.ValidationError("You have used this password before in the past year, please use a new password.")
+
         return self.cleaned_data['new_password']
 
 class UserForgetForm(forms.Form):
     email = forms.EmailField(label="Your Email",)
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip()
+
+        allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
+        if not allow_email_recovery:
+            raise forms.ValidationError("E-mail recovery is not supported, please contact the website administrator to reset your password manually.")
+        
+        return email
     
-class UserRecoverForm(UserForm):
-    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=True, help_text="Your new password.")
-    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=True, help_text="Confirm your new password.")
+class SetPasswordForm(UserForm):
+    old_password = forms.CharField(label="Current Password", widget=forms.PasswordInput, required=True,
+                                   help_text="Your current password")
+    new_password = forms.CharField(label="New Password", widget=forms.PasswordInput, required=True, 
+                                   help_text="Your new password.")
+    confirm_new_password = forms.CharField(label="Confirm new Password", widget=forms.PasswordInput, required=True, 
+                                           help_text="Confirm your new password.")
+
+    def clean_old_password(self):
+        user = self.instance
+        if(not user.check_password(self.cleaned_data['old_password'])):
+            raise forms.ValidationError("Please enter your password to save changes")
+
+        return self.cleaned_data['old_password']
 
     def clean_confirm_new_password(self):
         if not 'new_password' in self.cleaned_data:
@@ -118,12 +150,20 @@ class UserRecoverForm(UserForm):
 
         if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
             raise forms.ValidationError("Mismatch between your new password and confirmation, try again")
+
+        password = self.cleaned_data['new_password']
+        if password and not is_password_complex(password):
+            raise forms.ValidationError("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
+
+        if password and PasswordHistory.is_password_repeat(self.instance, password):
+            raise forms.ValidationError("You have used this password before in the past year, please use a new password.")
+
         return self.cleaned_data['new_password']
 
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover','expired','failed')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -197,6 +237,11 @@ class UserCRUDL(SmartCRUDL):
                 for group in self.form.cleaned_data['groups']:
                     obj.groups.add(group)
 
+            # if a new password was set, reset our failed logins
+            if 'new_password' in self.form.cleaned_data and self.form.cleaned_data['new_password']:
+                FailedLogin.objects.filter(user=self.object).delete()
+                PasswordHistory.objects.create(user=obj, password=obj.password)
+
             return obj
 
     class Profile(SmartUpdateView):
@@ -210,6 +255,14 @@ class UserCRUDL(SmartCRUDL):
             'new_password': dict(help="If you want to set a new password, enter it here"),
             'confirm_new_password': dict(help="Confirm your new password"),
         }
+
+        def post_save(self, obj):
+            obj = super(UserCRUDL.Profile, self).post_save(obj)
+            if 'new_password' in self.form.cleaned_data and self.form.cleaned_data['new_password']:
+                FailedLogin.objects.filter(user=self.object).delete()
+                PasswordHistory.objects.create(user=obj, password=obj.password)
+
+            return obj
 
         def has_permission(self, request, *args, **kwargs):
             has_perm = super(UserCRUDL.Profile, self).has_permission(request, *args, **kwargs)
@@ -234,8 +287,13 @@ class UserCRUDL(SmartCRUDL):
 
         def form_valid(self, form):
             email = form.cleaned_data['email']
-            hostname = getattr(settings, 'HOSTNAME', 'hostname')
-            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'user@hostname')
+            hostname = getattr(settings, 'HOSTNAME', self.request.get_host())
+
+            col_index = hostname.find(':')
+            domain = hostname[:col_index] if col_index > 0 else hostname
+
+            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
+
             protocol = 'https' if self.request.is_secure() else 'http'
 
             user = User.objects.filter(email=email)
@@ -258,9 +316,35 @@ class UserCRUDL(SmartCRUDL):
             response = super(UserCRUDL.Forget, self).form_valid(form)
             return response
 
+    class Newpassword(SmartUpdateView):
+        form_class = SetPasswordForm
+        fields = ('old_password', 'new_password', 'confirm_new_password')
+        title = "Pick a new password"
+        template_name = 'smartmin/users/user_newpassword.html'
+        success_message = "Your password has successfully been updated, thank you."
+
+        def get_context_data(self, *args, **kwargs):
+            context_data = super(UserCRUDL.Newpassword, self).get_context_data(*args, **kwargs)
+            context_data['expire_days'] = getattr(settings, 'USER_PASSWORD_EXPIRATION', -1)
+            context_data['window_days'] = getattr(settings, 'USER_PASSWORD_REPEAT_WINDOW', -1)
+            return context_data
+
+        def has_permission(self, request, *args, **kwargs):
+            return request.user.is_authenticated()
+
+        def get_object(self, queryset=None):
+            return self.request.user
+
+        def post_save(self, obj):
+            obj = super(UserCRUDL.Newpassword, self).post_save(obj)
+            PasswordHistory.objects.create(user=obj, password=obj.password)
+            return obj
+
+        def get_success_url(self):
+            return settings.LOGIN_REDIRECT_URL
 
     class Recover(SmartUpdateView):
-        form_class = UserRecoverForm
+        form_class = SetPasswordForm
         permission = None
         success_message = "Password Updated Successfully. Now you can log in using your new password."
         success_url = '@users.user_login'
@@ -275,20 +359,18 @@ class UserCRUDL(SmartCRUDL):
                 return HttpResponseRedirect(reverse("users.user_expired"))
             return super(UserCRUDL.Recover, self).pre_process(request, args, kwargs)
 
-        
         def get_object(self, queryset=None):
             token = self.kwargs.get('token')
             recovery_token= RecoveryToken.objects.get(token=token)
             return recovery_token.user
-
  
         def post_save(self, obj):
-            validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
             obj = super(UserCRUDL.Recover, self).post_save(obj)
+            validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
             RecoveryToken.objects.filter(user=obj).delete()
             RecoveryToken.objects.filter(created_on__lt=validity_time).delete()
+            PasswordHistory.objects.create(user=obj, password=obj.password)
             return obj
-
 
     class Expired(SmartView, TemplateView):
         permission = None
@@ -301,9 +383,14 @@ class UserCRUDL(SmartCRUDL):
         def get_context_data(self, *args, **kwargs):
             context = super(UserCRUDL.Failed, self).get_context_data(*args, **kwargs)
 
-            context['time_interval'] = 10
-            context['limit_attempts'] = 5
+            lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
+            failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
+            allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
 
+            context['lockout_timeout'] = lockout_timeout
+            context['failed_login_limit'] = failed_login_limit
+            context['allow_email_recovery'] = allow_email_recovery
+            
             return context
 
 def login(request, template_name='smartmin/users/login.html',
@@ -311,27 +398,41 @@ def login(request, template_name='smartmin/users/login.html',
           authentication_form=AuthenticationForm,
           current_app=None, extra_context=None):
 
-    time_interval = 10
-    limit_attempts = 5
+    lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
+    failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
+    allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
 
     if request.method == "POST":
         if 'username' in request.REQUEST and 'password' in request.REQUEST:
             username = request.REQUEST['username']
-            user = User.objects.get(username=username)
-            FailedLogin.objects.create(user=user)
-    
-            bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=time_interval)
-            failures = FailedLogin.objects.filter(user=user).filter(failed_on__gt=bad_interval)
 
-            if len(failures) <= limit_attempts:
-                return django_login(request, template_name='smartmin/users/login.html',
-                                    redirect_field_name=REDIRECT_FIELD_NAME,
-                                    authentication_form=AuthenticationForm,
-                                    current_app=None, extra_context=None)
+            user = User.objects.filter(username=username)
+
+            # this could be a valid login by a user
+            if user:
+                user = user[0]
+
+                # incorrect password?  create a failed login token
+                valid_password = user.check_password(request.REQUEST['password'])
+                if not valid_password:
+                    FailedLogin.objects.create(user=user)
     
-            return HttpResponseRedirect(reverse('users.user_failed'))
+                bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=lockout_timeout)
+                failures = FailedLogin.objects.filter(user=user)
+
+                # if the failures reset after a period of time, then limit our query to that interval
+                if lockout_timeout > 0:
+                    failures = failures.filter(failed_on__gt=bad_interval)
+
+                # if there are too many failed logins, take them to the failed page
+                if len(failures) >= failed_login_limit:
+                    return HttpResponseRedirect(reverse('users.user_failed'))
+
+                # delete failed logins if the password is valid
+                elif valid_password:
+                    FailedLogin.objects.filter(user=user).delete()
 
     return django_login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
                         authentication_form=AuthenticationForm,
-                        current_app=None, extra_context=None)
+                        current_app=None, extra_context=dict(allow_email_recovery=allow_email_recovery))
