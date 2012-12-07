@@ -686,8 +686,8 @@ class SmartListView(SmartView, ListView):
         Overloaded to deal with _format arguments.
         """
         # is this a select2 format response?
-        if '_format' in self.request.REQUEST and self.request.REQUEST['_format'] == 'select2':
-            json = dict(results=[ dict(id=o.pk, text="%s" % o,) for o in context['object_list'] ])
+        if self.request.REQUEST.get('_format', 'html') == 'select2':
+            json = dict(results=[ dict(id=_.pk, text="%s" % _,) for _ in context['object_list'] ])
             json['err'] = 'nil'
             json['more'] = context['page_obj'].has_next()
             return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
