@@ -681,6 +681,20 @@ class SmartListView(SmartView, ListView):
         else:
             return ''
 
+    def render_to_response(self, context, **response_kwargs):
+        """
+        Overloaded to deal with _format arguments.
+        """
+        # is this a select2 format response?
+        if self.request.REQUEST.get('_format', 'html') == 'select2':
+            json = dict(results=[ dict(id=_.pk, text="%s" % _,) for _ in context['object_list'] ])
+            json['err'] = 'nil'
+            json['more'] = context['page_obj'].has_next()
+            return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
+        # otherwise, return normally
+        else:
+            return super(SmartListView, self).render_to_response(context)
+
 class SmartCsvView(SmartListView):
 
     def derive_filename(self):
