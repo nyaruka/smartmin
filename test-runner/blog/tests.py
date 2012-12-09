@@ -199,6 +199,14 @@ class SmartminTest(TestCase):
         self.assertEquals(5, len(json_list))
         self.assertEquals(post1.title, json_list[0]['title'])
 
+        # ask for select2 format
+        response = self.client.get(reverse('blog.post_list') + "?_format=select2")
+        select2 = simplejson.loads(response.content)
+        self.assertTrue('results' in select2)
+        self.assertEquals(5, len(select2['results']))
+
+        
+        
     def test_success_url(self):
         self.client.login(username='author', password='author')
 
