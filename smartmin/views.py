@@ -490,6 +490,7 @@ class SmartListView(SmartView, ListView):
     pjax = None
     field_config = { 'is_active': dict(label=''), }
     default_order = None
+    select_related = None
 
     list_permission = None
 
@@ -584,6 +585,9 @@ class SmartListView(SmartView, ListView):
 
         return context
 
+    def derive_select_related(self):
+        return self.select_related
+
     def derive_queryset(self, **kwargs):
         """
         Derives our queryset.
@@ -603,6 +607,11 @@ class SmartListView(SmartView, ListView):
                 query &= term_query
 
             queryset = queryset.filter(query)
+
+        # add any select related
+        related = self.derive_select_related()
+        if related:
+            queryset = queryset.select_related(*related)
 
         # return our queryset
         return queryset
