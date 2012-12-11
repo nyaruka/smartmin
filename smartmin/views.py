@@ -389,6 +389,9 @@ class SmartView(object):
         else:
             return super(SmartView, self).render_to_response(context)
 
+class SmartTemplateView(SmartView, TemplateView):
+    pass
+
 class SmartReadView(SmartView, DetailView):
     default_template = 'smartmin/read.html'
     edit_button = False
