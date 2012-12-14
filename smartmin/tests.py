@@ -93,7 +93,6 @@ class _CRUDLTest(SmartminTest):
         raise Exception("Missing method: %s.getUpdatePostData()" % self.__class__.__name__)
 
     def getTestObject(self):
-
         if self.object:
             return self.object
 
@@ -112,23 +111,23 @@ class _CRUDLTest(SmartminTest):
     def testCreate(self):
         if 'create' not in self.getCRUDL().actions:
             return
-        self.do_test_view('create', post_data=self.getCreatePostData())
+        self._do_test_view('create', post_data=self.getCreatePostData())
 
     def testRead(self):
         if 'read' not in self.getCRUDL().actions:
             return
-        self.do_test_view('read', self.getTestObject())
+        self._do_test_view('read', self.getTestObject())
 
     def testUpdate(self):
         if 'update' not in self.getCRUDL().actions:
             return
-        self.do_test_view('update', self.getTestObject(), post_data=self.getUpdatePostData())
+        self._do_test_view('update', self.getTestObject(), post_data=self.getUpdatePostData())
 
     def testDelete(self):
         if 'delete' not in self.getCRUDL().actions:
             return
         object = self.getTestObject()
-        self.do_test_view('delete', object, post_data=dict())
+        self._do_test_view('delete', object, post_data=dict())
         self.assertEquals(0, len(self.getCRUDL().model.objects.filter(pk=object.pk)))
 
     def testList(self):
@@ -136,18 +135,19 @@ class _CRUDLTest(SmartminTest):
             return
         # have at least one object
         self.getTestObject()
-        self.do_test_view('list')
+        self._do_test_view('list')
 
     def testCsv(self):
         if 'csv' not in self.getCRUDL().actions:
             return
         # have at least one object
         self.getTestObject()
-        self.do_test_view('csv')
+        self._do_test_view('csv')
 
-    def do_test_view(self, action, object=None, post_data=None, query_string=None):
-
-        # print "testing view %s.%s" % (self.__class__.__name__, action)
+    def _do_test_view(self, action=None, object=None, post_data=None, query_string=None):
+        if not action:
+            import pdb; pdb.set_trace()
+            print "testing view %s.%s" % (self.__class__.__name__, action)
 
         url_name = self.getCRUDL().url_name_for_action(action)
         if object:
