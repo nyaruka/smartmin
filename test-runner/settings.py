@@ -181,6 +181,7 @@ PERMISSIONS = {
           'delete', # can delete an object,
           'list'),  # can view a list of the objects
     'blog.post': ('author', 'exclude', 'exclude2', 'readonly', 'readonly2', 'messages'),
+    'auth.user': ('profile',),
 
     # invalid content type for test
     'blog.foo': ('nothing',)
@@ -195,7 +196,7 @@ ANONYMOUS_PERMISSIONS = (
 # authority to create and change users
 GROUP_PERMISSIONS = {
     "Administrator": ('auth.user.*',),
-    "Editors": ('blog.post_update', 'blog.post_list'),
+    "Editors": ('blog.post_update', 'blog.post_list', 'auth.user_profile'),
     "Authors": ('blog.post.*','blog.category.*'),
 }
 

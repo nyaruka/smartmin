@@ -266,11 +266,10 @@ class UserCRUDL(SmartCRUDL):
 
         def has_permission(self, request, *args, **kwargs):
             has_perm = super(UserCRUDL.Profile, self).has_permission(request, *args, **kwargs)
-            user = request.user
 
-            if (not has_perm):
-                if(user.pk == int(self.kwargs['pk']) and user.is_authenticated()):
-                    return True
+            if has_perm and request.user.pk != int(self.kwargs['pk']):
+                has_perm = False
+
             return has_perm
 
         def derive_title(self):

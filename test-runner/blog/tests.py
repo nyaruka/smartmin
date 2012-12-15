@@ -407,15 +407,19 @@ class UserTest(TestCase):
         # login as a simple plain user
         self.assertTrue(self.client.login(username='plain', password='plain'))
         
-        # check is access his profile
+        # check is access his profile, should not since plain users don't have that permission
         response = self.client.get(reverse('users.user_profile', args=[plain.id]))
-        self.assertEquals(200, response.status_code)
-        self.assertEquals(reverse('users.user_profile', args=[plain.id]), response.request['PATH_INFO'])
+        self.assertEquals(302, response.status_code)
+
+        # log in as an editor instead
+        self.assertTrue(self.client.login(username='steve', password='googleIsNumber1'))
+        response = self.client.get(reverse('users.user_profile', args=[steve.id]))
+        self.assertEquals(reverse('users.user_profile', args=[steve.id]), response.request['PATH_INFO'])
         
         # check if we are at the right form
         self.assertEquals("UserProfileForm", type(response.context['form']).__name__)
 
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), {}, follow=True)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), {}, follow=True)
 
         # check which field he have access to
         self.assertEquals(6, len(response.context['form'].visible_fields()))
@@ -425,33 +429,33 @@ class UserTest(TestCase):
 
         # check if he can fill a wrong old password
         post_data = dict(old_password="plainwrong", new_password="NewPassword1")
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertTrue('old_password' in response.context['form'].errors)
 
         # check if he can mismatch new password and its confirmation
         post_data = dict(old_password="plain", new_password="NewPassword1", confirm_new_password="confirmnewpassword")
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
 
         # check if he can fill old and new password only without the confirm new password
         post_data = dict(old_password="plain", new_password="NewPassword1")
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertIn("Confirm the new password by filling the this field", response.content)
 
         # actually change the password
-        post_data = dict(old_password="plain", new_password="NewPassword1", confirm_new_password="NewPassword1")
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        post_data = dict(old_password="googleIsNumber1", new_password="NewPassword1", confirm_new_password="NewPassword1")
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
 
         # assert new password works
-        self.assertTrue(self.client.login(username='plain', password='NewPassword1'))
+        self.assertTrue(self.client.login(username='steve', password='NewPassword1'))
 
         # see whether we can change our email without a password
         post_data = dict(email="new@foo.com")
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertTrue('old_password' in response.context['form'].errors)
 
         # but with the new password we can
         post_data = dict(email="new@foo.com", old_password='NewPassword1')
-        response = self.client.post(reverse('users.user_profile', args=[plain.id]), post_data)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertTrue(User.objects.get(email='new@foo.com'))
 
     def test_token(self):
