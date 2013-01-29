@@ -165,7 +165,7 @@ class SetPasswordForm(UserForm):
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -345,6 +345,22 @@ class UserCRUDL(SmartCRUDL):
         def get_success_url(self):
             return settings.LOGIN_REDIRECT_URL
 
+    class Mimic(SmartUpdateView):
+
+        def derive_success_message(self):
+            return "You are now logged in as %s" % self.object.username
+
+        def pre_process(self, request, *args, **kwargs):
+            if request.user.is_superuser:
+                user = self.get_object()
+                login(request, user)
+                # After logging in it is important to change the user stored in the session
+                # otherwise the user will remain the same
+                request.session["_auth_user_id"] = user.id
+                return HttpResponseRedirect(reverse('users.user_list'))
+            else:
+                return HttpResponseRedirect(reverse('users.user_login'))
+
     class Recover(SmartUpdateView):
         form_class = SetPasswordForm
         permission = None
@@ -438,18 +454,3 @@ def login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
                         authentication_form=AuthenticationForm,
                         current_app=None, extra_context=dict(allow_email_recovery=allow_email_recovery))
-
-
-@login_required
-def mimic(request, id):
-
-    if request.user.is_superuser:
-        user = User.objects.get(pk=id)
-        login(request, user)
-        request.session["_auth_user_id"] = user.id
-        messages.add_message(request, messages.SUCCESS, 'You are now logged in as %s' % user.username)
-        return HttpResponseRedirect(reverse('users.user_list'))
-    else:
-        messages.add_message(request, messages.ERROR, 'You must be a superuser to be able to mimic other users')
-        return HttpResponseRedirect(reverse('users.user_login'))
-
