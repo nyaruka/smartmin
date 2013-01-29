@@ -89,10 +89,27 @@ class SmartModel(models.Model):
         if len(header) < 1:
             raise Exception("Invalid header for import file")
 
+        def normalize_value(val):
+            # remove surrounding whitespace
+            val = val.strip()
+
+            # if surrounded by double quotes, remove those
+            if val and val[0] == '"' and val[-1] == '"':
+                val = val[1:-1]
+
+            # if surrounded by single quotes, remove those
+            if val and val[0] == "'" and val[-1] == "'":
+                val = val[1:-1]            
+
+            return val
+
+        # normalize our header names, removing quotes and spaces
+        header = [normalize_value(_).lower() for _ in header]
+
         records = []
         for row in reader:
             # trim all our values
-            row = [val.strip() for val in row]
+            row = [normalize_value(_) for _ in row]
 
             line_number += 1
 
