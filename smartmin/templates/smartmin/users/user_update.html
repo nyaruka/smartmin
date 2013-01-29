@@ -1,0 +1,15 @@
+{% extends "smartmin/update.html" %}
+
+{% block post-form %}
+{% if request.user.is_superuser %}
+<form class="smartmin-form form-horizontal" action="{% url users.user_mimic object.id %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="control-group">
+    <label class="control-label">Login as</label>
+    <div class="controls">
+      <input type="submit" class="btn btn-primary" value="{{object.first_name}} {{object.last_name}}">
+    </div>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

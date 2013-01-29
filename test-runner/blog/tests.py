@@ -396,6 +396,19 @@ class UserTest(TestCase):
         # login as super user
         self.assertTrue(self.client.login(username='superuser', password='superuser'))
 
+        # as a super user mimic Steve
+        response = self.client.post(reverse('users.user_mimic', args=[steve.id]), follow=True)
+
+        # check if the logged in user is steve now
+        self.assertEquals(response.context['user'].username, 'steve')
+
+        # now that steve is the one logged in can he mimic woz?
+        response = self.client.get(reverse('users.user_mimic', args=[woz.id]), follow=True)
+        self.assertEquals(response.request['PATH_INFO'], '/users/login/')
+
+        # login as super user
+        self.assertTrue(self.client.login(username='superuser', password='superuser'))
+
         # check is access his profile
         response = self.client.get(reverse('users.user_profile', args=[self.superuser.id]))
         self.assertEquals(200, response.status_code)

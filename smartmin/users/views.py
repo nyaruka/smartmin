@@ -5,8 +5,10 @@ from django.conf import settings
 from .models import *
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, render
-from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth import login, authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from django.shortcuts import render
 from django.core.mail import send_mail
@@ -219,6 +221,7 @@ class UserCRUDL(SmartCRUDL):
         
     class Update(SmartUpdateView):
         form_class = UserUpdateForm
+        template_name = "smartmin/users/user_update.html"
         success_message = "User saved successfully."
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active', 'last_login')
         field_config = {
@@ -435,3 +438,18 @@ def login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
                         authentication_form=AuthenticationForm,
                         current_app=None, extra_context=dict(allow_email_recovery=allow_email_recovery))
+
+
+@login_required
+def mimic(request, id):
+
+    if request.user.is_superuser:
+        user = User.objects.get(pk=id)
+        login(request, user)
+        request.session["_auth_user_id"] = user.id
+        messages.add_message(request, messages.SUCCESS, 'You are now logged in as %s' % user.username)
+        return HttpResponseRedirect(reverse('users.user_list'))
+    else:
+        messages.add_message(request, messages.ERROR, 'You must be a superuser to be able to mimic other users')
+        return HttpResponseRedirect(reverse('users.user_login'))
+
