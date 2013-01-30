@@ -346,20 +346,18 @@ class UserCRUDL(SmartCRUDL):
             return settings.LOGIN_REDIRECT_URL
 
     class Mimic(SmartUpdateView):
+        fields = ('id',)
 
         def derive_success_message(self):
             return "You are now logged in as %s" % self.object.username
 
         def pre_process(self, request, *args, **kwargs):
-            if request.user.is_superuser:
                 user = self.get_object()
                 login(request, user)
                 # After logging in it is important to change the user stored in the session
                 # otherwise the user will remain the same
                 request.session["_auth_user_id"] = user.id
-                return HttpResponseRedirect(reverse('users.user_list'))
-            else:
-                return HttpResponseRedirect(reverse('users.user_login'))
+                return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
     class Recover(SmartUpdateView):
         form_class = SetPasswordForm

@@ -401,10 +401,11 @@ class UserTest(TestCase):
 
         # check if the logged in user is steve now
         self.assertEquals(response.context['user'].username, 'steve')
+        self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
 
         # now that steve is the one logged in can he mimic woz?
         response = self.client.get(reverse('users.user_mimic', args=[woz.id]), follow=True)
-        self.assertEquals(response.request['PATH_INFO'], '/users/login/')
+        self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_URL)
 
         # login as super user
         self.assertTrue(self.client.login(username='superuser', password='superuser'))
