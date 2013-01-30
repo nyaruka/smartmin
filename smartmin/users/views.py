@@ -353,6 +353,7 @@ class UserCRUDL(SmartCRUDL):
 
         def pre_process(self, request, *args, **kwargs):
                 user = self.get_object()
+                import pdb; pdb.set_trace()
                 login(request, user)
                 # After logging in it is important to change the user stored in the session
                 # otherwise the user will remain the same

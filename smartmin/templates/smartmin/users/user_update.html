@@ -1,7 +1,7 @@
 {% extends "smartmin/update.html" %}
 
 {% block post-form %}
-{% if perms.users.user_mimic %}
+{% if perms.auth.user_mimic %}
 <form class="smartmin-form form-horizontal" action="{% url users.user_mimic object.id %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="control-group">
