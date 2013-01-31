@@ -5,8 +5,10 @@ from django.conf import settings
 from .models import *
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, render
-from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth import login, authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from django.shortcuts import render
 from django.core.mail import send_mail
@@ -163,7 +165,7 @@ class SetPasswordForm(UserForm):
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
-    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword')
+    actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic')
 
     class List(SmartListView):
         search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
@@ -219,6 +221,7 @@ class UserCRUDL(SmartCRUDL):
         
     class Update(SmartUpdateView):
         form_class = UserUpdateForm
+        template_name = "smartmin/users/user_update.html"
         success_message = "User saved successfully."
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active', 'last_login')
         field_config = {
@@ -341,6 +344,20 @@ class UserCRUDL(SmartCRUDL):
 
         def get_success_url(self):
             return settings.LOGIN_REDIRECT_URL
+
+    class Mimic(SmartUpdateView):
+        fields = ('id',)
+
+        def derive_success_message(self):
+            return "You are now logged in as %s" % self.object.username
+
+        def pre_process(self, request, *args, **kwargs):
+                user = self.get_object()
+                login(request, user)
+                # After logging in it is important to change the user stored in the session
+                # otherwise the user will remain the same
+                request.session["_auth_user_id"] = user.id
+                return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
     class Recover(SmartUpdateView):
         form_class = SetPasswordForm
