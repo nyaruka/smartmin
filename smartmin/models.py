@@ -122,7 +122,9 @@ class SmartModel(models.Model):
             field_values['modified_by'] = user
             try:
                 field_values = cls.prepare_fields(field_values, import_params, user)
-                records.append(cls.create_instance(field_values))
+                record = cls.create_instance(field_values)
+                if record:
+                    records.append(record)
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
