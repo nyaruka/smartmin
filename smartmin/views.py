@@ -389,6 +389,9 @@ class SmartView(object):
         else:
             return super(SmartView, self).render_to_response(context)
 
+class SmartTemplateView(SmartView, TemplateView):
+    pass
+
 class SmartReadView(SmartView, DetailView):
     default_template = 'smartmin/read.html'
     edit_button = False
@@ -453,7 +456,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
         if not self.cancel_url:
             raise ImproperlyConfigured("DeleteView must define a cancel_url")
 
-        return smart_url(self.cancel_url)
+        return smart_url(self.cancel_url, self.object.id)
 
     def pre_delete(self, obj):
         pass
@@ -490,6 +493,7 @@ class SmartListView(SmartView, ListView):
     pjax = None
     field_config = { 'is_active': dict(label=''), }
     default_order = None
+    select_related = None
 
     list_permission = None
 
@@ -584,6 +588,9 @@ class SmartListView(SmartView, ListView):
 
         return context
 
+    def derive_select_related(self):
+        return self.select_related
+
     def derive_queryset(self, **kwargs):
         """
         Derives our queryset.
@@ -604,6 +611,11 @@ class SmartListView(SmartView, ListView):
 
             queryset = queryset.filter(query)
 
+        # add any select related
+        related = self.derive_select_related()
+        if related:
+            queryset = queryset.select_related(*related)
+
         # return our queryset
         return queryset
 
@@ -612,7 +624,6 @@ class SmartListView(SmartView, ListView):
         Gets our queryset.  This takes care of filtering if there are any
         fields to filter by.
         """
-
         queryset = self.derive_queryset(**kwargs)
 
         # if our list should be filtered by a permission as well, do so
@@ -681,6 +692,20 @@ class SmartListView(SmartView, ListView):
             return '<div class="active_icon"></div>'
         else:
             return ''
+
+    def render_to_response(self, context, **response_kwargs):
+        """
+        Overloaded to deal with _format arguments.
+        """
+        # is this a select2 format response?
+        if self.request.REQUEST.get('_format', 'html') == 'select2':
+            json = dict(results=[ dict(id=_.pk, text="%s" % _,) for _ in context['object_list'] ])
+            json['err'] = 'nil'
+            json['more'] = context['page_obj'].has_next()
+            return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
+        # otherwise, return normally
+        else:
+            return super(SmartListView, self).render_to_response(context)
 
 class SmartCsvView(SmartListView):
 
@@ -1265,9 +1290,9 @@ class SmartCRUDL(object):
             # set our link URL based on read and update
             if not getattr(view, 'link_url', None):
                 if 'read' in self.actions:
-                    view.link_url = "id@%s.%s_read" % (self.module_name, self.model_name.lower())
+                    view.link_url = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
-                    view.link_url = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
+                    view.link_url = 'id@%s' % self.url_name_for_action('update')
                 else:
                     view.link_fields = ()
 
@@ -1281,7 +1306,7 @@ class SmartCRUDL(object):
 
             # if update or create, set success url if not set
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
-                view.success_url = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                view.success_url = '@%s' % self.url_name_for_action('list')
 
         # otherwise, use our defaults
         else:
@@ -1289,7 +1314,7 @@ class SmartCRUDL(object):
 
             # if this is an update or create, and we have a list view, then set the default to that
             if action == 'update' or action == 'create' and 'list' in self.actions:
-                options['success_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                options['success_url'] = '@%s' % self.url_name_for_action('list')
 
             # set permissions if appropriate
             if self.permissions:
@@ -1308,24 +1333,24 @@ class SmartCRUDL(object):
 
             elif action == 'update':
                 if 'delete' in self.actions:
-                    options['delete_url'] = "id@%s.%s_delete" % (self.module_name, self.model_name.lower())
+                    options['delete_url'] = 'id@%s' % self.url_name_for_action('delete')
 
                 view = type("%sUpdateView" % self.model_name, (SmartUpdateView,),
                     options)
 
             elif action == 'delete':
                 if 'list' in self.actions:
-                    options['cancel_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
-                    options['redirect_url'] = "@%s.%s_list" % (self.module_name, self.model_name.lower())
+                    options['cancel_url'] = '@%s' % self.url_name_for_action('list')
+                    options['redirect_url'] = '@%s' % self.url_name_for_action('list')
 
                 view = type("%sDeleteView" % self.model_name, (SmartDeleteView,),
                     options)
 
             elif action == 'list':
                 if 'read' in self.actions:
-                    options['link_url'] = "id@%s.%s_read" % (self.module_name, self.model_name.lower())
+                    options['link_url'] = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
-                    options['link_url'] = "id@%s.%s_update" % (self.module_name, self.model_name.lower())
+                    options['link_url'] = 'id@%s' % self.url_name_for_action('update')
                 else:
                     options['link_fields'] = ()
 

@@ -190,3 +190,7 @@ fieldset.field-group div.form-field {
     font-weight: bold;
     text-align: right;
 }
+
+input[readonly].datepicker {
+    cursor: pointer;
+}

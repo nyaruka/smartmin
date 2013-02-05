@@ -1,5 +1,5 @@
 from django import template
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import simplejson
 from django.template import TemplateSyntaxError
 from django.conf import settings
@@ -114,6 +114,26 @@ def map(string, args):
     return string % args.__dict__
 
 @register.filter
+def gmail_time(dtime):
+    now = datetime.now()
+    twelve_hours_ago = now - timedelta(hours=12)
+
+    # convert to the user time zone
+    timezone = getattr(settings, 'USER_TIME_ZONE', None)
+    time = dtime
+    if timezone:
+        db_tz = pytz.timezone(settings.TIME_ZONE)
+        local_tz = pytz.timezone(settings.USER_TIME_ZONE)
+        time = time.replace(tzinfo=db_tz).astimezone(local_tz)
+
+    if dtime > twelve_hours_ago:
+        return "%d:%d %s" % (int(time.strftime("%I")), int(time.strftime("%M")), time.strftime("%p").lower())
+    elif now.month == dtime.month:
+        return "%s %d" % (time.strftime("%b"), int(time.strftime("%d")))
+    else:
+        return "%d/%d/%s" % (int(time.strftime("%d")), int(time.strftime("%m")), time.strftime("%y"))
+
+@register.filter
 def field_help(view, field):
     """
     Returns the field help for the passed in field
@@ -215,6 +235,13 @@ def render_field(context, field):
         inclusion_context['object'] = context['object']
 
     return inclusion_context
-    
 
-
+@register.simple_tag
+def active(request, pattern):
+    """
+    Simple tag let us define a regex for the active navigation tab
+    """
+    import re
+    if re.search(pattern, request.path):
+        return 'active'
+    return ''

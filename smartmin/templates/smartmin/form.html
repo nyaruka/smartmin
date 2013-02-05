@@ -61,6 +61,15 @@
 {% endblock content %}
 
 {% block extra-script %}
+<script>
+
+  $(".datepicker").pickadate({
+  format: 'mmmm dd, yyyy',
+  year_selector: true
+})
+
+</script>
+
 {{ block.super }}
 {% if javascript_submit %}
 <script>

@@ -115,6 +115,7 @@ Contents:
    crudl
    templates
    perms
+   users
    misc
 
 Indices and tables
