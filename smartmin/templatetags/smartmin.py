@@ -127,7 +127,7 @@ def gmail_time(dtime):
         time = time.replace(tzinfo=db_tz).astimezone(local_tz)
 
     if dtime > twelve_hours_ago:
-        return "%d:%d %s" % (int(time.strftime("%I")), int(time.strftime("%M")), time.strftime("%p").lower())
+        return "%d:%s %s" % (int(time.strftime("%I")), time.strftime("%M"), time.strftime("%p").lower())
     elif now.month == dtime.month:
         return "%s %d" % (time.strftime("%b"), int(time.strftime("%d")))
     else:
