@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.utils import simplejson
 from django.template import TemplateSyntaxError
 from django.conf import settings
+from django.core.urlresolvers import reverse
 import pytz
 
 register = template.Library()
@@ -101,6 +102,15 @@ def view_as_json(context):
     """
     view = context['view']
     return simplejson.dumps(view.as_json(context))
+
+@register.simple_tag(takes_context=True)
+def ssl_url(context, url_name, args=None):
+    path = reverse(url_name, args)
+
+    if getattr(settings, 'SESSION_COOKIE_SECURE', False):
+        return "https://%s%s" % (settings.HOSTNAME, path)
+    else:
+        return path
 
 @register.filter
 def field(form, field):

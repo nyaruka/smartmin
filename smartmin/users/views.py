@@ -267,13 +267,8 @@ class UserCRUDL(SmartCRUDL):
 
             return obj
 
-        def has_permission(self, request, *args, **kwargs):
-            has_perm = super(UserCRUDL.Profile, self).has_permission(request, *args, **kwargs)
-
-            if has_perm and request.user.pk != int(self.kwargs['pk']):
-                has_perm = False
-
-            return has_perm
+        def get_object(self, queryset=None):
+            return self.request.user
 
         def derive_title(self):
             return "Edit your profile"

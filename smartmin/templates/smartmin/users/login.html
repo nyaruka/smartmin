@@ -30,7 +30,7 @@
         </div>
         {% endfor %}
         {% csrf_token %}
-        <input type="submit" class="btn primary" value="Login">
+        <input type="submit" class="btn btn-primary" value="Login">
         {% if allow_email_recovery %}
         <span class="pull-right" style="padding-top:7px;padding-right:20px;"><a href="{% url users.user_forget %}">Forgot Password?</a></span>
         {% endif %}
