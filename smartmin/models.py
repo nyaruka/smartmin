@@ -42,8 +42,15 @@ class SmartModel(models.Model):
         user = task.created_by
 
         import_params = None
+
+        # additional parameters are optional
+        if task.import_params:
+            try:
+                import_params = simplejson.loads(task.import_params)
+            except:
+                pass
+
         try:
-            import_params = simplejson.loads(task.import_params)
             records = cls.import_xls(filename, user, import_params, log)
         except XLRDError:
             records = cls.import_raw_csv(filename, user, import_params, log)
