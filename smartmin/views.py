@@ -740,11 +740,48 @@ class SmartCsvView(SmartListView):
             writer.writerow([s.encode("utf-8") for s in row])
 
         return response
-    
+
+
+class SmartXlsView(SmartListView):
+
+    def derive_filename(self):
+        filename = getattr(self, 'filename', None)
+        if not filename:
+            filename = "%s.xls" % self.model._meta.verbose_name.lower()
+        return filename
+
+    def render_to_response(self, context, **response_kwargs):
+
+        from xlwt import Workbook
+        book = Workbook()
+        sheet1 = book.add_sheet(self.derive_title())
+        fields = self.derive_fields()
+
+        # build up our header row
+        for col in range(len(fields)):
+            field = fields[col]
+            sheet1.write(0, col, unicode(self.lookup_field_label(dict(), field)))
+
+        # then our actual values
+        for row in range(len(self.object_list)):
+            obj = self.object_list[row]
+            for col in range(len(fields)):
+                field = fields[col]
+                value = unicode(self.lookup_field_value(dict(), obj, field))
+                # skip the header
+                sheet1.write(row + 1, col, value)
+
+        # Create the HttpResponse object with the appropriate header.
+        response = HttpResponse(mimetype='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
+        book.save(response)
+        return response
+
+
 class SmartFormMixin(object):
     readonly = ()
-    field_config = { 'modified_blurb': dict(label="Modified"),
-                     'created_blurb': dict(label="Created")    }
+    field_config = {'modified_blurb': dict(label="Modified"),
+                    'created_blurb': dict(label="Created")}
     success_message = None
     submit_button_name = "Submit"
 

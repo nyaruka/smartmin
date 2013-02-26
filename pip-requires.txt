@@ -5,3 +5,4 @@ django-celery
 pytz
 redis==2.4.9
 simplejson
+xlutils
