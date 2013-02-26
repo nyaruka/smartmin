@@ -471,7 +471,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
 
     def get_redirect_url(self, **kwargs):
         if not self.redirect_url:
-            raise ImproperlyConfigured("DeleteView must define a redirect_url")        
+            raise ImproperlyConfigured("DeleteView must define a redirect_url")
 
         return smart_url(self.redirect_url)
 
@@ -1343,8 +1343,10 @@ class SmartCRUDL(object):
                     options['cancel_url'] = '@%s' % self.url_name_for_action('list')
                     options['redirect_url'] = '@%s' % self.url_name_for_action('list')
 
-                view = type("%sDeleteView" % self.model_name, (SmartDeleteView,),
-                    options)
+                elif 'update' in self.actions:
+                    options['cancel_url'] = '@%s' % self.url_name_for_action('update')
+
+                view = type("%sDeleteView" % self.model_name, (SmartDeleteView,), options)
 
             elif action == 'list':
                 if 'read' in self.actions:
