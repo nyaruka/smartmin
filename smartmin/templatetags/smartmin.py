@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.utils import simplejson
 from django.template import TemplateSyntaxError
 from django.conf import settings
+from django.core.urlresolvers import reverse
 import pytz
 
 register = template.Library()
@@ -102,6 +103,15 @@ def view_as_json(context):
     view = context['view']
     return simplejson.dumps(view.as_json(context))
 
+@register.simple_tag(takes_context=True)
+def ssl_url(context, url_name, args=None):
+    path = reverse(url_name, args)
+
+    if getattr(settings, 'SESSION_COOKIE_SECURE', False):
+        return "https://%s%s" % (settings.HOSTNAME, path)
+    else:
+        return path
+
 @register.filter
 def field(form, field):
     try:
@@ -127,7 +137,7 @@ def gmail_time(dtime):
         time = time.replace(tzinfo=db_tz).astimezone(local_tz)
 
     if dtime > twelve_hours_ago:
-        return "%d:%d %s" % (int(time.strftime("%I")), int(time.strftime("%M")), time.strftime("%p").lower())
+        return "%d:%s %s" % (int(time.strftime("%I")), time.strftime("%M"), time.strftime("%p").lower())
     elif now.month == dtime.month:
         return "%s %d" % (time.strftime("%b"), int(time.strftime("%d")))
     else:

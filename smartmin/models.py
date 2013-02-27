@@ -3,7 +3,6 @@ import traceback
 import simplejson
 from django.db import models
 from django.contrib.auth.models import User
-import codecs
 
 class SmartModel(models.Model):
     """
@@ -38,18 +37,91 @@ class SmartModel(models.Model):
     @classmethod
     def import_csv(cls, task, log=None):
 
-        file = task.csv_file.file
+        from xlrd import XLRDError
+        filename = task.csv_file.file
         user = task.created_by
 
         import_params = None
-        if task.import_params:
-            import_params = simplejson.loads(task.import_params)
 
+        # additional parameters are optional
+        if task.import_params:
+            try:
+                import_params = simplejson.loads(task.import_params)
+            except:
+                pass
+
+        try:
+            records = cls.import_xls(filename, user, import_params, log)
+        except XLRDError:
+            records = cls.import_raw_csv(filename, user, import_params, log)
+
+        return records
+
+    @classmethod
+    def normalize_value(cls, val):
+        # remove surrounding whitespace
+        val = val.strip()
+
+        # if surrounded by double quotes, remove those
+        if val and val[0] == '"' and val[-1] == '"':
+            val = val[1:-1]
+
+        # if surrounded by single quotes, remove those
+        if val and val[0] == "'" and val[-1] == "'":
+            val = val[1:-1]
+
+        return val
+
+    @classmethod
+    def import_xls(cls, filename, user, import_params, log=None):
+        from xlrd import open_workbook
+        workbook = open_workbook(filename.name, 'rb')
+
+        records = []
+
+        for sheet in workbook.sheets():
+
+            # read our header
+            header = []
+            for col in range(sheet.ncols):
+                header.append(str(sheet.cell(0, col).value))
+            header = [cls.normalize_value(_).lower() for _ in header]
+
+            # read our rows
+            line_number = 1
+            for row in range(sheet.nrows - 1):
+                field_values = []
+                for col in range(sheet.ncols):
+                    field_values.append(str(sheet.cell(row + 1, col).value))
+
+                field_values = [cls.normalize_value(_) for _ in field_values]
+                field_values = dict(zip(header, field_values))
+                field_values['created_by'] = user
+                field_values['modified_by'] = user
+
+                try:
+                    field_values = cls.prepare_fields(field_values, import_params, user)
+                    record = cls.create_instance(field_values)
+                    if record:
+                        records.append(record)
+                except Exception as e:
+                    if log:
+                        traceback.print_exc(100, log)
+                    raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
+                line_number += 1
+            # only care about the first sheet
+            break
+
+        return records
+
+
+    @classmethod
+    def import_raw_csv(cls, filename, user, import_params, log=None):
         # our alternative codec, by default we are the crazy windows encoding
         ascii_codec = 'cp1252'
 
         # read the entire file, look for mac_roman characters
-        reader = open(file.name, "rb")
+        reader = open(filename.name, "rb")
         for byte in reader.read():
             # these are latin accented characterse in mac_roman, if we see them then our alternative
             # encoding should be mac_roman
@@ -58,18 +130,18 @@ class SmartModel(models.Model):
                 break
         reader.close()
 
-        reader = open(file.name, "rU")
+        reader = open(filename.name, "rU")
 
         def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
             csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
             for row in csv_reader:
                 encoded = []
                 for cell in row:
-                    try: 
+                    try:
                         cell = unicode(cell)
                     except:
                         cell = unicode(cell.decode(ascii_codec))
-                        
+
                     encoded.append(cell)
 
                 yield encoded
@@ -89,27 +161,13 @@ class SmartModel(models.Model):
         if len(header) < 1:
             raise Exception("Invalid header for import file")
 
-        def normalize_value(val):
-            # remove surrounding whitespace
-            val = val.strip()
-
-            # if surrounded by double quotes, remove those
-            if val and val[0] == '"' and val[-1] == '"':
-                val = val[1:-1]
-
-            # if surrounded by single quotes, remove those
-            if val and val[0] == "'" and val[-1] == "'":
-                val = val[1:-1]            
-
-            return val
-
         # normalize our header names, removing quotes and spaces
-        header = [normalize_value(_).lower() for _ in header]
+        header = [cls.normalize_value(_).lower() for _ in header]
 
         records = []
         for row in reader:
             # trim all our values
-            row = [normalize_value(_) for _ in row]
+            row = [cls.normalize_value(_) for _ in row]
 
             line_number += 1
 
@@ -129,9 +187,7 @@ class SmartModel(models.Model):
                 if log:
                     traceback.print_exc(100, log)
                 raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
-
         return records
-
 
 class ActiveManager(models.Manager):
     """
