@@ -8,6 +8,12 @@ import pytz
 
 register = template.Library()
 
+@register.assignment_tag
+def get_hostname():
+    if settings.HOSTNAME:
+        return settings.HOSTNAME
+    return "localhost"
+
 @register.simple_tag(takes_context=True)
 def get_list_class(context, list):
     """
