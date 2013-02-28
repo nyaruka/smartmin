@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
-import datetime
+from datetime import timedelta
+from django.utils import timezone
 import re
 
 def is_password_complex(password):
@@ -43,7 +44,7 @@ class PasswordHistory(models.Model):
             return True
 
         # get all the passwords in the past year
-        window_ago = datetime.date.today() - datetime.timedelta(days=password_window)
+        window_ago = timezone.now() - timedelta(days=password_window)
         previous_passwords = PasswordHistory.objects.filter(user=user, set_on__gte=window_ago)
         for previous in previous_passwords:
             if check_password(password, previous.password):
@@ -66,8 +67,8 @@ class PasswordHistory(models.Model):
             last_set = last_password[0].set_on
 
         # calculate how long ago our password was set
-        today = datetime.date.today()
-        difference = today - last_set.date()
+        today = timezone.now()
+        difference = (today - last_set)
 
         # return whether that is expired
         return difference.days > password_expiration

@@ -8,10 +8,11 @@ from django.utils import simplejson
 from .views import PostCRUDL
 from smartmin.views import smart_url
 from guardian.shortcuts import assign
-import datetime
 import settings
 
 from smartmin.users.models import *
+from datetime import date, datetime, timedelta
+from django.utils import timezone
 
 class SmartminTest(TestCase):
 
@@ -612,6 +613,8 @@ class TagTestCase(TestCase):
         self.list_view = self.crudl.view_for_action('list')()
         self.read_view = self.crudl.view_for_action('read')()
 
+        self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'plain')
+
         self.author = User.objects.create_user('author', 'author@group.com', 'author')
         self.author.groups.add(Group.objects.get(name="Authors"))
 
@@ -620,10 +623,12 @@ class TagTestCase(TestCase):
 
     def test_value_from_view(self):
         from smartmin.templatetags.smartmin import get_value_from_view
+        import pytz
 
         context = dict(view=self.read_view, object=self.post)
         self.assertEquals(self.post.title, get_value_from_view(context, 'title'))
-        self.assertEquals(self.post.created_on.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, 'created_on'))
+        local_created = self.post.created_on.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Africa/Kigali'))
+        self.assertEquals(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, 'created_on'))
 
     def test_view_as_json(self):
         from smartmin.templatetags.smartmin import view_as_json
@@ -648,6 +653,48 @@ class TagTestCase(TestCase):
         from smartmin.templatetags.smartmin import map
         self.assertEquals("title: First Post id: 1", map("title: %(title)s id: %(id)d", self.post))
 
+    def test_gmail_time(self):
+        import pytz
+        from smartmin.templatetags.smartmin import gmail_time
+
+        # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
+        now = timezone.now()
+        modified_now = now.replace(hour=17, minute=05)
+        self.assertEquals("7:05 pm", gmail_time(modified_now))
+
+        # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
+        feb_2 = datetime(2013, 02, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
+        self.assertEquals("Feb 2", gmail_time(feb_2))
+
+        # given the time beyond the current month, should display "DayOfMonth/Month/Year" eg. "2/1/2013"
+        jan_2 = datetime(2013, 01, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
+        self.assertEquals("2/1/13", gmail_time(jan_2))
+
+    def test_user_as_string(self):
+        from smartmin.templatetags.smartmin import user_as_string
+        
+        # plain user have both first and last names
+        self.plain.first_name = "Mr"
+        self.plain.last_name = "Chips"
+        self.plain.save()
+        self.assertEquals("Mr Chips", user_as_string(self.plain))
+
+        # change this user to have firstname as an empty string
+        self.plain.first_name = ''
+        self.plain.save()
+        self.assertEquals("Chips", user_as_string(self.plain))
+
+        # change this user to have lastname as an empty string
+        self.plain.last_name = ''
+        self.plain.first_name = 'Mr'
+        self.plain.save()
+        self.assertEquals("Mr", user_as_string(self.plain))
+
+        # change this user to have both first and last being empty strings
+        self.plain.last_name = ''
+        self.plain.first_name = ''
+        self.plain.save()
+        self.assertEquals("plain", user_as_string(self.plain))
 
 class UserLockoutTestCase(TestCase):
 
@@ -706,7 +753,7 @@ class UserLockoutTestCase(TestCase):
             self.assertContains(response, "10 minutes")
 
             # move all our lockout events to 11 minutes in the past
-            ten_minutes = datetime.timedelta(minutes=10)
+            ten_minutes = timedelta(minutes=10)
             for failed in FailedLogin.objects.filter(user=self.plain):
                 failed.failed_on = failed.failed_on - ten_minutes
                 failed.save()
@@ -727,7 +774,7 @@ class UserLockoutTestCase(TestCase):
             self.assertTrue(response.content.find("10 minutes") == -1)
 
             # move all our lockout events to 11 minutes in the past
-            ten_minutes = datetime.timedelta(minutes=10)
+            ten_minutes = timedelta(minutes=10)
             for failed in FailedLogin.objects.filter(user=self.plain):
                 failed.failed_on = failed.failed_on - ten_minutes
                 failed.save()
@@ -768,7 +815,7 @@ class PasswordExpirationTestCase(TestCase):
 
     def testNoExpiration(self):
         # create a fake password set 90 days ago
-        ninety_days_ago = datetime.datetime.now() - datetime.timedelta(days=90)
+        ninety_days_ago = timezone.now() - timedelta(days=90)
         history = PasswordHistory.objects.create(user=self.plain,
                                                  password="asdfasdf")
 
@@ -793,7 +840,7 @@ class PasswordExpirationTestCase(TestCase):
             self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "anotherpassword"))
 
             # move our history into the past
-            history.set_on = datetime.date.today() - datetime.timedelta(days=366)
+            history.set_on = timezone.now() - timedelta(days=366)
             history.save()
 
             # still a repeat because it is our current password
@@ -806,7 +853,7 @@ class PasswordExpirationTestCase(TestCase):
             self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
 
         with self.settings(USER_PASSWORD_REPEAT_WINDOW=-1):
-            history.set_on = datetime.date.today()
+            history.set_on = timezone.now()
             history.save()
 
             self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
@@ -814,7 +861,7 @@ class PasswordExpirationTestCase(TestCase):
     def testExpiration(self):
         with self.settings(USER_PASSWORD_EXPIRATION=60, USER_PASSWORD_REPEAT_WINDOW=365):
             # create a fake password set 90 days ago
-            ninety_days_ago = datetime.datetime.now() - datetime.timedelta(days=90)
+            ninety_days_ago = timezone.now() - timedelta(days=90)
             history = PasswordHistory.objects.create(user=self.plain,
                                                      password=self.plain.password)
 
@@ -863,7 +910,3 @@ class PasswordExpirationTestCase(TestCase):
             
             self.assertEquals(302, response.status_code)
             self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)
-            
-
-
-                                       

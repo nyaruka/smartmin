@@ -1,4 +1,5 @@
 {% extends "smartmin/update.html" %}
+{% load smartmin %}
 
 {% block post-form %}
 {% if perms.auth.user_mimic %}
@@ -7,7 +8,7 @@
   <div class="control-group">
     <label class="control-label">Login as</label>
     <div class="controls">
-      <input type="submit" class="btn btn-primary" value="{{object.first_name}} {{object.last_name}}">
+      <input type="submit" class="btn btn-primary" value="{{object|user_as_string}}">
     </div>
   </div>
 </form>

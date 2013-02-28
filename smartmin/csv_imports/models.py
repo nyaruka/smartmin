@@ -1,6 +1,6 @@
-import datetime
 from django.db import models, transaction
 from smartmin import class_from_string
+from django.utils import timezone
 
 from smartmin.models import SmartModel
 
@@ -13,7 +13,7 @@ class ImportTask(SmartModel):
 
     def start(self):
         from .tasks import csv_import
-        self.log("Queued import at %s" % datetime.datetime.now())
+        self.log("Queued import at %s" % timezone.now())
         result = csv_import.delay(self)
         self.task_id = result.task_id
         self.save()
@@ -34,7 +34,7 @@ class ImportTask(SmartModel):
 
     def log(self, message):
         self.import_log += "%s\n" % message
-        self.modified_on = datetime.datetime.now()
+        self.modified_on = timezone.now()
         self.save()
 
     def __unicode__(self):

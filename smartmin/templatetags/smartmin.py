@@ -4,6 +4,7 @@ from django.utils import simplejson
 from django.template import TemplateSyntaxError
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 import pytz
 
 register = template.Library()
@@ -21,14 +22,12 @@ def format_datetime(time):
     """
     Formats a date, converting the time to the user timezone if one is specified
     """
-    # see if a USER_TIME_ZONE is specified
-    timezone = getattr(settings, 'USER_TIME_ZONE', None)
-    if timezone:
-        db_tz = pytz.timezone(settings.TIME_ZONE)
-        local_tz = pytz.timezone(settings.USER_TIME_ZONE)
-        time = time.replace(tzinfo=db_tz).astimezone(local_tz)
+    user_time_zone = timezone.get_current_timezone()
+    if time.tzinfo is None:
+        time = time.replace(tzinfo = pytz.utc)
+        user_time_zone = pytz.timezone(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
 
-    # print it out
+    time = time.astimezone(user_time_zone)
     return time.strftime("%b %d, %Y %H:%M")
 
 @register.simple_tag(takes_context=True)
@@ -125,23 +124,40 @@ def map(string, args):
 
 @register.filter
 def gmail_time(dtime):
-    now = datetime.now()
+    if dtime.tzinfo is None:
+        dtime = dtime.replace(tzinfo = pytz.utc)
+        user_time_zone = pytz.timezone(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
+        dtime = dtime.astimezone(user_time_zone)
+    else:
+        dtime = dtime.astimezone(timezone.get_current_timezone())
+    
+    now = timezone.now()
+    if now.tzinfo is None:
+        now = now.replace(tzinfo = pytz.utc)
+
     twelve_hours_ago = now - timedelta(hours=12)
 
-    # convert to the user time zone
-    timezone = getattr(settings, 'USER_TIME_ZONE', None)
-    time = dtime
-    if timezone:
-        db_tz = pytz.timezone(settings.TIME_ZONE)
-        local_tz = pytz.timezone(settings.USER_TIME_ZONE)
-        time = time.replace(tzinfo=db_tz).astimezone(local_tz)
-
     if dtime > twelve_hours_ago:
-        return "%d:%s %s" % (int(time.strftime("%I")), time.strftime("%M"), time.strftime("%p").lower())
+        return "%d:%s %s" % (int(dtime.strftime("%I")), dtime.strftime("%M"), dtime.strftime("%p").lower())
     elif now.month == dtime.month:
-        return "%s %d" % (time.strftime("%b"), int(time.strftime("%d")))
+        return "%s %d" % (dtime.strftime("%b"), int(dtime.strftime("%d")))
     else:
-        return "%d/%d/%s" % (int(time.strftime("%d")), int(time.strftime("%m")), time.strftime("%y"))
+        return "%d/%d/%s" % (int(dtime.strftime("%d")), int(dtime.strftime("%m")), dtime.strftime("%y"))
+
+@register.filter
+def user_as_string(user):
+    first_name = user.first_name if user.first_name and len(user.first_name) > 0 else None
+    last_name = user.last_name if user.last_name and len(user.last_name) > 0 else None
+
+    if first_name and last_name:
+        return "%s %s" % (first_name, last_name)
+
+    if first_name:
+        return first_name
+    elif last_name:
+        return last_name
+    else:
+        return user.username
 
 @register.filter
 def field_help(view, field):
