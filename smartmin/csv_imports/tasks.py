@@ -1,7 +1,7 @@
 import StringIO
 from celery.task import task
-from datetime import datetime
 from smartmin import class_from_string
+from django.utils import timezone
 
 @task(track_started=True)
 def csv_import(task):  #pragma: no cover
@@ -14,7 +14,7 @@ def csv_import(task):  #pragma: no cover
 
     try:
         task.task_id = csv_import.request.id
-        task.log("Started import at %s" % datetime.now())
+        task.log("Started import at %s" % timezone.now())
         task.log("--------------------------------")
         task.save()
 
@@ -24,7 +24,7 @@ def csv_import(task):  #pragma: no cover
         records = model.import_csv(task, log)
 
         task.log(log.getvalue())
-        task.log("Import finished at %s" % datetime.now())
+        task.log("Import finished at %s" % timezone.now())
         task.log("%d record(s) added." % len(records))
 
         transaction.commit()
