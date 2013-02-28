@@ -14,7 +14,9 @@ from django.shortcuts import render
 from django.core.mail import send_mail
 import random
 import string
-import datetime
+
+from django.utils import timezone
+from datetime import timedelta
 
 from django.template import loader, Context
 from smartmin.views import *
@@ -364,7 +366,7 @@ class UserCRUDL(SmartCRUDL):
 
         def pre_process(self, request, *args, **kwargs):
             token = self.kwargs.get('token')
-            validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
+            validity_time = timezone.now() - timedelta(hours=48)
             recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time).filter(token=token)
             if not recovery_token:
                 return HttpResponseRedirect(reverse("users.user_expired"))
@@ -377,7 +379,7 @@ class UserCRUDL(SmartCRUDL):
  
         def post_save(self, obj):
             obj = super(UserCRUDL.Recover, self).post_save(obj)
-            validity_time = datetime.datetime.now() - datetime.timedelta(hours=48)
+            validity_time = timezone.now() - timedelta(hours=48)
             RecoveryToken.objects.filter(user=obj).delete()
             RecoveryToken.objects.filter(created_on__lt=validity_time).delete()
             PasswordHistory.objects.create(user=obj, password=obj.password)
@@ -428,7 +430,7 @@ def login(request, template_name='smartmin/users/login.html',
                 if not valid_password:
                     FailedLogin.objects.create(user=user)
     
-                bad_interval = datetime.datetime.now() - datetime.timedelta(minutes=lockout_timeout)
+                bad_interval = timezone.now() - timedelta(minutes=lockout_timeout)
                 failures = FailedLogin.objects.filter(user=user)
 
                 # if the failures reset after a period of time, then limit our query to that interval

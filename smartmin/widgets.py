@@ -2,7 +2,7 @@ from django.forms import fields
 from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
-import datetime
+from django.utils import timezone
 
 class VisibleHiddenWidget(widgets.Widget):
 
@@ -30,7 +30,7 @@ class DatePickerWidget(widgets.Widget):
         """
         html = ''
         if not value:
-            value = datetime.datetime.now().date()
+            value = timezone.now().date()
 
         str_value = "%s %d, %d" % (value.strftime("%B"), value.day, value.year)
 
