@@ -1,6 +1,8 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.http import HttpResponse
 import sys, StringIO, os
+from django.utils import timezone
+from django.conf import settings
 
 class AjaxRedirect(object):
     def process_response(self, request, response):
@@ -52,3 +54,10 @@ class ProfileMiddleware():
                 return HttpResponse('<pre>%s</pre>' % std_new.getvalue())
 
         return None
+
+class TimezoneMiddleware(object):
+    def process_request(self, request):
+        user_tz = getattr(settings, 'USER_TIME_ZONE', None)
+
+        if user_tz:
+            timezone.activate(user_tz)
