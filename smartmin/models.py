@@ -84,7 +84,7 @@ class SmartModel(models.Model):
             # read our header
             header = []
             for col in range(sheet.ncols):
-                header.append(str(sheet.cell(0, col).value))
+                header.append(unicode(sheet.cell(0, col).value))
             header = [cls.normalize_value(_).lower() for _ in header]
 
             # read our rows
@@ -92,7 +92,7 @@ class SmartModel(models.Model):
             for row in range(sheet.nrows - 1):
                 field_values = []
                 for col in range(sheet.ncols):
-                    field_values.append(str(sheet.cell(row + 1, col).value))
+                    field_values.append(unicode(sheet.cell(row + 1, col).value))
 
                 field_values = [cls.normalize_value(_) for _ in field_values]
                 field_values = dict(zip(header, field_values))
