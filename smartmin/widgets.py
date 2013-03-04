@@ -3,6 +3,7 @@ from django.forms import widgets
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 from django.utils import timezone
+from datetime import datetime
 
 class VisibleHiddenWidget(widgets.Widget):
 
@@ -42,7 +43,7 @@ class DatePickerWidget(widgets.Widget):
         
         # try parsing it
         try:
-            parsed = datetime.datetime.strptime(val, "%B %d, %Y")
+            parsed = datetime.strptime(val, "%B %d, %Y")
             return parsed.date()
         except:
             # invalid format?  say so
