@@ -345,12 +345,6 @@ class UserTest(TestCase):
         # make sure the user was created
         steve = User.objects.get(username='steve')
 
-        # can't create another with the same email though
-        post_data['username'] = 'steve2'
-        response = self.client.post(reverse('users.user_create'), post_data, follow=True)
-        self.assertEquals(200, response.status_code)
-        self.assertTrue('email' in response.context['form'].errors)
-
         # create another user manually, make him inactive
         woz = User.objects.create_user('woz', 'woz@apple.com', 'woz')
         woz.is_active = False
@@ -663,12 +657,17 @@ class TagTestCase(TestCase):
         self.assertEquals("7:05 pm", gmail_time(modified_now))
 
         # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
-        feb_2 = datetime(2013, 02, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
-        self.assertEquals("Feb 2", gmail_time(feb_2))
+        now = now.replace(day=3, month=3)
+        test_date = now.replace(day=2)
+        self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
 
-        # given the time beyond the current month, should display "DayOfMonth/Month/Year" eg. "2/1/2013"
-        jan_2 = datetime(2013, 01, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
-        self.assertEquals("2/1/13", gmail_time(jan_2))
+        # last month should still be pretty
+        test_date = test_date.replace(month=2)
+        self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
+
+        # but a different year is different
+        jan_2 = datetime(2012, 01, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
+        self.assertEquals("2/1/12", gmail_time(jan_2, now))
 
     def test_user_as_string(self):
         from smartmin.templatetags.smartmin import user_as_string

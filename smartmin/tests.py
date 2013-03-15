@@ -43,7 +43,7 @@ class SmartminTest(TestCase):
             segments = urlparse(response.get('Location', None))
             self.assertNotEqual(segments.path, url, msg=msg)
 
-    def create_user(self, username, group_names=None):
+    def create_user(self, username, group_names=[]):
         # Create a user to run our CRUDL tests
         user = User.objects.create_user(username, "%s@nyaruka.com" % username)
         user.set_password(username)

@@ -36,19 +36,6 @@ class UserForm(forms.ModelForm):
 
         return password
 
-    def clean_email(self):
-        email = self.cleaned_data['email']
-        
-        if email:
-            email = email.strip()
-
-            # does another user exist with this email?
-            existing = User.objects.filter(email=email)
-            if existing and existing[0].pk != self.instance.pk:
-                raise forms.ValidationError("That email address is already in use by another user")
-
-        return email
-
     def save(self, commit=True):
         """
         Overloaded so we can save any new password that is included.
@@ -300,10 +287,10 @@ class UserCRUDL(SmartCRUDL):
                 user = user[0]
 
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
-                RecoveryToken.objects.create(token=token,user=user)
+                RecoveryToken.objects.create(token=token, user=user)
                 email_template = loader.get_template('smartmin/users/user_email.txt')
                 FailedLogin.objects.filter(user=user).delete()
-                context = Context(dict(website=hostname,
+                context = Context(dict(website=hostname, user=user,
                                        link='%s://%s/users/user/recover/%s/' % (protocol, hostname, token)))
                 user.email_user("Password Recovery", email_template.render(context) , from_email)
             else:

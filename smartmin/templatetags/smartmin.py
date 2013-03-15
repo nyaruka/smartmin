@@ -129,15 +129,17 @@ def map(string, args):
     return string % args.__dict__
 
 @register.filter
-def gmail_time(dtime):
+def gmail_time(dtime, now=None):
     if dtime.tzinfo is None:
         dtime = dtime.replace(tzinfo = pytz.utc)
         user_time_zone = pytz.timezone(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
         dtime = dtime.astimezone(user_time_zone)
     else:
         dtime = dtime.astimezone(timezone.get_current_timezone())
-    
-    now = timezone.now()
+
+    if not now:
+        now = timezone.now()
+
     if now.tzinfo is None:
         now = now.replace(tzinfo = pytz.utc)
 
@@ -145,7 +147,7 @@ def gmail_time(dtime):
 
     if dtime > twelve_hours_ago:
         return "%d:%s %s" % (int(dtime.strftime("%I")), dtime.strftime("%M"), dtime.strftime("%p").lower())
-    elif now.month == dtime.month:
+    elif now.year == dtime.year:
         return "%s %d" % (dtime.strftime("%b"), int(dtime.strftime("%d")))
     else:
         return "%d/%d/%s" % (int(dtime.strftime("%d")), int(dtime.strftime("%m")), dtime.strftime("%y"))
