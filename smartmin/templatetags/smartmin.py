@@ -276,6 +276,6 @@ def active(request, pattern):
     Simple tag let us define a regex for the active navigation tab
     """
     import re
-    if re.search(pattern, request.path):
+    if re.search(pattern, request.get_full_path()):
         return 'active'
     return ''
