@@ -51,6 +51,10 @@ function refresh(){
     url += "page={{page_obj.number}}";
   {% endif %}
 
+  $("#pjax").on('pjax:error', function() {
+     return false;
+  });
+
   $.pjax({
     url: url,
     container: '#pjax',
@@ -58,7 +62,9 @@ function refresh(){
     replace: false,
     timeout: 30000,
     scrollTo: false,
-    error: function(){}
+    error: function(){
+        return false;
+    }
   });
 }
 
