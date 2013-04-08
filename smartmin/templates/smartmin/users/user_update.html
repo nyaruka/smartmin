@@ -3,7 +3,7 @@
 
 {% block post-form %}
 {% if perms.auth.user_mimic %}
-<form class="smartmin-form form-horizontal" action="{% url users.user_mimic object.id %}" method="post" enctype="multipart/form-data">
+<form class="smartmin-form form-horizontal" action="{% url 'users.user_mimic' object.id %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="control-group">
     <label class="control-label">Login as</label>
