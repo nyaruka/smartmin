@@ -51,14 +51,20 @@ function refresh(){
     url += "page={{page_obj.number}}";
   {% endif %}
 
+  $("#pjax").on('pjax:error', function() {
+     return false;
+  });
+
   $.pjax({
     url: url,
-    data: { 'pjax': "true" },
     container: '#pjax',
     push: false,
     replace: false,
     timeout: 30000,
-    error: function(){}
+    scrollTo: false,
+    error: function(){
+        return false;
+    }
   });
 }
 

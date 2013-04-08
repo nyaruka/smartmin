@@ -360,6 +360,10 @@ class SmartView(object):
         base_template = "base.html"
         if 'pjax' in self.request.REQUEST or 'pjax' in self.request.POST:
             base_template = "smartmin/pjax.html"
+
+        if 'HTTP_X_PJAX' in self.request.META:
+            base_template = "smartmin/pjax.html"
+
         context['base_template'] = base_template
 
         # set our refresh if we have one
