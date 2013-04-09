@@ -109,7 +109,6 @@ class SmartView(object):
             return has_perm
 
     def has_object_permission(self, getter_name):
-
         """
         Checks for object level permission for an arbitrary getter
         """
@@ -402,6 +401,14 @@ class SmartReadView(SmartView, DetailView):
 
     field_config = { 'modified_blurb': dict(label="Modified"),
                      'created_blurb': dict(label="Created") }
+
+
+    def derive_queryset(self):
+        return self.queryset
+
+    def get_queryset(self):
+        self.queryset = self.derive_queryset()
+        return super(SmartReadView, self).get_queryset()
 
     def derive_title(self):
         """

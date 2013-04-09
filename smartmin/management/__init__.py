@@ -65,8 +65,7 @@ def check_role_permissions(role, permissions, current_permissions):
             try:
                 assign(full_codename, role)
             except ObjectDoesNotExist:
-                pass
-#                sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
+                sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
 
     # remove any that are extra
     for permission in current_permissions:
@@ -148,7 +147,6 @@ def check_all_permissions(sender, **kwargs):
 
     # for each of our items
     for natural_key, permissions in config.items():
-
         # if the natural key '*' then that means add to all objects
         if natural_key == '*':
             # for each of our content types
