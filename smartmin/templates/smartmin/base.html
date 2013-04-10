@@ -41,6 +41,46 @@
 
     $("#posterizer").submit();
   });
+
+  function fetchPJAXContent(url, container, options) {
+
+      var type = 'GET';
+      var data = undefined;
+      if (options) {
+          if ('postData' in options) {
+              type = 'POST';
+              data = options['postData'];
+          }
+      }
+
+      $.ajax({
+          headers: { 'X-PJAX' : true },
+          type: type,
+          url: url,
+          data: data,
+          success: function(data, status, jqXHR) {
+              var noPJAX = $(container).data('no-pjax');
+              if (options) {
+                  if (noPJAX || ('shouldIgnore' in options && options['shouldIgnore'](data))) {
+                      if ('onIgnore' in options) {
+                          options['onIgnore']();
+                      }
+                      return;
+                  }
+              }
+
+              $(container).html(data)
+
+              if (options) {
+                  if ('onSuccess' in options) {
+                      options['onSuccess']();
+                  }
+              }
+          }
+      });
+  }
+
+
 </script>
 
 {% if refresh %}
@@ -51,25 +91,19 @@ function refresh(){
     url += "page={{page_obj.number}}";
   {% endif %}
 
-  $("#pjax").on('pjax:error', function() {
-     return false;
-  });
-
-  $.pjax({
-    url: url,
-    container: '#pjax',
-    push: false,
-    replace: false,
-    timeout: 30000,
-    scrollTo: false,
-    error: function(){
-        return false;
-    }
+  fetchPJAXContent(url, '#pjax', {
+      onIgnore: function() {
+          scheduleRefresh();
+      }
   });
 }
 
-$(document).ready(function(){
+function scheduleRefresh() {
     window.setTimeout(refresh, {{ refresh }});
+}
+
+$(document).ready(function(){
+    scheduleRefresh();
 });
 </script>
 {% endif %}
