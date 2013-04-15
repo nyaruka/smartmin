@@ -828,7 +828,7 @@ class SmartFormMixin(object):
             if field in self.form.fields:
                 del self.form.fields[field]
             
-        if fields:
+        if fields is not None:
             # filter out our form fields
             for name, field in self.form.fields.items():
                 if not name in fields:
@@ -915,10 +915,8 @@ class SmartFormMixin(object):
         """
         Derives our fields.
         """
-        fields = []
-        if self.fields:
+        if self.fields is not None:
             fields = list(self.fields)
-
         else:
             form = self.form
             fields = []
@@ -1081,13 +1079,15 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
             self.object = self.post_save(self.object)
         
             messages.success(self.request, self.derive_success_message())
-            return HttpResponseRedirect(self.get_success_url())
+            if 'HTTP_X_FORMAX' not in self.request.META:
+                return HttpResponseRedirect(self.get_success_url())
 
         except IntegrityError as e:
             message = str(e).capitalize()
             errors = self.form._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.util.ErrorList())
             errors.append(message)
-            return self.render_to_response(self.get_context_data(form=form))
+
+        return self.render_to_response(self.get_context_data(form=form))
 
     def save_m2m(self):
         """
