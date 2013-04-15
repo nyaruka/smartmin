@@ -2,10 +2,12 @@ import StringIO
 from celery.task import task
 from smartmin import class_from_string
 from django.utils import timezone
+from .models import ImportTask
 
 @task(track_started=True)
-def csv_import(task):  #pragma: no cover
+def csv_import(task_id):  #pragma: no cover
     from django.db import transaction
+    task = ImportTask.objects.get(pk=task_id)
 
     transaction.enter_transaction_management()
     transaction.managed()

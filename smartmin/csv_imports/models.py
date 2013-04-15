@@ -14,7 +14,7 @@ class ImportTask(SmartModel):
     def start(self):
         from .tasks import csv_import
         self.log("Queued import at %s" % timezone.now())
-        result = csv_import.delay(self)
+        result = csv_import.delay(self.pk)
         self.task_id = result.task_id
         self.save()
 
