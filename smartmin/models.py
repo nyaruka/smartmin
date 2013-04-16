@@ -35,6 +35,10 @@ class SmartModel(models.Model):
         return cls.objects.create(**field_dict)
 
     @classmethod
+    def validate_import_header(cls, header):
+        return
+
+    @classmethod
     def import_csv(cls, task, log=None):
 
         from xlrd import XLRDError
@@ -86,6 +90,8 @@ class SmartModel(models.Model):
             for col in range(sheet.ncols):
                 header.append(unicode(sheet.cell(0, col).value))
             header = [cls.normalize_value(_).lower() for _ in header]
+
+            cls.validate_import_header(header)
 
             # read our rows
             line_number = 1
@@ -163,6 +169,8 @@ class SmartModel(models.Model):
 
         # normalize our header names, removing quotes and spaces
         header = [cls.normalize_value(_).lower() for _ in header]
+
+        cls.validate_import_header(header)
 
         records = []
         for row in reader:
