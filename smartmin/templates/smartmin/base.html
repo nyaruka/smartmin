@@ -53,8 +53,17 @@
           }
       }
 
+      var headers = { 'X-PJAX': true };
+      if ('headers' in options) {
+          for (key in options['headers']) {
+              headers[key] = options['headers'][key];
+          }
+      }
+
+      console.log(headers);
+
       $.ajax({
-          headers: { 'X-PJAX' : true },
+          headers: headers,
           type: type,
           url: url,
           data: data,
