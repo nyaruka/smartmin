@@ -1131,10 +1131,10 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
     def derive_success_message(self):
         # First check whether a default message has been set
-        if self.success_message:
-            return self.success_message
-        else:
+        if self.success_message is None:
             return "Your %s has been updated." % self.model._meta.verbose_name
+        else:
+            return self.success_message
 
     def pre_save(self, obj):
         # auto populate modified_by if it is present
