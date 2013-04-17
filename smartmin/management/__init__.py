@@ -65,7 +65,8 @@ def check_role_permissions(role, permissions, current_permissions):
             try:
                 assign(full_codename, role)
             except ObjectDoesNotExist:
-                sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
+                pass
+                # sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
 
     # remove any that are extra
     for permission in current_permissions:
