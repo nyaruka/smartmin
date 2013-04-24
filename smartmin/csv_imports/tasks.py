@@ -1,8 +1,12 @@
 import StringIO
-from celery.task import task
 from smartmin import class_from_string
 from django.utils import timezone
 from .models import ImportTask
+
+try:
+    from djcelery_transactions import task
+except:
+    from celery.task import task
 
 @task(track_started=True)
 def csv_import(task_id):  #pragma: no cover
