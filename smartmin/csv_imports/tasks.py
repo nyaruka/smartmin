@@ -13,7 +13,8 @@ def csv_import(task_id):  #pragma: no cover
     # there is a possible race condition between this task starting
     # so we have a bit of loop here to fetch the task
     tries = 0
-    while tries < 5:
+    task = None
+    while tries < 5 and not task:
         try:
             task = ImportTask.objects.get(pk=task_id)
         except Exception as e:
