@@ -93,12 +93,22 @@
 {% if refresh %}
 <script>
 function refresh(){
+
   var url = "{{url_params|safe}}"
   {% if page_obj %}
     url += "page={{page_obj.number}}";
   {% endif %}
 
+  if (url == '') {
+      url = '?';
+  }
+
+  url += '&ts=' + new Date().getTime();
+
   fetchPJAXContent(url, '#pjax', {
+      onSuccess: function() {
+          scheduleRefresh();
+      },
       onIgnore: function() {
           scheduleRefresh();
       }
