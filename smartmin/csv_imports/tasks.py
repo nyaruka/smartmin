@@ -1,13 +1,29 @@
 import StringIO
-from celery.task import task
 from smartmin import class_from_string
 from django.utils import timezone
 from .models import ImportTask
+from time import sleep
+
+from celery.task import task
 
 @task(track_started=True)
 def csv_import(task_id):  #pragma: no cover
     from django.db import transaction
-    task = ImportTask.objects.get(pk=task_id)
+
+    # there is a possible race condition between this task starting
+    # so we have a bit of loop here to fetch the task
+    tries = 0
+    task = None
+    while tries < 5 and not task:
+        try:
+            task = ImportTask.objects.get(pk=task_id)
+        except Exception as e:
+            # this object just doesn't exist yet, sleep a bit then try again
+            tries+=1
+            if tries >= 5:
+                raise e
+            else:
+                sleep(1)
 
     transaction.enter_transaction_management()
     transaction.managed()
