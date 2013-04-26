@@ -181,7 +181,8 @@ class UserCRUDL(SmartCRUDL):
             if group_id:
                 queryset = queryset.filter(groups=group_id)
                 
-            return queryset.filter(id__gt=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
+                # Ignore superusers, staff users and anonymous users
+            return queryset.filter(id__gte=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
         
         def get_name(self, obj):
             return " ".join((obj.first_name, obj.last_name))

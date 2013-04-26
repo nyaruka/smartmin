@@ -13,12 +13,12 @@ class SmartModel(models.Model):
     is_active = models.BooleanField(default=True,
                                     help_text="Whether this item is active, use this instead of deleting")
 
-    created_by = models.ForeignKey(User, related_name="%(class)s_creations",
+    created_by = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_creations",
                                    help_text="The user which originally created this item")    
     created_on = models.DateTimeField(auto_now_add=True,
                                       help_text="When this item was originally created")
 
-    modified_by = models.ForeignKey(User, related_name="%(class)s_modifications",
+    modified_by = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_modifications",
                                     help_text="The user which last modified this item")
     modified_on = models.DateTimeField(auto_now=True,
                                        help_text="When this item was last modified")
