@@ -106,9 +106,6 @@ function refresh(){
   url += '&ts=' + new Date().getTime();
 
   fetchPJAXContent(url, '#pjax', {
-      onSuccess: function() {
-          scheduleRefresh();
-      },
       onIgnore: function() {
           scheduleRefresh();
       }
