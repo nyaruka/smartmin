@@ -30,12 +30,11 @@ class DatePickerWidget(widgets.Widget):
         Renders this widget as HTML.
         """
         html = ''
-        if not value:
-            value = timezone.now().date()
+        str_value = ""
+        if value:
+            str_value = "%s %d, %d" % (value.strftime("%B"), value.day, value.year)
 
-        str_value = "%s %d, %d" % (value.strftime("%B"), value.day, value.year)
-
-        html += '<input type="text" class="datepicker" name="%s" value="%s">' % (escape(name), escape(str_value))
+        html += '<input type="text" class="datepicker" data-provide="datepicker" name="%s" value="%s" data-date-format="MM d, yyyy" data-date-autoclose="true">' % (escape(name), escape(str_value))
         return mark_safe(html)
 
     def value_from_datadict(self, data, files, name):
@@ -50,8 +49,8 @@ class DatePickerWidget(widgets.Widget):
             return None
 
     class Media:
-       js = ('js/pickadate.min.js',)
-       css = { 'all': ('css/pickadate.css',) }
+       js = ('js/datepicker.js',)
+       css = { 'all': ('css/datepicker.css',) }
 
 class ImageThumbnailWidget(widgets.ClearableFileInput): 
 
