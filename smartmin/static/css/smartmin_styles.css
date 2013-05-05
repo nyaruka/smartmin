@@ -77,9 +77,15 @@ div.controls ul li {
     list-style: none;
 }
 
+.alert-danger, .alert-error {
+    background-color: white;
+    border: #9D261D 3px solid;
+    font-size: 14px;
+}
+
 ul.errorlist {
     margin-left: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 8px;
 }
 
 #login-form {
