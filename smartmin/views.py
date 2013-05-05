@@ -1219,11 +1219,11 @@ class SmartCreateView(SmartModelFormView, CreateView):
         return obj
 
     def derive_success_message(self):
-        # first check whether a default message has been set
-        if self.success_message:
-            return self.success_message
-        else:
+        # First check whether a default message has been set
+        if self.success_message is None:
             return "Your new %s has been created." % self.model._meta.verbose_name
+        else:
+            return self.success_message
 
     def derive_title(self):
         """
