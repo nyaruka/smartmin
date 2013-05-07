@@ -404,11 +404,11 @@ class SmartReadView(SmartView, DetailView):
 
 
     def derive_queryset(self):
-        return self.queryset
+        return super(SmartReadView, self).get_queryset()
 
     def get_queryset(self):
         self.queryset = self.derive_queryset()
-        return super(SmartReadView, self).get_queryset()
+        return self.queryset
 
     def derive_title(self):
         """
@@ -1121,6 +1121,13 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
+
+    def derive_queryset(self):
+        return super(SmartUpdateView, self).get_queryset()
+
+    def get_queryset(self):
+        self.queryset = self.derive_queryset()
+        return self.queryset
 
     @classmethod
     def derive_url_pattern(cls, path, action):
