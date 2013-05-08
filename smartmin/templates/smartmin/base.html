@@ -68,14 +68,16 @@
           success: function(data, status, jqXHR) {
               var noPJAX = $(container).data('no-pjax');
               if (options) {
-                  if (noPJAX || ('shouldIgnore' in options && options['shouldIgnore'](data))) {
-                      if ('onIgnore' in options) {
-                          options['onIgnore']();
+                  if(!('forceReload' in options) || ('forceReload' in options && !options['forceReload'])) {
+
+                      if (noPJAX || ('shouldIgnore' in options && options['shouldIgnore'](data))) {
+                          if ('onIgnore' in options) {
+                              options['onIgnore']();
+                          }
+                          return;
                       }
-                      return;
                   }
               }
-
               $(container).html(data);
 
               if (options) {
