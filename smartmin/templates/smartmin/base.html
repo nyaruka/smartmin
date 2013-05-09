@@ -72,7 +72,7 @@
 
                       if (noPJAX || ('shouldIgnore' in options && options['shouldIgnore'](data))) {
                           if ('onIgnore' in options) {
-                              options['onIgnore']();
+                             options['onIgnore']();
                           }
                           return;
                       }
@@ -81,7 +81,7 @@
               $(container).html(data);
 
               if (options) {
-                  if ('onSuccess' in options) {
+                  if ('onSuccess' in options && options['onSuccess']) {
                       options['onSuccess']();
                   }
               }
@@ -94,7 +94,7 @@
 
 {% if refresh %}
 <script>
-function refresh(){
+function refresh(onSuccess, forceReload){
 
   var url = "{{url_params|safe}}"
   {% if page_obj %}
@@ -108,6 +108,8 @@ function refresh(){
   url += '&ts=' + new Date().getTime();
 
   fetchPJAXContent(url, '#pjax', {
+      forceReload: forceReload,
+      onSuccess: onSuccess,
       onIgnore: function() {
           scheduleRefresh();
       }
