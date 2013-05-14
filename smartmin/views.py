@@ -577,9 +577,10 @@ class SmartListView(SmartView, ListView):
         # build up our current parameter string, EXCLUSIVE of our page.  These
         # are used to build pagination URLs
         url_params = "?"
-        for key,value in self.request.REQUEST.items():
+        for key in self.request.REQUEST.keys():
             if key != 'page' and key != 'pjax' and key[0] != '_':
-                url_params += "%s=%s&" % (key, value)
+                for value in self.request.REQUEST.getlist(key):
+                    url_params += "%s=%s&" % (key, value)
         context['url_params'] = url_params
         context['pjax'] = self.pjax
 
