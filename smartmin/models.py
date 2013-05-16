@@ -39,6 +39,11 @@ class SmartModel(models.Model):
         return
 
     @classmethod
+    def get_import_file_headers(cls, task):
+        headers = task.get_import_file_headers()
+        return headers
+
+    @classmethod
     def import_csv(cls, task, log=None):
 
         from xlrd import XLRDError
