@@ -4,6 +4,7 @@ import simplejson
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class SmartModel(models.Model):
     """
     Useful abstract base class that adds the concept of something being active,
@@ -38,10 +39,78 @@ class SmartModel(models.Model):
     def validate_import_header(cls, header):
         return
 
+
     @classmethod
-    def get_import_file_headers(cls, task):
-        headers = task.get_import_file_headers()
+    def get_import_file_headers(cls, csv_file):
+        filename = csv_file
+        from xlrd import open_workbook, XLRDError
+            
+        headers =[]
+        try:
+            workbook = open_workbook(filename.name, 'rb')
+
+            records = []
+
+            for sheet in workbook.sheets():
+
+                # read our header
+                header = []
+                for col in range(sheet.ncols):
+                    header.append(unicode(sheet.cell(0, col).value))
+                headers = [cls.normalize_value(_).lower() for _ in header]
+
+                #only care for the first sheet
+                break
+        except XLRDError:
+            # our alternative codec, by default we are the crazy windows encoding
+            ascii_codec = 'cp1252'
+
+            # read the entire file, look for mac_roman characters
+            reader = open(filename.name, "rb")
+            for byte in reader.read():
+                # these are latin accented characterse in mac_roman, if we see them then our alternative
+                # encoding should be mac_roman
+                if ord(byte) in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
+                    ascii_codec = 'mac_roman'
+                    break
+            reader.close()
+            
+            reader = open(filename.name, "rU")
+
+            def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
+                csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
+                for row in csv_reader:
+                    encoded = []
+                    for cell in row:
+                        try:
+                            cell = unicode(cell)
+                        except:
+                            cell = unicode(cell.decode(ascii_codec))
+
+                        encoded.append(cell)
+                        
+                yield encoded
+
+            reader = unicode_csv_reader(reader)
+
+            # read in our header
+            line_number = 0
+
+            header = reader.next()
+            line_number += 1
+            while header is not None and len(header[0]) > 1 and header[0][0] == "#":
+                header = reader.next()
+                line_number += 1
+
+            # do some sanity checking to make sure they uploaded the right kind of file
+            if len(header) < 1:
+                raise Exception("Invalid header for import file")
+
+            # normalize our header names, removing quotes and spaces
+            headers = [cls.normalize_value(_).lower() for _ in header]
+            
         return headers
+
 
     @classmethod
     def import_csv(cls, task, log=None):
