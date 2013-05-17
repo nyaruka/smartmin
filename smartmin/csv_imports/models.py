@@ -37,5 +37,6 @@ class ImportTask(SmartModel):
         self.modified_on = timezone.now()
         self.save()
 
+
     def __unicode__(self):
         return "%s Import" % class_from_string(self.model_class)._meta.verbose_name.title()
