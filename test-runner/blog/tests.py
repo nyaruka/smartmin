@@ -657,7 +657,7 @@ class TagTestCase(TestCase):
         self.assertEquals("7:05 pm", gmail_time(modified_now))
 
         # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
-        now = now.replace(day=3, month=3)
+        now = now.replace(day=3, month=3, hour=10)
         test_date = now.replace(day=2)
         self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
 
