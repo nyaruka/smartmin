@@ -51,6 +51,7 @@ class SmartView(object):
     title = None
     refresh = 0
     template_name = None
+    pjax = None
 
     # set by our CRUDL
     url_name = None
@@ -342,6 +343,16 @@ class SmartView(object):
         # add our fields
         self.fields = self.derive_fields()
 
+        # build up our current parameter string, EXCLUSIVE of our page.  These
+        # are used to build pagination URLs
+        url_params = "?"
+        for key in self.request.REQUEST.keys():
+            if key != 'page' and key != 'pjax' and key[0] != '_':
+                for value in self.request.REQUEST.getlist(key):
+                    url_params += "%s=%s&" % (key, value)
+        context['url_params'] = url_params
+        context['pjax'] = self.pjax
+
         # set our blocks
         context['blocks'] = dict()
 
@@ -501,7 +512,6 @@ class SmartListView(SmartView, ListView):
     add_button = False
     search_fields = None
     paginate_by = 25
-    pjax = None
     field_config = { 'is_active': dict(label=''), }
     default_order = None
     select_related = None
@@ -573,16 +583,6 @@ class SmartListView(SmartView, ListView):
 
         # stuff it all in our context
         context['link_fields'] = self.link_fields
-
-        # build up our current parameter string, EXCLUSIVE of our page.  These
-        # are used to build pagination URLs
-        url_params = "?"
-        for key in self.request.REQUEST.keys():
-            if key != 'page' and key != 'pjax' and key[0] != '_':
-                for value in self.request.REQUEST.getlist(key):
-                    url_params += "%s=%s&" % (key, value)
-        context['url_params'] = url_params
-        context['pjax'] = self.pjax
 
         # our search term if any
         if 'search' in self.request.REQUEST:
