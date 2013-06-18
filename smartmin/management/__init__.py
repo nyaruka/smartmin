@@ -19,7 +19,7 @@ def is_last_model(kwargs):
         return kwargs['app'].__name__ == "%s.models" % permissions_app
 
     # Otherwise, run it for each of the last five apps in INSTALLED_APPS
-    return kwargs['app'].__name__ in ["%s.models" % app for app in settings.INSTALLED_APPS[-5:]]
+    return kwargs['app'].__name__ in ["%s.models" % app for app in settings.INSTALLED_APPS[-10:]]
 
 def check_role_permissions(role, permissions, current_permissions):
     """
