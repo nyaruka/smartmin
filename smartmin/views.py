@@ -711,9 +711,18 @@ class SmartListView(SmartView, ListView):
         """
         # is this a select2 format response?
         if self.request.REQUEST.get('_format', 'html') == 'select2':
-            json = dict(results=[ dict(id=_.pk, text="%s" % _,) for _ in context['object_list'] ])
-            json['err'] = 'nil'
-            json['more'] = context['page_obj'].has_next()
+
+            results = []
+            for obj in context['object_list']:
+                if hasattr(obj, 'as_select2'):
+                    result = obj.as_select2()
+
+                if not result:
+                    result = dict(id=obj.pk, text="%s" % obj)
+
+                results.append(result)
+
+            json = dict(results=results, err='nil', more=context['page_obj'].has_next())
             return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
         # otherwise, return normally
         else:
