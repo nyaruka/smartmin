@@ -714,6 +714,7 @@ class SmartListView(SmartView, ListView):
 
             results = []
             for obj in context['object_list']:
+                result = None
                 if hasattr(obj, 'as_select2'):
                     result = obj.as_select2()
 
