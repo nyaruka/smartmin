@@ -1081,6 +1081,8 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
         self.object.save()
         self.save_m2m()
 
+
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
 
@@ -1092,13 +1094,16 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
             messages.success(self.request, self.derive_success_message())
             if 'HTTP_X_FORMAX' not in self.request.META:
                 return HttpResponseRedirect(self.get_success_url())
+            else:
+                response = self.render_to_response(self.get_context_data(form=form))
+                response['REDIRECT'] = self.get_success_url()
+                return response
 
         except IntegrityError as e:
             message = str(e).capitalize()
             errors = self.form._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.util.ErrorList())
             errors.append(message)
-
-        return self.render_to_response(self.get_context_data(form=form))
+            return self.render_to_response(self.get_context_data(form=form))
 
     def save_m2m(self):
         """

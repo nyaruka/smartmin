@@ -66,6 +66,15 @@
           url: url,
           data: data,
           success: function(data, status, jqXHR) {
+
+              if ('followRedirects' in options && options['followRedirects'] == true) {
+                  var redirect = jqXHR.getResponseHeader('REDIRECT');
+                  if (redirect) {
+                      window.document.location.href = redirect;
+                      return;
+                  }
+              }
+
               var noPJAX = $(container).data('no-pjax');
               if (options) {
                   if(!('forceReload' in options) || ('forceReload' in options && !options['forceReload'])) {
