@@ -515,16 +515,28 @@ class UserTest(TestCase):
         # user click the link provided in mail
         
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
+        response = self.client.get(recover_url)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue(response.context['form'])
+        self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('confirm_new_password' in response.context['form'].fields)
+
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
         post_data['confirm_new_password'] = ''
-
+        
         response = self.client.post(recover_url, post_data, follow=True)
         self.assertIn("This field is required.", response.content)
 
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
         
+        response = self.client.get(recover_url)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue(response.context['form'])
+        self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('confirm_new_password' in response.context['form'].fields)
+
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
         post_data['confirm_new_password'] = 'user1_passwd_dont_match'
@@ -534,6 +546,12 @@ class UserTest(TestCase):
 
         # if the token is valid we get a form to fill with new password
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
+
+        response = self.client.get(recover_url)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue(response.context['form'])
+        self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('confirm_new_password' in response.context['form'].fields)
         
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
@@ -551,6 +569,16 @@ class UserTest(TestCase):
 
         # second click on the link
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
+
+        response = self.client.get(recover_url)
+        self.assertEquals(302, response.status_code)
+
+        response = self.client.get(recover_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], forget_url)
+        self.assertTrue(response.context['form'])
+        self.assertFalse('new_password' in response.context['form'].fields)
+        self.assertFalse('confirm_new_password' in response.context['form'].fields)
+        self.assertTrue('email' in response.context['form'].fields)
         
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd_2'
@@ -565,6 +593,22 @@ class UserTest(TestCase):
         self.client.logout()
         self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
+
+        # the token has expired
+        three_days_ago = timezone.now() - timedelta(days=3)
+        recovery_token.created_on = three_days_ago
+        recovery_token.save()
+
+        recover_url = reverse('users.user_recover', args=[recovery_token.token])
+        response = self.client.get(recover_url)
+        self.assertEquals(302, response.status_code)
+
+        response = self.client.get(recover_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], forget_url)
+        self.assertTrue(response.context['form'])
+        self.assertFalse('new_password' in response.context['form'].fields)
+        self.assertFalse('confirm_new_password' in response.context['form'].fields)
+        self.assertTrue('email' in response.context['form'].fields)
 
     def test_lockout(self):
         # first create a user to use on the test
