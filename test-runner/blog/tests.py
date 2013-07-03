@@ -515,6 +515,12 @@ class UserTest(TestCase):
         # user click the link provided in mail
         
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
+
+        response = self.client.get(recover_url)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue(response.context['form'])
+        self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('confirm_new_password' in response.context['form'].fields)
         
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
@@ -525,6 +531,12 @@ class UserTest(TestCase):
 
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
         
+        response = self.client.get(recover_url)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue(response.context['form'])
+        self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('confirm_new_password' in response.context['form'].fields)
+
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
         post_data['confirm_new_password'] = 'user1_passwd_dont_match'
@@ -532,9 +544,39 @@ class UserTest(TestCase):
         response = self.client.post(recover_url, post_data, follow=True)
         self.assertIn('confirm_new_password', response.context['form'].errors)
 
+        # the token has expired
+        token = recovery_token.token
+        three_days_ago = timezone.now() - timedelta(days=3)
+        recovery_token = RecoveryToken.objects.get(token=token)
+        recovery_token.created_on = three_days_ago
+        recovery_token.save()
+
+        recover_url = reverse('users.user_recover', args=[recovery_token.token])
+        response = self.client.get(recover_url)
+        self.assertEquals(302, response.status_code)
+
+        response = self.client.get(recover_url, follow=True)
+        self.assertEquals(response.request['PATH_INFO'], forget_url)
+        self.assertTrue(response.context['form'])
+        self.assertFalse('new_password' in response.context['form'].fields)
+        self.assertFalse('confirm_new_password' in response.context['form'].fields)
+        self.assertTrue('email' in response.context['form'].fields)
+
+        # valid token
+        token = recovery_token.token
+        recovery_token = RecoveryToken.objects.get(token=token)
+        recovery_token.created_on = timezone.now()
+        recovery_token.save()
+
         # if the token is valid we get a form to fill with new password
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
         
+        response = self.client.get(recover_url)
+        self.assertEquals(200, response.status_code)
+        self.assertTrue(response.context['form'])
+        self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('confirm_new_password' in response.context['form'].fields)
+
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
         post_data['confirm_new_password'] = 'user1_newpasswd'
@@ -548,10 +590,22 @@ class UserTest(TestCase):
         self.client.logout()
         self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
-
+        self.assertFalse(RecoveryToken.objects.all())
+        
         # second click on the link
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
         
+        response = self.client.get(recover_url)
+        self.assertEquals(302, response.status_code)
+
+        response = self.client.get(recover_url, follow=True)
+        self.assertTrue(response.request['PATH_INFO'], forget_url)
+        self.assertTrue(response.context['form'])
+        self.assertFalse('new_password' in response.context['form'].fields)
+        self.assertFalse('confirm_new_password' in response.context['form'].fields)
+        self.assertTrue('email' in response.context['form'].fields)
+
+        # if for some unexpeted magic way we post to recover_url the password must not change
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd_2'
         post_data['confirm_new_password'] = 'user1_newpasswd_2'
