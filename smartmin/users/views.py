@@ -352,12 +352,17 @@ class UserCRUDL(SmartCRUDL):
         fields = ('new_password', 'confirm_new_password')
         title = "Reset your Password"
 
+        @classmethod
+        def derive_url_pattern(cls, path, action):
+            return r'^%s/%s/(?P<token>\w+)/$' % (path, action)
+
         def pre_process(self, request, *args, **kwargs):
             token = self.kwargs.get('token')
             validity_time = timezone.now() - timedelta(hours=48)
-            recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time).filter(token=token)
+            recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time, token=token)
             if not recovery_token:
-                return HttpResponseRedirect(reverse("users.user_expired"))
+                messages.info(request, "Your link has expired for security reasons. Please reinitiate the process by entering your email here.")
+                return HttpResponseRedirect(reverse("users.user_forget"))
             return super(UserCRUDL.Recover, self).pre_process(request, args, kwargs)
 
         def get_object(self, queryset=None):
