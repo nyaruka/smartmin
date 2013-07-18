@@ -346,11 +346,16 @@ class SmartView(object):
         # build up our current parameter string, EXCLUSIVE of our page.  These
         # are used to build pagination URLs
         url_params = "?"
+        order_params = ""
         for key in self.request.REQUEST.keys():
             if key != 'page' and key != 'pjax' and key[0] != '_':
                 for value in self.request.REQUEST.getlist(key):
                     url_params += "%s=%s&" % (key, value)
+            elif key == '_order':
+                order_params = "&".join(["%s=%s" % (key, _) for _ in self.request.REQUEST.getlist(key)])
+
         context['url_params'] = url_params
+        context['order_params'] = order_params + "&"
         context['pjax'] = self.pjax
 
         # set our blocks
@@ -669,6 +674,14 @@ class SmartListView(SmartView, ListView):
         parameter.
         """
         order = self.derive_ordering()
+        
+        # if we get our order from the request
+        # make sure it is a valid field in the list 
+        if '_order' in self.request.REQUEST:
+            if order not in self.derive_fields():
+                order = None
+        
+
         if order:
             # if our order is a single string, convert to a simple list
             if isinstance(order, (str, unicode)):
