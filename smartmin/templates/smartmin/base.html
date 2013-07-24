@@ -81,7 +81,7 @@
 
                       if (noPJAX || ('shouldIgnore' in options && options['shouldIgnore'](data))) {
                           if ('onIgnore' in options) {
-                             options['onIgnore']();
+                             options['onIgnore'](jqXHR);
                           }
                           return;
                       }
