@@ -25,7 +25,7 @@ import re
 
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label="New Password", widget=forms.PasswordInput)
-    groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Group.objects.all())
+    groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Group.objects.all(), required=False)
 
     def clean_new_password(self):
         password = self.cleaned_data['new_password']
