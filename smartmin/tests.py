@@ -163,7 +163,9 @@ class _CRUDLTest(SmartminTest):
         self.client.logout()
 
         response = self.client.get(url)
-        if self.getCRUDL().permissions:
+
+        view = self.getCRUDL().view_for_action(action)
+        if self.getCRUDL().permissions and view.permission is not None:
             self.assertRedirect(response, reverse("users.user_login"), msg="Page for '%s' loaded without being logged in first" % action)
             self.login(self.getUser())
             response = self.client.get(url)
