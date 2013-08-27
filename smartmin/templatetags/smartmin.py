@@ -111,11 +111,17 @@ def view_as_json(context):
 @register.simple_tag(takes_context=True)
 def ssl_url(context, url_name, args=None):
     path = reverse(url_name, args)
-
     if getattr(settings, 'SESSION_COOKIE_SECURE', False):
         return "https://%s%s" % (settings.HOSTNAME, path)
     else:
         return path
+
+@register.simple_tag(takes_context=True)
+def non_ssl_url(context, url_name, args=None):
+    path = reverse(url_name, args)
+    if settings.HOSTNAME != "localhost":
+        return "http://%s%s" % (settings.HOSTNAME, path)
+    return path
 
 @register.filter
 def field(form, field):
