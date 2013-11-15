@@ -2,13 +2,13 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from blog.models import Post, Category
+from test_runner.blog.models import Post, Category
 from smartmin.management import check_role_permissions
 from django.utils import simplejson
 from .views import PostCRUDL
 from smartmin.views import smart_url
 from guardian.shortcuts import assign
-import settings
+import test_runner.settings
 
 from smartmin.users.models import *
 from datetime import date, datetime, timedelta
