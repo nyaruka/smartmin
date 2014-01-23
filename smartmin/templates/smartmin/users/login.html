@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% load smartmin %}
+{% load smartmin i18n %}
 
 {% block login %}{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="span7 offset2">
-    <div class="page-header"><h2>Sign in</h2></div>
+    <div class="page-header"><h2>{% trans "Sign in" %}</h2></div>
 
     <form method="post" class="form-stacked" id="login-form">
       {% for field, errors in form.errors.items %}
@@ -30,9 +30,9 @@
         </div>
         {% endfor %}
         {% csrf_token %}
-        <input type="submit" class="btn btn-primary" value="Login">
+        <input type="submit" class="btn btn-primary" value="{% trans "Login" %}">
         {% if allow_email_recovery %}
-        <span class="pull-right" style="padding-top:7px;padding-right:20px;"><a href="{% url 'users.user_forget' %}">Forgot Password?</a></span>
+        <span class="pull-right" style="padding-top:7px;padding-right:20px;"><a href="{% url 'users.user_forget' %}">{% trans "Forgot Password?" %}</a></span>
         {% endif %}
       </fieldset>
     </form>
