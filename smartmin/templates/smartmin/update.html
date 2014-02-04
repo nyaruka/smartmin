@@ -1,12 +1,12 @@
 {% extends "smartmin/form.html" %}
-
+{% load i18n %}
 
 {% block form-buttons %}
 <div class="form-actions">
   <input type="submit" class="btn btn-primary" value="{{ submit_button_name }}">
-  <a class="btn" onclick="javascript:history.go(-1)">Cancel</a>
+  <a class="btn" onclick="javascript:history.go(-1)">{% trans "Cancel" %}</a>
   {% if delete_url %}
-  <a class="btn btn-danger pull-right" href="{{ delete_url }}">Remove</a>
+  <a class="btn btn-danger pull-right" href="{{ delete_url }}">{% trans "Remove" %}</a>
   {% endif %}
 </div>
 {% endblock %}

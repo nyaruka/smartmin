@@ -20,6 +20,7 @@ from django.conf.urls.defaults import patterns, url
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
 
 import string
 from smartmin.csv_imports.models import ImportTask
@@ -818,14 +819,14 @@ class SmartFormMixin(object):
     field_config = {'modified_blurb': dict(label="Modified"),
                     'created_blurb': dict(label="Created")}
     success_message = None
-    submit_button_name = "Submit"
+    submit_button_name = _("Submit")
 
     def derive_title(self):
         """
         Derives our title from our object
         """
         if not self.title:
-            return "Form"
+            return _("Form")
         else:
             return self.title
 
@@ -1077,7 +1078,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
         Derives our title from our object
         """
         if not self.title:
-            return "Edit %s" % force_unicode(self.model._meta.verbose_name).title()
+            return _("Edit %s") % force_unicode(self.model._meta.verbose_name).title()
         else:
             return self.title
     
@@ -1146,7 +1147,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
 class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = 'smartmin/update.html'
     exclude = ('created_by', 'modified_by')
-    submit_button_name = "Save Changes"
+    submit_button_name = _("Save Changes")
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
@@ -1241,7 +1242,7 @@ class SmartMultiFormView(SmartView, TemplateView):
 class SmartCreateView(SmartModelFormView, CreateView):
     default_template = 'smartmin/create.html'
     exclude = ('created_by', 'modified_by', 'is_active')
-    submit_button_name = "Create"
+    submit_button_name = _("Create")
 
     def pre_save(self, obj):
         # auto populate created_by if it is present
@@ -1257,7 +1258,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
     def derive_success_message(self):
         # First check whether a default message has been set
         if self.success_message is None:
-            return "Your new %s has been created." % self.model._meta.verbose_name
+            return _("Your new %s has been created.") % self.model._meta.verbose_name
         else:
             return self.success_message
 
@@ -1266,7 +1267,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
         Derives our title from our object
         """
         if not self.title:
-            return "Create %s" % force_unicode(self.model._meta.verbose_name).title()
+            return _("Create %s") % force_unicode(self.model._meta.verbose_name).title()
         else:
             return self.title
 
@@ -1276,7 +1277,7 @@ class SmartCSVImportView(SmartCreateView):
     fields = ('csv_file',)
 
     def derive_title(self):
-        return "Import %s" % self.crudl.model._meta.verbose_name_plural.title()
+        return _("Import %s") % self.crudl.model._meta.verbose_name_plural.title()
 
     def pre_save(self, obj):
         obj = super(SmartCSVImportView, self).pre_save(obj)
