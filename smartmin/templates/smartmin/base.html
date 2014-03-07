@@ -29,6 +29,7 @@
 
   $("a.posterize").click(function(event){
     event.preventDefault();
+    event.stopPropagation();
 
     var href = $(this).attr("href");
     var url = $.url(href);
