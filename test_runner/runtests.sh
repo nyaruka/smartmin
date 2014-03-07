@@ -6,6 +6,6 @@ pip install django-nose
 pip install coverage
 pip install django-celery
 
-python manage.py test blog -s --pdb --noinput --with-coverage --cover-package=smartmin --cover-html-dir=../coverage-report --cover-html
+python manage.py test test_runner.blog.tests -s --pdb --noinput --with-coverage --cover-package=smartmin --cover-html-dir=../coverage-report --cover-html
 
 
