@@ -16,7 +16,7 @@ from guardian.shortcuts import get_objects_for_user, assign
 from django.core.exceptions import ImproperlyConfigured
 from django import forms
 from django.utils import simplejson
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User

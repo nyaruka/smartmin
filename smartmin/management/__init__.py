@@ -93,7 +93,6 @@ def check_all_group_permissions(sender, **kwargs):
         (group, created) = Group.objects.get_or_create(name=name)
         if created:
             pass
-#            sys.stderr.write("Added %s group\n" % name)
 
         check_role_permissions(group, permissions, group.permissions.all())
 
@@ -129,12 +128,14 @@ def add_permission(content_type, permission):
     # build our permission slug
     codename = "%s_%s" % (content_type.model, permission)
 
+    # sys.stderr.write("Checking %s permission for %s\n" % (permission, content_type.name))
+
     # does it already exist
     if not Permission.objects.filter(content_type=content_type, codename=codename):
         Permission.objects.create(content_type=content_type,
                                   codename=codename,
                                   name="Can %s %s" % (permission, content_type.name))
-#        sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
+        # sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
 
 def check_all_permissions(sender, **kwargs):
     """
