@@ -75,13 +75,17 @@
 <div class="row">
   <div class="span3">
     <div class="pagination-text">
-    {% if not paginator or paginator.num_pages <= 1 %}
-    {{ object_list|length }} {% if object_list|length == 0 or object_list|length > 1 %}{% trans "results" %}{% else %}{% trans "result" %}{% endif %}
-    {% else %}
+      {% if not paginator or paginator.num_pages <= 1 %}
+	{% blocktrans with count counter=object_list|lenght %}
+	 {{ counter }} result
+	{% plural %}
+         {{ counter }} results
+        {% endblocktrans %}
+      {% else %}
 	{% blocktrans with start=page_obj.start_index end=start_obj.end_index count=paginator.count %}
 	Results {{ start }}-{{ end }} of {{ count }}
 	{% endblocktrans %}
-    {% endif %}
+      {% endif %}
     </div>
   </div>
   <div class="span9">
