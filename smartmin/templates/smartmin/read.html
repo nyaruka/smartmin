@@ -1,6 +1,6 @@
 {% extends "smartmin/base.html" %}
 
-{% load smartmin %}
+{% load smartmin i18n %}
 
 {% block content %}
 {% block pjax %}
@@ -10,7 +10,7 @@
     <div class="span12 buttons">
       {% block read-buttons %}
       {% if view.edit_button %}
-      <a class="btn btn-primary pull-right" href="../../update/{{ object.id }}/">edit</a>
+      <a class="btn btn-primary pull-right" href="../../update/{{ object.id }}/">{% trans "edit" %}</a>
       {% endif %}
       {% endblock %}
     </div>
