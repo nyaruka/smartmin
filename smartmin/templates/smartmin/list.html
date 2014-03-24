@@ -76,7 +76,7 @@
   <div class="span3">
     <div class="pagination-text">
       {% if not paginator or paginator.num_pages <= 1 %}
-	{% blocktrans with count counter=object_list|lenght %}
+	{% blocktrans count counter=object_list|length %}
 	 {{ counter }} result
 	{% plural %}
          {{ counter }} results
