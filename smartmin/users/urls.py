@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, url
 
+
 from .views import *
 from django.contrib.auth.views import logout
 from django.conf import settings
