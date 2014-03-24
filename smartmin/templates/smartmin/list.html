@@ -78,7 +78,9 @@
     {% if not paginator or paginator.num_pages <= 1 %}
     {{ object_list|length }} {% if object_list|length == 0 or object_list|length > 1 %}{% trans "results" %}{% else %}{% trans "result" %}{% endif %}
     {% else %}
-    {% trans "Results" %} {{ page_obj.start_index }}-{{ page_obj.end_index }} {% trans "of" %} {{ paginator.count }}
+	{% blocktrans with start=page_obj.start_index end=start_obj.end_index count=paginator.count %}
+	Results {{ start }}-{{ end }} of {{ count }}
+	{% endblocktrans %}
     {% endif %}
     </div>
   </div>

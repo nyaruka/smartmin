@@ -8,9 +8,13 @@
 {% block pjax %}
 <div class="confirmation">
 
-  <h2>{% trans "Remove Item" %}?</h2>
-  <p>{% trans "Are you sure you want to remove" %} <b>{{ object }}</b>?</p>
-  <p>{% trans "Once it is removed, it will be gone forever. There is no way to undo this operation" %}.</p>
+  <h2>{% trans "Remove Item?" %}</h2>
+  <p>
+    {% blocktrans with object=object %}
+    Are you sure you want to remove <b>{{ object }}</b>?
+    {% endblocktrans %}
+  </p>
+  <p>{% trans "Once it is removed, it will be gone forever. There is no way to undo this operation." %}</p>
   
   <form method="POST">
 
