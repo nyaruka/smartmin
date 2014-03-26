@@ -1,22 +1,30 @@
 {% extends "base.html" %}
 
-{% load smartmin %}
+{% load smartmin i18n %}
 
 {% block content %}
 <div class="row">
   <div class="span7 offset2">
     <div class="alert alert-error">
-    <div class="page-header"><h2>Login Failure</h2></div>
-    <p > Sorry, you cannot log in at this time because we received {{failed_login_limit}} incorrect login attempts.</p> 
+    <div class="page-header"><h2>{% trans "Login Failure" %}</h2></div>
+    <p>
+      {% blocktrans %}
+      Sorry, you cannot log in at this time because we received {{failed_login_limit}} incorrect login attempts.
+      {% endblocktrans %}
+    </p>
 
     {% if lockout_timeout >= 0 %}
-    <p>Please wait {{lockout_timeout}} minutes before to try log in again.</p>
+    <p>
+      {% blocktrans %}
+      Please wait {{lockout_timeout}} minutes before to try log in again.
+      {% endblocktrans %}
+    </p>
     {% endif %}
 
     {% if allow_email_recovery %}
-    <p>Alternatively, you can fill out the form below to have your password reset via e-mail.</p>
+    <p>{% trans "Alternatively, you can fill out the form below to have your password reset via e-mail." %}</p>
     {% else %}
-    <p>Please contact the website administrator to have your password reset.</p>
+    <p>{% trans "Please contact the website administrator to have your password reset." %}</p>
     {% endif %}
     </div>
   </div>
@@ -28,9 +36,9 @@
     <form class="form-inline" method="post" action="{% url 'users.user_forget' %}">
       {% csrf_token %}
       <fieldset>
-	<label>Email Address</label> 
+	<label>{% trans "Email Address" %}</label> 
 	<input  class="span4" type="text" name="email">
-	<input type="submit" value="Recover" class="btn btn-primary">
+	<input type="submit" value='{% trans "Recover" %}' class="btn btn-primary">
       </fieldset>
     </form>
   </div>
