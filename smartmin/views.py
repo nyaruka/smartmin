@@ -531,6 +531,12 @@ class SmartListView(SmartView, ListView):
         else:
             return r'^%s/%s/$' % (path, action)
 
+    def derive_search_fields(self):
+        """
+        Derives our search fields, by default just returning what was set
+        """
+        return self.search_fields
+
     def derive_title(self):
         """
         Derives our title from our list
@@ -617,13 +623,14 @@ class SmartListView(SmartView, ListView):
         queryset = super(SmartListView, self).get_queryset(**kwargs)
 
         # apply any filtering
-        if self.search_fields and 'search' in self.request.REQUEST:
+        search_fields = self.derive_search_fields()
+        if search_fields and 'search' in self.request.REQUEST:
             terms = self.request.REQUEST['search'].split()
 
             query = Q(pk__gt=0)
             for term in terms:
                 term_query = Q(pk__lt=0)
-                for field in self.search_fields:
+                for field in search_fields:
                     term_query |= Q(**{ field: term })
                 query &= term_query
 

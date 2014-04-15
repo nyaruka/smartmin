@@ -158,7 +158,6 @@ class SmartModel(models.Model):
         records = []
 
         for sheet in workbook.sheets():
-
             # read our header
             header = []
             for col in range(sheet.ncols):
