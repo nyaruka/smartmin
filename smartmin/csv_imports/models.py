@@ -1,6 +1,8 @@
 from django.db import models, transaction
 from smartmin import class_from_string
 from django.utils import timezone
+from django.conf import settings
+from celery.result import EagerResult, AsyncResult
 
 from smartmin.models import SmartModel
 
@@ -21,14 +23,20 @@ class ImportTask(SmartModel):
     def done(self):
         from .tasks import csv_import
         if self.task_id:
-            result = csv_import.AsyncResult(self.task_id)
+            if getattr(settings, 'CELERY_ALWAYS_EAGER', False):
+                result = EagerResult(self.task_id, None, 'SUCCESS')
+            else:
+                result = AsyncResult(self.task_id)
             return result.ready()
 
     def status(self):
         from .tasks import csv_import
         status = "PENDING"
         if self.task_id:
-            result = csv_import.AsyncResult(self.task_id)
+            if getattr(settings, 'CELERY_ALWAYS_EAGER', False):
+                result = EagerResult(self.task_id, None, 'SUCCESS')
+            else:
+                result = AsyncResult(self.task_id)
             status = result.state
         return status
 
