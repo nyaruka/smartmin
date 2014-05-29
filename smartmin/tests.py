@@ -2,7 +2,7 @@ from urlparse import urlparse
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
-
+from django.conf import settings
 
 class SmartminTest(TestCase):
 
@@ -32,6 +32,9 @@ class SmartminTest(TestCase):
                 self.assertEquals(302, response.status_code)
 
         return response
+
+    def assertLoginRedirect(self, response, msg=None):
+        self.assertRedirect(response, settings.LOGIN_URL, msg)
 
     def assertRedirect(self, response, url, msg=None):
         self.assertEquals(302, response.status_code, msg=msg)
