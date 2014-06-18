@@ -1,8 +1,11 @@
 import csv
+import datetime
 import traceback
 import simplejson
 from django.db import models
 from django.contrib.auth.models import User
+from pytz import timezone, UTC
+from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
 
 
 class SmartModel(models.Model):
@@ -43,9 +46,7 @@ class SmartModel(models.Model):
     @classmethod
     def get_import_file_headers(cls, csv_file):
         filename = csv_file
-        from xlrd import open_workbook, XLRDError
-            
-        headers =[]
+        headers = []
         try:
             workbook = open_workbook(filename.name, 'rb')
 
@@ -114,8 +115,6 @@ class SmartModel(models.Model):
 
     @classmethod
     def import_csv(cls, task, log=None):
-
-        from xlrd import XLRDError
         filename = task.csv_file.file
         user = task.created_by
 
@@ -135,6 +134,7 @@ class SmartModel(models.Model):
 
         return records
 
+
     @classmethod
     def normalize_value(cls, val):
         # remove surrounding whitespace
@@ -150,10 +150,13 @@ class SmartModel(models.Model):
 
         return val
 
+
     @classmethod
     def import_xls(cls, filename, user, import_params, log=None):
-        from xlrd import open_workbook
         workbook = open_workbook(filename.name, 'rb')
+
+        # timezone for date cells can be specified as an import parameter or defaults to UTC
+        tz = timezone(import_params['timezone']) if import_params and 'timezone' in import_params else UTC
 
         records = []
 
@@ -171,9 +174,9 @@ class SmartModel(models.Model):
             for row in range(sheet.nrows - 1):
                 field_values = []
                 for col in range(sheet.ncols):
-                    field_values.append(unicode(sheet.cell(row + 1, col).value))
+                    cell = sheet.cell(row + 1, col)
+                    field_values.append(cls.get_cell_value(workbook, tz, cell))
 
-                field_values = [cls.normalize_value(_) for _ in field_values]
                 field_values = dict(zip(header, field_values))
                 field_values['created_by'] = user
                 field_values['modified_by'] = user
@@ -192,6 +195,15 @@ class SmartModel(models.Model):
             break
 
         return records
+
+
+    @classmethod
+    def get_cell_value(cls, workbook, tz, cell):
+        if cell.ctype == XL_CELL_DATE:
+            date = xldate_as_tuple(cell.value, workbook.datemode)
+            return datetime.datetime(*date, tzinfo=tz)
+        else:
+            return cls.normalize_value(unicode(cell.value))
 
 
     @classmethod
