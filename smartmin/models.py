@@ -156,7 +156,7 @@ class SmartModel(models.Model):
         workbook = open_workbook(filename.name, 'rb')
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
-        tz = timezone(import_params['timezone']) if import_params and import_params['timezone'] else UTC
+        tz = timezone(import_params['timezone']) if import_params and 'timezone' in import_params else UTC
 
         records = []
 
