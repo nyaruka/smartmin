@@ -1,7 +1,7 @@
 import csv
 import datetime
 import traceback
-import simplejson
+import json
 from django.db import models
 from django.contrib.auth.models import User
 from pytz import timezone, UTC
@@ -119,18 +119,21 @@ class SmartModel(models.Model):
         user = task.created_by
 
         import_params = None
+        import_results = dict()
 
         # additional parameters are optional
         if task.import_params:
             try:
-                import_params = simplejson.loads(task.import_params)
+                import_params = json.loads(task.import_params)
             except:
                 pass
 
         try:
-            records = cls.import_xls(filename, user, import_params, log)
+            records = cls.import_xls(filename, user, import_params, log, import_results)
         except XLRDError:
-            records = cls.import_raw_csv(filename, user, import_params, log)
+            records = cls.import_raw_csv(filename, user, import_params, log, import_results)
+
+        task.import_results = json.dumps(import_results)
 
         return records
 
@@ -152,13 +155,14 @@ class SmartModel(models.Model):
 
 
     @classmethod
-    def import_xls(cls, filename, user, import_params, log=None):
+    def import_xls(cls, filename, user, import_params, log=None, import_results=None):
         workbook = open_workbook(filename.name, 'rb')
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         tz = timezone(import_params['timezone']) if import_params and 'timezone' in import_params else UTC
 
         records = []
+        num_errors = 0
 
         for sheet in workbook.sheets():
             # read our header
@@ -186,6 +190,8 @@ class SmartModel(models.Model):
                     record = cls.create_instance(field_values)
                     if record:
                         records.append(record)
+                    else:
+                        num_errors += 1
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
@@ -193,6 +199,10 @@ class SmartModel(models.Model):
                 line_number += 1
             # only care about the first sheet
             break
+
+        if import_results is not None:
+            import_results['records'] = len(records)
+            import_results['errors'] = num_errors
 
         return records
 
@@ -207,7 +217,7 @@ class SmartModel(models.Model):
 
 
     @classmethod
-    def import_raw_csv(cls, filename, user, import_params, log=None):
+    def import_raw_csv(cls, filename, user, import_params, log=None, import_results=None):
         # our alternative codec, by default we are the crazy windows encoding
         ascii_codec = 'cp1252'
 
@@ -258,6 +268,8 @@ class SmartModel(models.Model):
         cls.validate_import_header(header)
 
         records = []
+        num_errors = 0
+
         for row in reader:
             # trim all our values
             row = [cls.normalize_value(_) for _ in row]
@@ -276,11 +288,19 @@ class SmartModel(models.Model):
                 record = cls.create_instance(field_values)
                 if record:
                     records.append(record)
+                else:
+                    num_errors += 1
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
                 raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
+
+        if import_results is not None:
+            import_results['records'] = len(records)
+            import_results['errors'] = num_errors
+
         return records
+
 
 class ActiveManager(models.Manager):
     """
