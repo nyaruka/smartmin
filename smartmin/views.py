@@ -15,7 +15,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from guardian.shortcuts import get_objects_for_user, assign
 from django.core.exceptions import ImproperlyConfigured
 from django import forms
-from django.utils import simplejson
+import json
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -402,8 +402,8 @@ class SmartView(object):
         """
         # should we actually render in json?
         if '_format' in self.request.REQUEST and self.request.REQUEST['_format'] == 'json':
-          json = self.as_json(context)
-          return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
+          json_data = self.as_json(context)
+          return HttpResponse(json.dumps(json_data), content_type='application/javascript')
 
         # otherwise, return normally
         else:
@@ -744,8 +744,8 @@ class SmartListView(SmartView, ListView):
 
                 results.append(result)
 
-            json = dict(results=results, err='nil', more=context['page_obj'].has_next())
-            return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
+            json_data = dict(results=results, err='nil', more=context['page_obj'].has_next())
+            return HttpResponse(json.dumps(json_data), content_type='application/javascript')
         # otherwise, return normally
         else:
             return super(SmartListView, self).render_to_response(context)
@@ -762,7 +762,7 @@ class SmartCsvView(SmartListView):
         import csv
 
         # Create the HttpResponse object with the appropriate CSV header.
-        response = HttpResponse(mimetype='text/csv; charset=utf-8')
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
 
         writer = csv.writer(response, quoting=csv.QUOTE_ALL)
@@ -815,7 +815,7 @@ class SmartXlsView(SmartListView):
                 sheet1.write(row + 1, col, value)
 
         # Create the HttpResponse object with the appropriate header.
-        response = HttpResponse(mimetype='application/vnd.ms-excel')
+        response = HttpResponse(content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
         book.save(response)
         return response
@@ -1122,7 +1122,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
 
         except IntegrityError as e:
             message = str(e).capitalize()
-            errors = self.form._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.util.ErrorList())
+            errors = self.form._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.utils.ErrorList())
             errors.append(message)
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -1294,7 +1294,7 @@ class SmartCSVImportView(SmartCreateView):
     def post_save(self, task):
         task = super(SmartCSVImportView, self).post_save(task)
 
-        task.import_params = simplejson.dumps(self.form.data)
+        task.import_params = json.dumps(self.form.data)
 
         # kick off our CSV import
         task.start()

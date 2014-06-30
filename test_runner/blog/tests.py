@@ -2,13 +2,13 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from blog.models import Post, Category
+from test_runner.blog.models import Post, Category
 from smartmin.management import check_role_permissions
-from django.utils import simplejson
+import json
 from .views import PostCRUDL
 from smartmin.views import smart_url
 from guardian.shortcuts import assign
-import settings
+import test_runner.settings
 
 from smartmin.users.models import *
 from datetime import date, datetime, timedelta
@@ -196,13 +196,13 @@ class SmartminTest(TestCase):
         response = self.client.get(reverse('blog.post_list') + "?_format=json")
 
         # parse the json
-        json_list = simplejson.loads(response.content)
+        json_list = json.loads(response.content)
         self.assertEquals(5, len(json_list))
         self.assertEquals(post1.title, json_list[0]['title'])
 
         # ask for select2 format
         response = self.client.get(reverse('blog.post_list') + "?_format=select2")
-        select2 = simplejson.loads(response.content)
+        select2 = json.loads(response.content)
         self.assertTrue('results' in select2)
         self.assertEquals(5, len(select2['results']))
 
@@ -685,9 +685,9 @@ class TagTestCase(TestCase):
         context = dict(view=self.list_view)
 
         foo = view_as_json(context)
-        json = simplejson.loads(view_as_json(context))
-        self.assertEquals(1, len(json))
-        self.assertEquals(self.post.title, json[0]['title'])
+        json_data = json.loads(view_as_json(context))
+        self.assertEquals(1, len(json_data))
+        self.assertEquals(self.post.title, json_data[0]['title'])
 
     def test_get(self):
         from smartmin.templatetags.smartmin import get

@@ -306,8 +306,8 @@ class ActiveManager(models.Manager):
     """
     A manager that only selects items which are still active.
     """
-    def get_query_set(self):
+    def get_queryset(self):
         """
         Where the magic happens, we automatically throw on an extra is_active = True to every filter
         """
-        return super(ActiveManager, self).get_query_set().filter(is_active=True)
+        return super(ActiveManager, self).get_queryset().filter(is_active=True)
