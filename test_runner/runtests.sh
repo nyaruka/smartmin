@@ -7,7 +7,7 @@ pip install coverage
 pip install django-celery
 pip install pysqlite
 
-cd test-runner
+cd test_runner
 python manage.py test blog -s --pdb --noinput --with-coverage --cover-package=smartmin --cover-html-dir=../coverage-report --cover-html
 
 
