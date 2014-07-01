@@ -90,8 +90,7 @@
   </div>
   <div class="col-md-9">
     {% if paginator and paginator.num_pages > 1 %}
-    <div class="pagination pagination-right">
-      <ul>
+      <ul class="pagination pull-right">
         {% if page_obj.has_previous %}
         <li class="prev"><a href="{{url_params|safe}}page={{page_obj.previous_page_number}}">&larr; {% trans "Previous" %}</a></li>
         {% else %}
@@ -131,7 +130,6 @@
         <li class="next disabled"><a href="#">{% trans "Next" %} &rarr;</a></li>
         {% endif %}
       </ul>
-    </div>
     {% endif %}
   </div>
 </div>
