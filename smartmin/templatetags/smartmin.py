@@ -130,6 +130,10 @@ def field(form, field):
     except KeyError:
         return None
 
+@register.filter(name='addcss')
+def addcss(field, css):
+    return field.as_widget(attrs={"class":css})
+
 @register.filter
 def map(string, args):
     return string % args.__dict__

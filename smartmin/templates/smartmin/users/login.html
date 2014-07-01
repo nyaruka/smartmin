@@ -6,13 +6,13 @@
 
 {% block content %}
 <div class="row">
-  <div class="span7 offset2">
+  <div class="col-md-7 col-md-offset-2">
     <div class="page-header"><h2>{% trans "Sign in" %}</h2></div>
 
     <form method="post" class="form-stacked" id="login-form">
       {% for field, errors in form.errors.items %}
       {% if field == '__all__' %}
-      <div class="alert alert-error form-errors">
+      <div class="alert alert-danger form-errors">
         <h3>Error</h3>
         {{ errors }}
       </div>
@@ -21,18 +21,18 @@
       
       <fieldset>
         {% for field in form %}
-        <div class="clearfix {% if field.error %}error{% endif %}">
+        <div class="form-group {% if field.error %}has-error{% endif %}">
           <label for="{{ field.name }}">{{ field.label }}</label>
           <div class="input">{{ field }}</div>
           {% if field.error %}
-          <span class="help-inline">{{ field.error }}</span>
+          <span class="help-block">{{ field.error }}</span>
           {% endif %}
         </div>
         {% endfor %}
         {% csrf_token %}
-        <input type="submit" class="btn btn-primary" value="{% trans "Login" %}">
+        <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
         {% if allow_email_recovery %}
-        <span class="pull-right" style="padding-top:7px;padding-right:20px;"><a href="{% url 'users.user_forget' %}">{% trans "Forgot Password?" %}</a></span>
+        <span class="pull-right" style="padding-top:7px;padding-right:150px;"><a href="{% url 'users.user_forget' %}">{% trans "Forgot Password?" %}</a></span>
         {% endif %}
       </fieldset>
     </form>

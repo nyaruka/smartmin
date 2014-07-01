@@ -6,12 +6,12 @@
 
 {% block table-controls %}
 <div class="row">
-  <div class="span8">
+  <div class="col-md-8">
     {% if view.search_fields %}
     {% block search-form %}
-    <form class="form-search">
-      <input type="text" class="input-medium search-query" name="search" value="{{ search }}">
-      <button type="submit" class="btn">{% trans "Search" %}</button>
+    <form class="form-inline" role="form">
+      <input type="text" class="form-control input-medium search-query" name="search" value="{{ search }}">
+      <button type="submit" class="btn btn-default">{% trans "Search" %}</button>
     </form>
     {% endblock %}
     {% else %}
@@ -19,7 +19,7 @@
     {% endif %}
   </div>
 
-  <div class="span4 buttons">
+  <div class="col-md-4 buttons">
     {% block table-buttons %}
     {% if view.add_button %}
     <a class="btn btn-primary pull-right" href="./create/">{% trans "Add" %}</a>
@@ -32,7 +32,7 @@
 {% block pjax %}
 <div id="pjax">
 <div class="row">
-  <div class="span12">
+  <div class="col-md-12">
     {% block pre-table %}{% endblock %}
 
     {% block table %}
@@ -73,7 +73,7 @@
 
 {% block paginator %}
 <div class="row">
-  <div class="span3">
+  <div class="col-md-3">
     <div class="pagination-text">
       {% if not paginator or paginator.num_pages <= 1 %}
 	{% blocktrans count counter=object_list|length %}
@@ -88,7 +88,7 @@
       {% endif %}
     </div>
   </div>
-  <div class="span9">
+  <div class="col-md-9">
     {% if paginator and paginator.num_pages > 1 %}
     <div class="pagination pagination-right">
       <ul>

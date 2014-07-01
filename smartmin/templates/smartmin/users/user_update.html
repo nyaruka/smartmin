@@ -5,10 +5,10 @@
 {% if perms.auth.user_mimic %}
 <form class="smartmin-form form-horizontal" action="{% url 'users.user_mimic' object.id %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
-  <div class="control-group">
-    <label class="control-label">Login as</label>
-    <div class="controls">
-      <input type="submit" class="btn btn-primary" value="{{object|user_as_string}}">
+  <div class="form-group">
+    <label class="col-sm-2 control-label">Login as</label>
+    <div class="col-sm-10">
+      <button type="submit" class="btn btn-primary">{{object|user_as_string}}</button>
     </div>
   </div>
 </form>

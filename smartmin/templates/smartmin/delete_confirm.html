@@ -21,7 +21,7 @@
     {% block delete_form %}{% endblock %}
     
     <div class="buttons">
-      <a class="btn" href="{{ cancel_url }}">{% trans "Cancel" %}</a>
+      <a class="btn btn-default" href="{{ cancel_url }}">{% trans "Cancel" %}</a>
       {% csrf_token %}
         <input type="submit" class="btn btn-danger" value='{% trans "Remove" %}'/>
     </div>
