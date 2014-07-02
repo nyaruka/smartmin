@@ -23,7 +23,7 @@
         {% for field in form %}
         <div class="form-group {% if field.error %}has-error{% endif %}">
           <label for="{{ field.name }}">{{ field.label }}</label>
-          <div class="input">{{ field }}</div>
+          <div class="input">{{ field|addcss:"form-control" }}</div>
           {% if field.error %}
           <span class="help-block">{{ field.error }}</span>
           {% endif %}
