@@ -6,7 +6,7 @@ from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
 import django.forms.models as model_forms
 from guardian.utils import get_anonymous_user
-from django.utils.http import urlquote
+from django.utils.http import urlquote, urlquote_plus
 from django.db.models import Q
 from django.db import IntegrityError
 from django.conf import settings
@@ -351,7 +351,7 @@ class SmartView(object):
         for key in self.request.REQUEST.keys():
             if key != 'page' and key != 'pjax' and key[0] != '_':
                 for value in self.request.REQUEST.getlist(key):
-                    url_params += "%s=%s&" % (key, value)
+                    url_params += "%s=%s&" % (key, urlquote_plus(value))
             elif key == '_order':
                 order_params = "&".join(["%s=%s" % (key, _) for _ in self.request.REQUEST.getlist(key)])
 
