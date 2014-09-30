@@ -26,7 +26,7 @@ import string
 from smartmin.csv_imports.models import ImportTask
 import widgets
 
-def smart_url(url, id=None):
+def smart_url(url, obj=None):
     """
     URLs that start with @ are reversed, using the passed in arguments.
 
@@ -36,14 +36,15 @@ def smart_url(url, id=None):
         (args, value) = url.split('@')
 
         if args:
-            return reverse(value, args=[id])
+            val = getattr(obj, args, None)
+            return reverse(value, args=[val])
         else:
             return reverse(value)
     else:
-        if id is None:
+        if obj is None:
             return url
         else:
-            return url % id
+            return url % obj.id
 
 class SmartView(object):
     fields = None
@@ -484,7 +485,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
         if not self.cancel_url:
             raise ImproperlyConfigured("DeleteView must define a cancel_url")
 
-        return smart_url(self.cancel_url, self.object.id)
+        return smart_url(self.cancel_url, self.object)
 
     def pre_delete(self, obj):
         pass
@@ -570,7 +571,7 @@ class SmartListView(SmartView, ListView):
         """
         By default we just return /view/{{ id }}/ for the current object.
         """
-        return smart_url(self.link_url, str(obj.id))
+        return smart_url(self.link_url, obj)
 
     def lookup_field_orderable(self, field):
         """
@@ -1028,7 +1029,7 @@ class SmartFormMixin(object):
         if self.success_url:
             # if our smart url references an object, pass that in
             if self.success_url.find('@') > 0:
-                return smart_url(self.success_url, self.object.pk)
+                return smart_url(self.success_url, self.object)
             else:
                 return smart_url(self.success_url, None)
         
@@ -1191,7 +1192,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
         context = super(SmartUpdateView, self).get_context_data(**kwargs)
 
         if self.delete_url:
-            context['delete_url'] = smart_url(self.delete_url, self.object.id)
+            context['delete_url'] = smart_url(self.delete_url, self.object)
             
         return context
 
@@ -1242,7 +1243,7 @@ class SmartMultiFormView(SmartView, TemplateView):
         context = super(SmartMultiFormView, self).get_context_data(**kwargs)
 
         if self.delete_url:
-            context['delete_url'] = smart_url(self.delete_url, self.object.id)
+            context['delete_url'] = smart_url(self.delete_url, self.object)
             
         return context
 
