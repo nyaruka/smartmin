@@ -58,9 +58,9 @@ class SmartminTest(TestCase):
 
     def test_smart_url(self):
         self.assertEquals(reverse('blog.post_create'), smart_url("@blog.post_create"))
-        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("id@blog.post_update", self.post.id))
+        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("id@blog.post_update", self.post))
         self.assertEquals(reverse('blog.post_create'), smart_url("/blog/post/create/"))
-        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("/blog/post/update/%d/", self.post.id))
+        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("/blog/post/update/%d/", self.post))
 
     def test_permissions(self):
         create_url = reverse('blog.post_create')
