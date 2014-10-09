@@ -11,6 +11,7 @@ setup(
         "django_compressor",
         "pytz",
         "simplejson",
+        "xlutils",
     ],
 
     description="Scaffolding system for Django object management.",
