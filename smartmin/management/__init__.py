@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission, Group, User
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from guardian.shortcuts import assign, remove_perm
+from guardian.shortcuts import assign_perm, remove_perm
 from guardian.utils import get_anonymous_user
 from guardian.management import create_anonymous_user
 import sys
@@ -63,7 +63,7 @@ def check_role_permissions(role, permissions, current_permissions):
             role_permissions.append(full_codename)
 
             try:
-                assign(full_codename, role)
+                assign_perm(full_codename, role)
             except ObjectDoesNotExist:
                 pass
                 # sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                

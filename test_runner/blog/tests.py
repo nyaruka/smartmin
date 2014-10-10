@@ -7,7 +7,7 @@ from smartmin.management import check_role_permissions
 import json
 from .views import PostCRUDL
 from smartmin.views import smart_url
-from guardian.shortcuts import assign
+from guardian.shortcuts import assign_perm
 import test_runner.settings
 
 from smartmin.users.models import *
@@ -110,7 +110,7 @@ class SmartminTest(TestCase):
         # now grant object level permission to update a single post for anonymous user
         self.client.logout()
         anon = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
-        assign('blog.post_update', anon, self.post)
+        assign_perm('blog.post_update', anon, self.post)
 
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
