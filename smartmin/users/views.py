@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import login as django_login
-from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from django.conf import settings
 from .models import *
@@ -152,11 +151,6 @@ class SetPasswordForm(UserForm):
             raise forms.ValidationError(_("You have used this password before in the past year, please use a new password."))
 
         return self.cleaned_data['new_password']
-
-class SmartminAuthenticationForm(AuthenticationForm):
-
-    def clean_username(self):
-        return self.cleaned_data['username'].lower()
 
 
 class UserCRUDL(SmartCRUDL):
@@ -407,7 +401,7 @@ class UserCRUDL(SmartCRUDL):
 
 def login(request, template_name='smartmin/users/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
-          authentication_form=SmartminAuthenticationForm,
+          authentication_form=AuthenticationForm,
           current_app=None, extra_context=None):
 
     lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
@@ -446,5 +440,5 @@ def login(request, template_name='smartmin/users/login.html',
 
     return django_login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
-                        authentication_form=SmartminAuthenticationForm,
+                        authentication_form=AuthenticationForm,
                         current_app=None, extra_context=dict(allow_email_recovery=allow_email_recovery))

@@ -322,6 +322,22 @@ class UserTest(TestCase):
         response = self.client.post(login_url, dict(username='SUPERuser', password='superuser'), follow=True)
         self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
 
+        other_supersuser = User.objects.create_user('withCAPS', 'with_caps@group.com', 'thePASSWORD')
+        other_supersuser.is_superuser = True
+        other_supersuser.save()
+
+        response = self.client.post(login_url, dict(username='withcaps', password='thePASSWORD'))
+        self.assertEquals(response.status_code, 302)
+
+        response = self.client.post(login_url, dict(username='withcaps', password='thePASSWORD'), follow=True)
+        self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
+
+        # passwords stay case sensitive
+        response = self.client.post(login_url, dict(username='withcaps', password='thepassword'), follow=True)
+        self.assertTrue('form' in response.context)
+        self.assertTrue(response.context['form'].errors)
+
+
     def test_crudl(self):
         self.client.login(username='superuser', password='superuser')
 
