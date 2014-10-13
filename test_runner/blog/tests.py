@@ -8,7 +8,7 @@ from django.utils import simplejson
 from .views import PostCRUDL
 from smartmin.views import smart_url
 from guardian.shortcuts import assign
-import settings
+from django.conf import settings
 
 from smartmin.users.models import *
 from datetime import date, datetime, timedelta
@@ -307,7 +307,21 @@ class UserTest(TestCase):
         self.superuser.is_superuser = True
         self.superuser.save()
 
-       
+    def test_login_case_not_sensitive(self):
+        login_url = reverse('users.user_login')
+
+        response = self.client.post(login_url, dict(username='superuser', password='superuser'))
+        self.assertEquals(response.status_code, 302)
+
+        response = self.client.post(login_url, dict(username='superuser', password='superuser'), follow=True)
+        self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
+
+        response = self.client.post(login_url, dict(username='SUPERuser', password='superuser'))
+        self.assertEquals(response.status_code, 302)
+
+        response = self.client.post(login_url, dict(username='SUPERuser', password='superuser'), follow=True)
+        self.assertEquals(response.request['PATH_INFO'], settings.LOGIN_REDIRECT_URL)
+
     def test_crudl(self):
         self.client.login(username='superuser', password='superuser')
 
