@@ -152,6 +152,7 @@ class SetPasswordForm(UserForm):
 
         return self.cleaned_data['new_password']
 
+
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = True
