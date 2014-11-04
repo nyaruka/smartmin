@@ -4,7 +4,8 @@ import traceback
 import json
 from django.db import models
 from django.contrib.auth.models import User
-from pytz import timezone, UTC
+from django.utils import timezone
+import pytz
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
 
 
@@ -159,7 +160,9 @@ class SmartModel(models.Model):
         workbook = open_workbook(filename.name, 'rb')
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
-        tz = timezone(import_params['timezone']) if import_params and 'timezone' in import_params else UTC
+        # use now to determine a relevant timezone
+        naive_timezone = pytz.timezone(import_params['timezone']) if import_params and 'timezone' in import_params else pytz.UTC
+        tz = timezone.now().astimezone(naive_timezone).tzinfo
 
         records = []
         num_errors = 0
