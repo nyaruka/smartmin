@@ -175,7 +175,7 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend', # this is default
+    'smartmin.backends.CaseInsensitiveBackend',
     'guardian.backends.ObjectPermissionBackend',
 )
 
