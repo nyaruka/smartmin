@@ -117,7 +117,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
 )
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'test_runner.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -139,7 +139,7 @@ INSTALLED_APPS = (
     'smartmin',
     'smartmin.users',
 
-    'blog',
+    'test_runner.blog',
 
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',

@@ -2,12 +2,14 @@
 {% load i18n %}
 
 {% block form-buttons %}
-<div class="form-actions">
-  <input type="submit" class="btn btn-primary" value="{{ submit_button_name }}">
-  <a class="btn" onclick="javascript:history.go(-1)">{% trans "Cancel" %}</a>
+<div class="form-group smartmin-form-buttons">
+  <div class="col-sm-offset-2 col-sm-10">
+    <button type="submit" class="btn btn-primary">{{ submit_button_name }}</button>
+    <a class="btn btn-default" onclick="javascript:history.go(-1)">{% trans "Cancel" %}</a>
   {% if delete_url %}
   <a class="btn btn-danger pull-right" href="{{ delete_url }}">{% trans "Remove" %}</a>
   {% endif %}
+  </div>
 </div>
 {% endblock %}
 

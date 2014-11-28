@@ -18,6 +18,7 @@ class CategoryForm(forms.ModelForm):
 
     class Meta:
         model = Category
+        fields = ('name',)
 
 # just tests that our reverse and permissions are based on the view.py app, not
 # the model app, the template should also be /blog/user_list.html for the List view

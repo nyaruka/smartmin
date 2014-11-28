@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class="row">
-  <div class="span7 offset2">
-    <div class="alert alert-error">
+  <div class="col-md-7 col-md-offset-2">
+    <div class="alert alert-danger">
     <div class="page-header"><h2>{% trans "Login Failure" %}</h2></div>
     <p>
       {% blocktrans %}
@@ -32,12 +32,12 @@
 
 {% if allow_email_recovery %}
 <div class="row" >
-  <div class="span7 offset2">
+  <div class="col-md-7 col-md-offset-2">
     <form class="form-inline" method="post" action="{% url 'users.user_forget' %}">
       {% csrf_token %}
       <fieldset>
 	<label>{% trans "Email Address" %}</label> 
-	<input  class="span4" type="text" name="email">
+	<input  class="col-md-4" type="text" name="email">
 	<input type="submit" value='{% trans "Recover" %}' class="btn btn-primary">
       </fieldset>
     </form>

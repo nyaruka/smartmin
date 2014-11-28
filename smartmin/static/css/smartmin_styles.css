@@ -4,8 +4,8 @@ html, body {
     background-color: #efefef;
 }
 
-body {
-    padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+header {
+  background-color: #fff;
 }
 
 .container {
@@ -50,14 +50,31 @@ div.page-header {
     padding-bottom: 0px;
 }
 
-div.controls ul {
+.smartmin-form-field ul {
     margin-left: 0px;
-    margin-top: 3px;
+    margin-top: 5px;
+    padding-left: 0px;
 }
 
-div.controls ul li {
+.smartmin-form-field ul li {
     list-style: none;
     margin-left: 0px;
+}
+
+.smartmin-form-field ul li input {
+  width: 30px
+  
+}
+input.form-control, textarea.form-control, select.form-control {
+  width: 500px;
+}
+
+.smartmin-form-buttons {
+  padding: 17px 20px 18px 0px;
+  margin-top: 18px;
+  margin-bottom: 18px;
+  background-color: #eeeeee;
+  border-top: 1px solid #ddd;
 }
 
 .content {
@@ -200,3 +217,7 @@ fieldset.field-group div.form-field {
 input[readonly].datepicker {
     cursor: pointer;
 }
+
+.navbar-toggle .icon-bar {
+  background-color: #333;
+} 

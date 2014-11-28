@@ -1,15 +1,15 @@
 {% extends "smartmin/list.html" %}
 
 {% block search-form %}
-    <form class="form-search">
-      <input type="text" class="input-medium search-query" name="search" value="{{ search }}">
-      <select name="group_id" class="groups"> 
+    <form class="form-inline">
+      <input type="text" class="input-medium search-query form-control" name="search" value="{{ search }}">
+      <select name="group_id" class="groups form-control"> 
         <option value="0" {% if group_id == 0 %}selected="selected"{% endif %}>All</option>
         {% for group in groups %}
         <option value="{{group.id}}" {% if group_id == group.id %}selected="selected"{% endif %}>{{ group.name }}</option>
         {% endfor %}
       </select>
-      <button type="submit" class="btn">Search</button>
+      <button type="submit" class="btn btn-default">Search</button>
     </form>
 {% endblock %}
 

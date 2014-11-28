@@ -1,15 +1,15 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-admin.autodiscover()
+
 
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'proj.views.home', name='home'),
 
     url(r'^users/', include('smartmin.users.urls')),
-    url(r'^blog/', include('blog.urls')),
+    url(r'^blog/', include('test_runner.blog.urls')),
     url(r'^csv_imports/', include('smartmin.csv_imports.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

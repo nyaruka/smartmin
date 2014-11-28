@@ -1,6 +1,6 @@
 from django import template
 from datetime import datetime, timedelta
-from django.utils import simplejson
+import json
 from django.template import TemplateSyntaxError
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -21,7 +21,7 @@ def get_list_class(context, list):
     Returns the class to use for the passed in list.  We just build something up
     from the object type for the list.
     """
-    css = "list_%s_%s" % (list.model._meta.app_label, list.model._meta.module_name)
+    css = "list_%s_%s" % (list.model._meta.app_label, list.model._meta.model_name)
     return css
 
 def format_datetime(time):
@@ -106,7 +106,7 @@ def view_as_json(context):
     Returns our view serialized as json
     """
     view = context['view']
-    return simplejson.dumps(view.as_json(context))
+    return json.dumps(view.as_json(context))
 
 @register.simple_tag(takes_context=True)
 def ssl_url(context, url_name, args=None):
@@ -129,6 +129,17 @@ def field(form, field):
         return form[field]
     except KeyError:
         return None
+
+@register.filter(name='add_css')
+def add_css(field, css):
+    custom_attrs = field.field.widget.attrs
+
+    if not custom_attrs.get('class', None):
+        custom_attrs['class'] = css
+    else:
+        custom_attrs['class'] += " " + css
+
+    return field.as_widget(attrs=custom_attrs)
 
 @register.filter
 def map(string, args):

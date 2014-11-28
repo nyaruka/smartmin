@@ -7,28 +7,29 @@
 {{ form_field }}
 {% else %}
 {% if form_field %}
-<div class="control-group {% if form_field.errors %}error{% endif %}">
-  <label class="control-label" for="{{ field.name }}">{% get_label field %}</label>
-  <div class="controls">{{ form_field }}
+<div class="form-group {% if form_field.errors %}error{% endif %}">
+  <label class="col-sm-2 control-label" for="{{ field.name }}">{% get_label field %}</label>
+  <div class="col-sm-10 smartmin-form-field">
+    {{ form_field|add_css:"form-control" }}
     {% with view|field_help:field as help %}
     {% if help %}
-    <p class="help-block">{{ help }}</p>
+    <span class="help-block">{{ help }}</span>
     {% endif %}
     {% endwith %}
-    
+
     {% if form_field.errors %}
     <span class="help-block field-errors">{{ form_field.errors }}</span>
     {% endif %}
-  </div>
+ </div>
 </div>
 {% else %}
-<div class="control-group">
-  <label class="control-label" for="{{ field.name }}">{% get_label field %}</label>
-  <div class="controls">
-    <span class="uneditable-input">{% get_value_from_view field %}</span>
+<div class="form-group">
+  <label class="col-sm-2 control-label" for="{{ field.name }}">{% get_label field %}</label>
+  <div class="col-sm-10">
+    <span class="form-control uneditable-input">{% get_value_from_view field %}</span>
     {% with view|field_help:field as help %}
     {% if help %}
-    <p class="help-block">{{ help }}</p>
+    <span class="help-block">{{ help }}</span>
     {% endif %}
     {% endwith %}
   </div>
