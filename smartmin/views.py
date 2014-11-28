@@ -12,7 +12,7 @@ from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import HttpResponseRedirect, HttpResponse
-from guardian.shortcuts import get_objects_for_user, assign
+from guardian.shortcuts import get_objects_for_user, assign_perm
 from django.core.exceptions import ImproperlyConfigured
 from django import forms
 import json
@@ -1143,7 +1143,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
                 # if the user doesn't have this permission globally already
                 if not self.request.user.has_perm(permission):
                     # then assign it for this object
-                    assign(permission, self.request.user, self.object)
+                    assign_perm(permission, self.request.user, self.object)
 
         return obj
 
