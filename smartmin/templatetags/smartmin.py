@@ -130,9 +130,16 @@ def field(form, field):
     except KeyError:
         return None
 
-@register.filter(name='addcss')
-def addcss(field, css):
-    return field.as_widget(attrs={"class":css})
+@register.filter(name='add_css')
+def add_css(field, css):
+    custom_attrs = field.field.widget.attrs
+
+    if not custom_attrs.get('class', None):
+        custom_attrs['class'] = css
+    else:
+        custom_attrs['class'] += " " + css
+
+    return field.as_widget(attrs=custom_attrs)
 
 @register.filter
 def map(string, args):
