@@ -44,6 +44,7 @@ def csv_import(task_id):  #pragma: no cover
 
             model = class_from_string(task.model_class)
             records = model.import_csv(task, log)
+            task.save()
 
             task.log(log.getvalue())
             task.log("Import finished at %s" % timezone.now())
@@ -77,6 +78,7 @@ def csv_import(task_id):  #pragma: no cover
             with transaction.atomic():
                 model = class_from_string(task.model_class)
                 records = model.import_csv(task, log)
+                task.save()
 
                 task.log(log.getvalue())
                 task.log("Import finished at %s" % timezone.now())

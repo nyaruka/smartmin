@@ -49,7 +49,7 @@ class ImportTask(SmartModel):
     def log(self, message):
         self.import_log += "%s\n" % message
         self.modified_on = timezone.now()
-        self.save()
+        self.save(update_fields=['import_log', 'modified_on'])
 
     def __unicode__(self):
         return "%s Import" % class_from_string(self.model_class)._meta.verbose_name.title()
