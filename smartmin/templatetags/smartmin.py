@@ -171,16 +171,9 @@ def gmail_time(dtime, now=None):
 
 @register.filter
 def user_as_string(user):
-    first_name = user.first_name if user.first_name and len(user.first_name) > 0 else None
-    last_name = user.last_name if user.last_name and len(user.last_name) > 0 else None
-
-    if first_name and last_name:
-        return "%s %s" % (first_name, last_name)
-
-    if first_name:
-        return first_name
-    elif last_name:
-        return last_name
+    full_name = user.get_full_name()
+    if full_name:
+        return full_name
     else:
         return user.username
 
