@@ -488,7 +488,9 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
         return smart_url(self.cancel_url, self.object)
 
     def pre_delete(self, obj):
-        pass
+        # auto populate modified_by if it is present
+        if hasattr(obj, 'modified_by_id') and self.request.user.id >= 0:
+            obj.modified_by = self.request.user
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
