@@ -410,12 +410,14 @@ class SmartView(object):
         else:
             return super(SmartView, self).render_to_response(context)
 
+
 class SmartTemplateView(SmartView, TemplateView):
     pass
 
+
 class SmartReadView(SmartView, DetailView):
     default_template = 'smartmin/read.html'
-    edit_button = False
+    edit_button = None
 
     field_config = { 'modified_blurb': dict(label="Modified"),
                      'created_blurb': dict(label="Created") }
@@ -518,7 +520,7 @@ class SmartListView(SmartView, ListView):
 
     link_url = None
     link_fields = None
-    add_button = False
+    add_button = None
     search_fields = None
     paginate_by = 25
     field_config = { 'is_active': dict(label=''), }
@@ -1390,16 +1392,16 @@ class SmartCRUDL(object):
                     view.link_url = 'id@%s' % self.url_name_for_action('update')
 
             # if we can't infer a link URL then view class must override lookup_field_link
-            if not view.link_url and 'lookup_field_link' not in view.__dict__:
+            if not getattr(view, 'link_url', None) and 'lookup_field_link' not in view.__dict__:
                 view.link_fields = ()
 
             # set add_button based on existence of Create view if add_button not explicitly set
-            if not hasattr(view, 'add_button') and (action == 'list' and 'create' in self.actions):
-                view.add_button = True
+            if action == 'list' and getattr(view, 'add_button', None) is None:
+                view.add_button = 'create' in self.actions
 
             # set edit_button based on existence of Update view if edit_button not explicitly set
-            if not hasattr(view, 'edit_button') and (action == 'read' and 'update' in self.actions):
-                view.edit_button = True
+            if action == 'read' and getattr(view, 'edit_button', None) is None:
+                view.edit_button = 'update' in self.actions
 
             # if update or create, set success url if not set
             if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
