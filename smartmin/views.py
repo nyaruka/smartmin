@@ -1388,15 +1388,17 @@ class SmartCRUDL(object):
                     view.link_url = 'id@%s' % self.url_name_for_action('read')
                 elif 'update' in self.actions:
                     view.link_url = 'id@%s' % self.url_name_for_action('update')
-                else:
-                    view.link_fields = ()
 
-            # set add_button based on existance of Create view if add_button not explicitely set
-            if not getattr(view, 'add_button', None) and (action == 'list' and 'create' in self.actions):
+            # if we can't infer a link URL then view class must override lookup_field_link
+            if not view.link_url and 'lookup_field_link' not in view.__dict__:
+                view.link_fields = ()
+
+            # set add_button based on existence of Create view if add_button not explicitly set
+            if not hasattr(view, 'add_button') and (action == 'list' and 'create' in self.actions):
                 view.add_button = True
 
-            # set edit_button based on existance of Update view if edit_button not explicitely set
-            if not getattr(view, 'edit_button', None) and (action == 'read' and 'update' in self.actions):
+            # set edit_button based on existence of Update view if edit_button not explicitly set
+            if not hasattr(view, 'edit_button') and (action == 'read' and 'update' in self.actions):
                 view.edit_button = True
 
             # if update or create, set success url if not set
