@@ -95,6 +95,9 @@ class _CRUDLTest(SmartminTest):
     def getUpdatePostData(self):
         raise Exception("Missing method: %s.getUpdatePostData()" % self.__class__.__name__)
 
+    def getManager(self):
+        return self.getCRUDL().model.objects
+
     def getTestObject(self):
         if self.object:
             return self.object
@@ -108,7 +111,7 @@ class _CRUDLTest(SmartminTest):
         self.client.post(create_page, data=post_data)
 
         # find our created object
-        self.object = self.getCRUDL().model.objects.get(**post_data)
+        self.object = self.getManager().get(**post_data)
         return self.object
 
     def testCreate(self):
@@ -131,7 +134,7 @@ class _CRUDLTest(SmartminTest):
             return
         object = self.getTestObject()
         self._do_test_view('delete', object, post_data=dict())
-        self.assertEquals(0, len(self.getCRUDL().model.objects.filter(pk=object.pk)))
+        self.assertEquals(0, len(self.getManager().filter(pk=object.pk)))
 
     def testList(self):
         if 'list' not in self.getCRUDL().actions:
