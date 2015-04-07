@@ -1,4 +1,4 @@
-django>=1.7
+django>=1.7,<1.8
 django-guardian>=1.2.0
 django_compressor
 django-celery
