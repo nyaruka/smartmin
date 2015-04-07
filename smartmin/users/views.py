@@ -187,7 +187,7 @@ class UserCRUDL(SmartCRUDL):
             return queryset.filter(id__gte=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
         
         def get_name(self, obj):
-            return " ".join((obj.first_name, obj.last_name))
+            return obj.get_full_name()
 
     class Create(SmartCreateView):
         form_class = UserForm
