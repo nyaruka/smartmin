@@ -1,7 +1,8 @@
-django>=1.7,<1.8
+django>=1.7,<1.9
 django-guardian>=1.2.0
 django_compressor
 django-celery
+django_nose
 pytz>=2013b
 redis==2.4.9
 xlutils

@@ -5,8 +5,8 @@ setup(
     version=__import__('smartmin').__version__,
     license="BSD",
 
-    install_requires = [
-        "django>=1.7,<1.8",
+    install_requires=[
+        "django>=1.7,<1.9",
         "django-guardian>=1.2.0",
         "django_compressor",
         "pytz",

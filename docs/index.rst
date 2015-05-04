@@ -27,7 +27,7 @@ Built in Rwanda by Nyaruka Ltd:
 Dependencies
 ===========================================
 
-Smartmin depends on features in Django 1.3, so you'll need to be running at least that version.  It also depends on the most excellent django-guardian package to deal with object level permissions, so you'll need to install that as well.
+Smartmin depends on features in Django 1.7, so you'll need to be running at least that version.  It also depends on the most excellent django-guardian package to deal with object level permissions, so you'll need to install that as well.
 
 Installation
 ===========================================
