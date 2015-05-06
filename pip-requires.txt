@@ -1,4 +1,4 @@
--e git+https://github.com/lukaszb/django-guardian#egg=django-guardian
+-e git+https://github.com/lukaszb/django-guardian@devel#egg=django-guardian
 django>=1.7,<1.9
 django_compressor
 django-celery
