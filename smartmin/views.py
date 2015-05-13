@@ -848,7 +848,7 @@ class SmartFormMixin(object):
         """
         return self.success_message
     
-    def get_form(self, form_class=None):
+    def get_form(self, form_class):
         """
         Returns an instance of the form to be used in this view.
         """
