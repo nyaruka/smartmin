@@ -10,7 +10,8 @@ setup(
         "django-guardian==1.3",
         "django_compressor",
         "pytz",
-        "xlutils",
+        "xlrd",
+        "xlwt",
     ],
 
     description="Scaffolding system for Django object management.",
