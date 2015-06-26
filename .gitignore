@@ -1,4 +1,5 @@
 .idea
+*.sw[po]
 *.pyc
 *.db
 *~
