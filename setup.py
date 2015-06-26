@@ -6,8 +6,8 @@ setup(
     license="BSD",
 
     install_requires=[
-        "django>=1.7,<1.8",
-        "django-guardian>=1.2.0",
+        "django>=1.7",
+        "django-guardian==1.3",
         "django_compressor",
         "pytz",
         "xlutils",
