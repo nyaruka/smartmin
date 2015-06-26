@@ -151,10 +151,6 @@ class _CRUDLTest(SmartminTest):
         self._do_test_view('csv')
 
     def _do_test_view(self, action=None, object=None, post_data=None, query_string=None):
-        if not action:
-            import pdb; pdb.set_trace()
-            print "testing view %s.%s" % (self.__class__.__name__, action)
-
         url_name = self.getCRUDL().url_name_for_action(action)
         if object:
             url = reverse(url_name, args=[object.pk])
