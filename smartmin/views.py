@@ -24,7 +24,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import string
 from smartmin.csv_imports.models import ImportTask
-import widgets
+from . import widgets
 
 def smart_url(url, obj=None):
     """
