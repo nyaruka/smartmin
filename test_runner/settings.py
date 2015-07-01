@@ -112,7 +112,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
-    'django.core.context_processors.static',    
+    'django.core.context_processors.static',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
 )
@@ -147,8 +147,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 
     'smartmin.csv_imports',
-
-    'djcelery',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -198,7 +196,7 @@ ANONYMOUS_PERMISSIONS = (
     'blog.post_read',
 )
 
-# assigns the permissions that each group should have, here creating an Administrator group with 
+# assigns the permissions that each group should have, here creating an Administrator group with
 # authority to create and change users
 GROUP_PERMISSIONS = {
     "Administrator": ('auth.user.*',),
@@ -216,11 +214,9 @@ LOGIN_REDIRECT_URL = "/blog/post/"
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-#-----------------------------------------------------------------------------------                                    
-# Async tasks with django-celery                                                                                        
-#-----------------------------------------------------------------------------------                                    
-import djcelery
-djcelery.setup_loader()
+#-----------------------------------------------------------------------------------
+# Async tasks with celery
+#-----------------------------------------------------------------------------------
 
 CELERY_RESULT_BACKEND = 'database'
 
