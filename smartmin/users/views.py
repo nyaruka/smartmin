@@ -42,7 +42,7 @@ class UserForm(forms.ModelForm):
         Overloaded so we can save any new password that is included.
         """
         is_new_user = self.instance.pk is None
-        
+
         user = super(UserForm, self).save(commit)
 
         # new users should be made active by default
@@ -115,9 +115,9 @@ class UserForgetForm(forms.Form):
         allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
         if not allow_email_recovery:
             raise forms.ValidationError(_("E-mail recovery is not supported, please contact the website administrator to reset your password manually."))
-        
+
         return email
-    
+
 class SetPasswordForm(UserForm):
     old_password = forms.CharField(label=_("Current Password"), widget=forms.PasswordInput, required=True,
                                    help_text=_("Your current password"))
@@ -165,11 +165,12 @@ class UserCRUDL(SmartCRUDL):
         default_order = 'username'
         add_button = True
         template_name = "smartmin/users/user_list.html"
-        
+
         def get_context_data(self, **kwargs):
             context = super(UserCRUDL.List, self).get_context_data(**kwargs)
             context['groups'] = Group.objects.all()
-            context['group_id'] = int(self.request.REQUEST.get('group_id', 0))
+            group_id = self.request.POST.get('group_id', self.request.GET.get('group_id', 0))
+            context['group_id'] = int(group_id)
             return context
 
         def get_group(self, obj):
@@ -177,15 +178,16 @@ class UserCRUDL(SmartCRUDL):
 
         def get_queryset(self, **kwargs):
             queryset = super(UserCRUDL.List, self).get_queryset(**kwargs)
-            group_id = int(self.request.REQUEST.get('group_id', 0))
+            group_id = self.request.POST.get('group_id', self.request.GET.get('group_id', 0))
+            group_id = int(group_id)
 
             # filter by the group
             if group_id:
                 queryset = queryset.filter(groups=group_id)
-                
+
                 # Ignore superusers, staff users and anonymous users
             return queryset.filter(id__gte=0).exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
-        
+
         def get_name(self, obj):
             return obj.get_full_name()
 
@@ -208,7 +210,7 @@ class UserCRUDL(SmartCRUDL):
                     obj.groups.add(group)
 
             return obj
-        
+
     class Update(SmartUpdateView):
         form_class = UserUpdateForm
         template_name = "smartmin/users/user_update.html"
@@ -369,7 +371,7 @@ class UserCRUDL(SmartCRUDL):
             token = self.kwargs.get('token')
             recovery_token= RecoveryToken.objects.get(token=token)
             return recovery_token.user
- 
+
         def post_save(self, obj):
             obj = super(UserCRUDL.Recover, self).post_save(obj)
             validity_time = timezone.now() - timedelta(hours=48)
@@ -396,7 +398,7 @@ class UserCRUDL(SmartCRUDL):
             context['lockout_timeout'] = lockout_timeout
             context['failed_login_limit'] = failed_login_limit
             context['allow_email_recovery'] = allow_email_recovery
-            
+
             return context
 
 def login(request, template_name='smartmin/users/login.html',
@@ -409,8 +411,8 @@ def login(request, template_name='smartmin/users/login.html',
     allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
 
     if request.method == "POST":
-        if 'username' in request.REQUEST and 'password' in request.REQUEST:
-            username = request.REQUEST['username']
+        if 'username' in request.POST and 'password' in request.POST:
+            username = request.POST['username']
 
             user = User.objects.filter(username=username)
 
@@ -419,10 +421,10 @@ def login(request, template_name='smartmin/users/login.html',
                 user = user[0]
 
                 # incorrect password?  create a failed login token
-                valid_password = user.check_password(request.REQUEST['password'])
+                valid_password = user.check_password(request.POST['password'])
                 if not valid_password:
                     FailedLogin.objects.create(user=user)
-    
+
                 bad_interval = timezone.now() - timedelta(minutes=lockout_timeout)
                 failures = FailedLogin.objects.filter(user=user)
 
