@@ -1,8 +1,7 @@
+celery
 django>=1.7
 django-guardian>=1.3
 django_compressor
-django-celery
-django_nose
 pytz>=2013b
 redis==2.4.9
 xlrd
