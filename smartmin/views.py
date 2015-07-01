@@ -1,6 +1,6 @@
 from django.db import models
 
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.views.generic.edit import FormMixin, ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
@@ -89,13 +89,13 @@ class SmartView(object):
         self.kwargs = kwargs
         self.args = args
         self.request = request
-        
+
         if not getattr(self, 'permission', None):
             return True
         else:
             # first check our anonymous permissions
             real_anon = get_anonymous_user()
-            has_perm = real_anon.has_perm(self.permission)            
+            has_perm = real_anon.has_perm(self.permission)
 
             # if not, then check our real permissions
             if not has_perm:
@@ -210,7 +210,7 @@ class SmartView(object):
         # if this is a subfield, strip off everything but the last field name
         if field.find('.') >= 0:
             return self.lookup_field_label(context, field.split('.')[-1], default)
-        
+
         label = None
 
         # is there a label specified for this field
@@ -549,7 +549,7 @@ class SmartListView(SmartView, ListView):
         title = super(SmartListView, self).derive_title()
 
         if not title:
-            return force_unicode(self.model._meta.verbose_name_plural).title()
+            return force_text(self.model._meta.verbose_name_plural).title()
         else:
             return title
 
@@ -687,13 +687,13 @@ class SmartListView(SmartView, ListView):
         parameter.
         """
         order = self.derive_ordering()
-        
+
         # if we get our order from the request
-        # make sure it is a valid field in the list 
+        # make sure it is a valid field in the list
         if '_order' in self.request.REQUEST:
             if order not in self.derive_fields():
                 order = None
-        
+
 
         if order:
             # if our order is a single string, convert to a simple list
@@ -771,7 +771,7 @@ class SmartCsvView(SmartListView):
         response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
 
         writer = csv.writer(response, quoting=csv.QUOTE_ALL)
-        
+
         fields = self.derive_fields()
 
         # build up our header row
@@ -847,7 +847,7 @@ class SmartFormMixin(object):
         Returns a message to display when this form is successfully saved
         """
         return self.success_message
-    
+
     def get_form(self, form_class=None):
         """
         Returns an instance of the form to be used in this view.
@@ -864,7 +864,7 @@ class SmartFormMixin(object):
         for field in exclude:
             if field in self.form.fields:
                 del self.form.fields[field]
-            
+
         if fields is not None:
             # filter out our form fields
             for name, field in self.form.fields.items():
@@ -900,7 +900,7 @@ class SmartFormMixin(object):
 
         if isinstance(field, forms.fields.ImageField) and isinstance(field.widget, forms.widgets.ClearableFileInput):
             field.widget = widgets.ImageThumbnailWidget()
-        
+
         return field
 
     def lookup_field_label(self, context, field, default=None):
@@ -978,7 +978,7 @@ class SmartFormMixin(object):
         Returns the form class to use in this view
         """
         form_class = None
-        
+
         if self.form_class:
             form_class = self.form_class
 
@@ -1004,7 +1004,7 @@ class SmartFormMixin(object):
     def get_factory_kwargs(self):
         """
         Let's us specify any extra parameters we might want to call for our form factory.
-        
+
         These can include: 'form', 'fields', 'exclude' or 'formfield_callback'
         """
         params = dict()
@@ -1017,7 +1017,7 @@ class SmartFormMixin(object):
             for ex in exclude:
                 if ex in fields:
                     fields.remove(ex)
-            
+
             params['fields'] = fields
 
         if exclude:
@@ -1036,10 +1036,10 @@ class SmartFormMixin(object):
                 return smart_url(self.success_url, self.object)
             else:
                 return smart_url(self.success_url, None)
-        
+
         elif 'loc' in self.form.cleaned_data:
             return self.form.cleaned_data['loc']
-        
+
         raise ImproperlyConfigured("No redirect location found, override get_success_url to not use redirect urls")
 
 
@@ -1083,17 +1083,17 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
     javascript_submit = None
 
     field_config = { 'modified_blurb': dict(label="Modified"),
-                     'created_blurb': dict(label="Created") }    
+                     'created_blurb': dict(label="Created") }
 
     def derive_title(self):
         """
         Derives our title from our object
         """
         if not self.title:
-            return _("Edit %s") % force_unicode(self.model._meta.verbose_name).title()
+            return _("Edit %s") % force_text(self.model._meta.verbose_name).title()
         else:
             return self.title
-    
+
     def pre_save(self, obj):
         """
         Called before an object is saved away
@@ -1116,7 +1116,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
             self.object = self.pre_save(self.object)
             self.save(self.object)
             self.object = self.post_save(self.object)
-        
+
             messages.success(self.request, self.derive_success_message())
             if 'HTTP_X_FORMAX' not in self.request.META:
                 return HttpResponseRedirect(self.get_success_url())
@@ -1197,7 +1197,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
         if self.delete_url:
             context['delete_url'] = smart_url(self.delete_url, self.object)
-            
+
         return context
 
     def get_modified_blurb(self, obj):
@@ -1248,7 +1248,7 @@ class SmartMultiFormView(SmartView, TemplateView):
 
         if self.delete_url:
             context['delete_url'] = smart_url(self.delete_url, self.object)
-            
+
         return context
 
 class SmartCreateView(SmartModelFormView, CreateView):
@@ -1263,7 +1263,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
 
         # auto populate modified_by if it is present
         if hasattr(obj, 'modified_by_id') and self.request.user.id >= 0:
-            obj.modified_by = self.request.user            
+            obj.modified_by = self.request.user
 
         return obj
 
@@ -1279,7 +1279,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
         Derives our title from our object
         """
         if not self.title:
-            return _("Create %s") % force_unicode(self.model._meta.verbose_name).title()
+            return _("Create %s") % force_text(self.model._meta.verbose_name).title()
         else:
             return self.title
 
@@ -1312,7 +1312,7 @@ class SmartCRUDL(object):
     app_name = None
     module_name = None
     path = None
-    
+
     permissions = True
 
     def __init__(self, model=None, path=None, actions=None):
@@ -1361,7 +1361,7 @@ class SmartCRUDL(object):
         """
         Returns the reverse name for this action
         """
-        return "%s.%s_%s" % (self.module_name.lower(), self.model_name.lower(), action)        
+        return "%s.%s_%s" % (self.module_name.lower(), self.model_name.lower(), action)
 
     def view_for_action(self, action):
         """
@@ -1490,14 +1490,14 @@ class SmartCRUDL(object):
 
         # otherwise take our best guess
         else:
-            return r'^%s/%s/$' % (self.path, action)            
+            return r'^%s/%s/$' % (self.path, action)
 
     def as_urlpatterns(self):
         """
         Creates the appropriate URL patterns for this object.
         """
         urlpatterns = patterns('')
-        
+
         # for each of our actions
         for action in self.actions:
             view_class = self.view_for_action(action)
