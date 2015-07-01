@@ -734,7 +734,9 @@ class TagTestCase(TestCase):
 
     def test_map(self):
         from smartmin.templatetags.smartmin import map
-        self.assertEquals("title: First Post id: 1", map("title: %(title)s id: %(id)d", self.post))
+        kwargs = {'title': self.post.title, 'id': self.post.pk}
+        self.assertEquals("title: {title} id: {id}".format(**kwargs),
+                          map("title: %(title)s id: %(id)d", self.post))
 
     def test_gmail_time(self):
         import pytz
