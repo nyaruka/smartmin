@@ -1,4 +1,4 @@
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
