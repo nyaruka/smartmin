@@ -77,7 +77,7 @@ class SmartminTest(TestCase):
         self.assertHasAccess(self.author, create_url)
         self.assertHasAccess(self.superuser, create_url)
 
-        # updating posts 
+        # updating posts
         update_url = reverse('blog.post_update', args=[self.post.id])
 
         # if not logged in can't read
@@ -206,8 +206,8 @@ class SmartminTest(TestCase):
         self.assertTrue('results' in select2)
         self.assertEquals(5, len(select2['results']))
 
-        
-        
+
+
     def test_success_url(self):
         self.client.login(username='author', password='author')
 
@@ -445,7 +445,7 @@ class UserTest(TestCase):
 
         # login as a simple plain user
         self.assertTrue(self.client.login(username='plain', password='plain'))
-        
+
         # check is access his profile, should not since plain users don't have that permission
         response = self.client.get(reverse('users.user_profile', args=[plain.id]))
         self.assertEquals(302, response.status_code)
@@ -454,7 +454,7 @@ class UserTest(TestCase):
         self.assertTrue(self.client.login(username='steve', password='googleIsNumber1'))
         response = self.client.get(reverse('users.user_profile', args=[steve.id]))
         self.assertEquals(reverse('users.user_profile', args=[steve.id]), response.request['PATH_INFO'])
-        
+
         # check if we are at the right form
         self.assertEquals("UserProfileForm", type(response.context['form']).__name__)
 
@@ -500,7 +500,7 @@ class UserTest(TestCase):
     def test_token(self):
         # create a user user1 with password user1 and email user1@user1.com
         user1 = User.objects.create_user("user1", 'user1@user1.com', 'user1')
- 
+
         # be sure no one is logged in
         self.client.logout()
 
@@ -510,15 +510,15 @@ class UserTest(TestCase):
 
         # initialise the process of recovering password by clicking the forget
         # password link and fill the form with the email associated with the account
-        
-        # invalid user 
+
+        # invalid user
         forget_url = reverse('users.user_forget')
-    
+
         post_data = dict()
         post_data['email'] = 'nouser@nouser.com'
-        
+
         response = self.client.post(forget_url, post_data, follow=True)
-        
+
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
 
@@ -527,9 +527,9 @@ class UserTest(TestCase):
 
         post_data = dict()
         post_data['email'] = 'user1@user1.com'
-        
+
         response = self.client.post(forget_url, post_data, follow=True)
-        
+
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
 
@@ -543,7 +543,7 @@ class UserTest(TestCase):
         self.assertFalse(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
         # user click the link provided in mail
-        
+
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
 
         response = self.client.get(recover_url)
@@ -551,7 +551,7 @@ class UserTest(TestCase):
         self.assertTrue(response.context['form'])
         self.assertTrue('new_password' in response.context['form'].fields)
         self.assertTrue('confirm_new_password' in response.context['form'].fields)
-        
+
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
         post_data['confirm_new_password'] = ''
@@ -560,7 +560,7 @@ class UserTest(TestCase):
         self.assertIn("This field is required.", response.content)
 
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
         response = self.client.get(recover_url)
         self.assertEquals(200, response.status_code)
         self.assertTrue(response.context['form'])
@@ -600,7 +600,7 @@ class UserTest(TestCase):
 
         # if the token is valid we get a form to fill with new password
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
         response = self.client.get(recover_url)
         self.assertEquals(200, response.status_code)
         self.assertTrue(response.context['form'])
@@ -614,17 +614,17 @@ class UserTest(TestCase):
         response = self.client.post(recover_url, post_data, follow=True)
         # form submitted successfull
         self.assertEquals(200, response.status_code)
-        
+
         # now the user cannot login with the old password but can login with the new one
         self.assertFalse(self.client.login(username='user1', password='user1'))
         self.client.logout()
         self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
         self.assertFalse(RecoveryToken.objects.all())
-        
+
         # second click on the link
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
         response = self.client.get(recover_url)
         self.assertEquals(302, response.status_code)
 
@@ -643,7 +643,7 @@ class UserTest(TestCase):
         response = self.client.post(recover_url, post_data, follow=True)
         # form submitted successfull
         self.assertEquals(200, response.status_code)
-        
+
         # password must not change
         self.assertFalse(self.client.login(username='user1', password='user1_newpasswd_2'))
         self.client.logout()
@@ -676,7 +676,7 @@ class UserTest(TestCase):
 class UserTestCase(TestCase):
 
     def test_reverse(self):
-        # the reverse tag here should be blog.user_list, not auth.user_list, since the 
+        # the reverse tag here should be blog.user_list, not auth.user_list, since the
         # CRUDL objects is defined in the blog app
         response = self.client.get(reverse('blog.user_list'))
         self.assertEquals(200, response.status_code)
@@ -737,7 +737,7 @@ class TagTestCase(TestCase):
 
         # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
         now = timezone.now()
-        modified_now = now.replace(hour=17, minute=05)
+        modified_now = now.replace(hour=17, minute=5)
         self.assertEquals("7:05 pm", gmail_time(modified_now))
 
         # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
@@ -750,12 +750,12 @@ class TagTestCase(TestCase):
         self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
 
         # but a different year is different
-        jan_2 = datetime(2012, 01, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
+        jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo = pytz.utc)
         self.assertEquals("2/1/12", gmail_time(jan_2, now))
 
     def test_user_as_string(self):
         from smartmin.templatetags.smartmin import user_as_string
-        
+
         # plain user have both first and last names
         self.plain.first_name = "Mr"
         self.plain.last_name = "Chips"
@@ -869,7 +869,7 @@ class UserLockoutTestCase(TestCase):
             self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
 
             # log in as superuser
-            response = self.client.post(reverse('users.user_login'), 
+            response = self.client.post(reverse('users.user_login'),
                                         dict(username='superuser', password='superuser'))
 
             # go edit our 'plain' user
@@ -916,7 +916,7 @@ class PasswordExpirationTestCase(TestCase):
 
     def testPasswordRepeat(self):
         history = PasswordHistory.objects.create(user=self.plain,
-                                                 password=self.plain.password)        
+                                                 password=self.plain.password)
 
         with self.settings(USER_PASSWORD_REPEAT_WINDOW=365):
             self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1"))
@@ -950,7 +950,7 @@ class PasswordExpirationTestCase(TestCase):
 
             history.set_on = ninety_days_ago
             history.save()
-            
+
             # log in
             self.client.logout()
             post_data = dict(username='plain', password='Password1')
@@ -990,6 +990,6 @@ class PasswordExpirationTestCase(TestCase):
 
             post_data = dict(username='plain', password='Password2')
             response = self.client.post(reverse('users.user_login'), post_data)
-            
+
             self.assertEquals(302, response.status_code)
             self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)
