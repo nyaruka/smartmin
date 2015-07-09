@@ -11,6 +11,7 @@ docs/_build
 .coverage
 build
 coverage-report
+celerybeat-schedule
 
 *.DS_Store
 .tox/
