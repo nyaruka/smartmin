@@ -6,7 +6,7 @@
 Introduction
 ===========================================
 
-Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients.  Smartmin aims to allow you to quickly build scaffolding which you can customize by using Django 1.3's views.
+Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients.  Smartmin aims to allow you to quickly build scaffolding which you can customize by using Django class based views.
 
 It is very opininated in how it works, if you don't agree, Smartmin may not be for you:
 
@@ -94,10 +94,9 @@ From here you can create, update and list users on the system, all using standar
 Versioning:
 ===========================================
 
-Smartmin will release major versions in step (or rather a bit behind) Django's major releases.  That is the version 1.3.* series are made to work with Django 1.3.  Version 1.4.* is made to work with Django 1.4.*.  Although we try not to rock the boat too much, Smartmin is still actively changing, so we don't guarantee any backwards compatability between major releases.
+Smartmin will release major versions in step (or rather a bit behind) Django's major releases.  Version 1.8 actually works against both Version 1.7 and Version 1.8 and we hope to support the past two versions in each release.  Smartmin is used in quite a few of our projects, so we don't rock the boat too much, even in major releases. That said, we don't guarantee that major releases always be backwards compatible.
 
-At the onset of each new Django version we will upgrade Twitter Bootstrap to the current version.  Currently for 1.4, which targets Django 1.4, that means Twitter Bootstrap 2.
-
+At the onset of each new Django version we will upgrade Twitter Bootstrap to the current version.  Currently for 1.8, which targets Django 1.8, that means Twitter Bootstrap 2. Note that some of our screenshots are a bit outdated, our standard views now use Bootstrap styling, not the more Django admin looking pages shown in our docs. (PRs accepted to fix this!)
 
 Contents:
 ===========================================
