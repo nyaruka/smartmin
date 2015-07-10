@@ -1,32 +1,32 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from datetime import timedelta
 from django.utils import timezone
 import re
 
+
 def is_password_complex(password):
     has_caps = re.search('[A-Z]+', password)
     has_lower = re.search('[a-z]+', password)
     has_digit = re.search('[0-9]+', password)
-    
+
     if len(password) < 8 or (len(password) < 12 and (not has_caps or not has_lower or not has_digit)):
         return False
     else:
         return True
 
 class RecoveryToken(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     token = models.CharField(max_length=32, unique=True, default=None, help_text="token to reset password")
     created_on = models.DateTimeField(auto_now_add=True)
 
 class FailedLogin(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     failed_on = models.DateTimeField(auto_now_add=True)
 
 class PasswordHistory(models.Model):
-    user = models.ForeignKey(User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              help_text="The user that set a password")
     password = models.CharField(max_length=255,
                                 help_text="The hash of the password that was set")
@@ -72,6 +72,6 @@ class PasswordHistory(models.Model):
 
         # return whether that is expired
         return difference.days > password_expiration
-            
+
 
 

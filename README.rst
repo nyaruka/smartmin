@@ -1,6 +1,9 @@
 Django-Smartmin
 ===========================================
 
+.. image:: https://travis-ci.org/nyaruka/smartmin.svg?branch=master
+    :target: https://travis-ci.org/nyaruka/smartmin
+
 Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients.  Smartmin aims to allow you to quickly build scaffolding which you can customize by using Django 1.7's views.
 
 It is very opininated in how it works, if you don't agree, Smartmin may not be for you:

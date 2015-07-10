@@ -11,8 +11,10 @@ docs/_build
 .coverage
 build
 coverage-report
+celerybeat-schedule
 
 *.DS_Store
+.tox/
 /smartmin/.DS_Store
 /smartmin/static/.DS_Store
 /smartmin/static/img/.DS_Store

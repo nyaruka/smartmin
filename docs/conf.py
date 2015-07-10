@@ -10,6 +10,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import unicode_literals
 
 import sys, os
 
@@ -37,13 +38,13 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Django Smartmin'
-copyright = u'2011, Nyaruka Ltd'
+project = 'Django Smartmin'
+copyright = '2011, Nyaruka Ltd'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-# 
+#
 # The short X.Y version.
 version = '0.0.3'
 # The full version, including alpha/beta/rc tags.
@@ -172,8 +173,8 @@ htmlhelp_basename = 'DjangoSmartmindoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'DjangoSmartmin.tex', u'Django Smartmin Documentation',
-   u'Nyaruka Ltd', 'manual'),
+  ('index', 'DjangoSmartmin.tex', 'Django Smartmin Documentation',
+   'Nyaruka Ltd', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

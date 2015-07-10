@@ -6,13 +6,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from guardian.shortcuts import assign_perm, remove_perm
 from guardian.utils import get_anonymous_user
 from guardian.management import create_anonymous_user
+import six
 import sys
 
 def is_last_model(kwargs):
     """
     Returns whether this is the last post_syncdb called in the application.
     """
-    # If the application specifies it, use their permissions app. This app should be 
+    # If the application specifies it, use their permissions app. This app should be
     # the last app needs to be the last app in INSTALLED_APPS which uses smartmin permissions.
     permissions_app = getattr(settings, 'PERMISSIONS_APP', None)
     if permissions_app:
@@ -23,11 +24,11 @@ def is_last_model(kwargs):
 
 def check_role_permissions(role, permissions, current_permissions):
     """
-    Checks the the passed in role (can be user, group or AnonymousUser)  has all the passed 
+    Checks the the passed in role (can be user, group or AnonymousUser)  has all the passed
     in permissions, granting them if necessary.
     """
     role_permissions = []
-    
+
     # get all the current permissions, we'll remove these as we verify they should still be granted
     for permission in permissions:
         splits = permission.split(".")
@@ -50,15 +51,15 @@ def check_role_permissions(role, permissions, current_permissions):
             # otherwise, this is an error, continue
             else:
                 sys.stderr.write("  invalid permission %s, ignoring\n" % permission)
-                continue                
+                continue
 
         if len(codenames) == 0:
-            continue                            
+            continue
 
         for codename in codenames:
             # the full codename for this permission
             full_codename = "%s.%s" % (app, codename)
-            
+
             # this marks all the permissions which should remain
             role_permissions.append(full_codename)
 
@@ -66,11 +67,11 @@ def check_role_permissions(role, permissions, current_permissions):
                 assign_perm(full_codename, role)
             except ObjectDoesNotExist:
                 pass
-                # sys.stderr.write("  unknown permission %s, ignoring\n" % permission)                
+                # sys.stderr.write("  unknown permission %s, ignoring\n" % permission)
 
     # remove any that are extra
     for permission in current_permissions:
-        if isinstance(permission, unicode):
+        if isinstance(permission, six.text_type):
             key = permission
         else:
             key = "%s.%s"  % (permission.content_type.app_label, permission.codename)
@@ -124,7 +125,7 @@ def add_permission(content_type, permission):
     """
     # bail if we already handled this model
     key = "%s:%s" % (content_type.model, permission)
-    
+
     # build our permission slug
     codename = "%s_%s" % (content_type.model, permission)
 

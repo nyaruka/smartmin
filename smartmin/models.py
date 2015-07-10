@@ -2,8 +2,8 @@ import csv
 import datetime
 import traceback
 import json
+from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 import pytz
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
@@ -18,12 +18,14 @@ class SmartModel(models.Model):
     is_active = models.BooleanField(default=True,
                                     help_text="Whether this item is active, use this instead of deleting")
 
-    created_by = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_creations",
-                                   help_text="The user which originally created this item")    
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                   related_name="%(app_label)s_%(class)s_creations",
+                                   help_text="The user which originally created this item")
     created_on = models.DateTimeField(auto_now_add=True,
                                       help_text="When this item was originally created")
 
-    modified_by = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_modifications",
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                    related_name="%(app_label)s_%(class)s_modifications",
                                     help_text="The user which last modified this item")
     modified_on = models.DateTimeField(auto_now=True,
                                        help_text="When this item was last modified")
@@ -76,7 +78,7 @@ class SmartModel(models.Model):
                     ascii_codec = 'mac_roman'
                     break
             reader.close()
-            
+
             reader = open(filename.name, "rU")
 
             def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
@@ -90,7 +92,7 @@ class SmartModel(models.Model):
                             cell = unicode(cell.decode(ascii_codec))
 
                         encoded.append(cell)
-                        
+
                 yield encoded
 
             reader = unicode_csv_reader(reader)
@@ -110,7 +112,7 @@ class SmartModel(models.Model):
 
             # normalize our header names, removing quotes and spaces
             headers = [cls.normalize_value(_).lower() for _ in header]
-            
+
         return headers
 
 

@@ -77,7 +77,7 @@ class SmartminTest(TestCase):
         self.assertHasAccess(self.author, create_url)
         self.assertHasAccess(self.superuser, create_url)
 
-        # updating posts 
+        # updating posts
         update_url = reverse('blog.post_update', args=[self.post.id])
 
         # if not logged in can't read
@@ -152,10 +152,11 @@ class SmartminTest(TestCase):
         self.client.login(username='author', password='author')
         messages_url = reverse('blog.post_messages')
         response = self.client.get(messages_url)
-        self.assertIn('<div class="alert alert-error">', response.content)
-        self.assertIn('<div class="alert alert-success">', response.content)
-        self.assertIn('<div class="alert alert-info">', response.content)
-        self.assertIn('<div class="alert alert-warning">', response.content)
+        content = response.content.decode("utf-8")
+        self.assertIn('<div class="alert alert-error">', content)
+        self.assertIn('<div class="alert alert-success">', content)
+        self.assertIn('<div class="alert alert-info">', content)
+        self.assertIn('<div class="alert alert-warning">', content)
 
     def test_template_name(self):
         self.client.login(username='author', password='author')
@@ -196,18 +197,18 @@ class SmartminTest(TestCase):
         response = self.client.get(reverse('blog.post_list') + "?_format=json")
 
         # parse the json
-        json_list = json.loads(response.content)
+        json_list = json.loads(response.content.decode("utf-8"))
         self.assertEquals(5, len(json_list))
         self.assertEquals(post1.title, json_list[0]['title'])
 
         # ask for select2 format
         response = self.client.get(reverse('blog.post_list') + "?_format=select2")
-        select2 = json.loads(response.content)
+        select2 = json.loads(response.content.decode("utf-8"))
         self.assertTrue('results' in select2)
         self.assertEquals(5, len(select2['results']))
 
-        
-        
+
+
     def test_success_url(self):
         self.client.login(username='author', password='author')
 
@@ -227,26 +228,30 @@ class SmartminTest(TestCase):
 
         # this view excludes tags with the default form
         response = self.client.get(reverse('blog.post_exclude', args=[self.post.id]))
-        self.assertEquals(0, response.content.count('tags'))
+        content = response.content.decode("utf-8")
+        self.assertEquals(0, content.count('tags'))
 
         # this view excludes tags included in a custom form
         response = self.client.get(reverse('blog.post_exclude2', args=[self.post.id]))
-        self.assertEquals(0, response.content.count('tags'))
+        content = response.content.decode("utf-8")
+        self.assertEquals(0, content.count('tags'))
 
     def test_readonly(self):
         self.client.login(username='author', password='author')
 
         # this view should have our tags field be readonly
         response = self.client.get(reverse('blog.post_readonly', args=[self.post.id]))
-        self.assertEquals(1, response.content.count('testing_tag'))
-        self.assertEquals(1, response.content.count('Tags'))
-        self.assertEquals(0, response.content.count('input id="id_tags"'))
+        content = response.content.decode("utf-8")
+        self.assertEquals(1, content.count('testing_tag'))
+        self.assertEquals(1, content.count('Tags'))
+        self.assertEquals(0, content.count('input id="id_tags"'))
 
         # this view should also have our tags field be readonly, but it does so on a custom form
         response = self.client.get(reverse('blog.post_readonly2', args=[self.post.id]))
-        self.assertEquals(1, response.content.count('testing_tag'))
-        self.assertEquals(1, response.content.count('Tags'))
-        self.assertEquals(0, response.content.count('input id="id_tags"'))
+        content = response.content.decode("utf-8")
+        self.assertEquals(1, content.count('testing_tag'))
+        self.assertEquals(1, content.count('Tags'))
+        self.assertEquals(0, content.count('input id="id_tags"'))
 
 
     def test_integrity_error(self):
@@ -445,7 +450,7 @@ class UserTest(TestCase):
 
         # login as a simple plain user
         self.assertTrue(self.client.login(username='plain', password='plain'))
-        
+
         # check is access his profile, should not since plain users don't have that permission
         response = self.client.get(reverse('users.user_profile', args=[plain.id]))
         self.assertEquals(302, response.status_code)
@@ -454,7 +459,7 @@ class UserTest(TestCase):
         self.assertTrue(self.client.login(username='steve', password='googleIsNumber1'))
         response = self.client.get(reverse('users.user_profile', args=[steve.id]))
         self.assertEquals(reverse('users.user_profile', args=[steve.id]), response.request['PATH_INFO'])
-        
+
         # check if we are at the right form
         self.assertEquals("UserProfileForm", type(response.context['form']).__name__)
 
@@ -478,7 +483,7 @@ class UserTest(TestCase):
         # check if he can fill old and new password only without the confirm new password
         post_data = dict(old_password="plain", new_password="NewPassword1")
         response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
-        self.assertIn("Confirm the new password by filling the this field", response.content)
+        self.assertIn("Confirm the new password by filling the this field", response.content.decode("utf-8"))
 
         # actually change the password
         post_data = dict(old_password="googleIsNumber1", new_password="NewPassword1", confirm_new_password="NewPassword1")
@@ -500,7 +505,7 @@ class UserTest(TestCase):
     def test_token(self):
         # create a user user1 with password user1 and email user1@user1.com
         user1 = User.objects.create_user("user1", 'user1@user1.com', 'user1')
- 
+
         # be sure no one is logged in
         self.client.logout()
 
@@ -510,15 +515,15 @@ class UserTest(TestCase):
 
         # initialise the process of recovering password by clicking the forget
         # password link and fill the form with the email associated with the account
-        
-        # invalid user 
+
+        # invalid user
         forget_url = reverse('users.user_forget')
-    
+
         post_data = dict()
         post_data['email'] = 'nouser@nouser.com'
-        
+
         response = self.client.post(forget_url, post_data, follow=True)
-        
+
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
 
@@ -527,9 +532,9 @@ class UserTest(TestCase):
 
         post_data = dict()
         post_data['email'] = 'user1@user1.com'
-        
+
         response = self.client.post(forget_url, post_data, follow=True)
-        
+
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
 
@@ -543,7 +548,7 @@ class UserTest(TestCase):
         self.assertFalse(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
         # user click the link provided in mail
-        
+
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
 
         response = self.client.get(recover_url)
@@ -551,16 +556,16 @@ class UserTest(TestCase):
         self.assertTrue(response.context['form'])
         self.assertTrue('new_password' in response.context['form'].fields)
         self.assertTrue('confirm_new_password' in response.context['form'].fields)
-        
+
         post_data = dict()
         post_data['new_password'] = 'user1_newpasswd'
         post_data['confirm_new_password'] = ''
 
         response = self.client.post(recover_url, post_data, follow=True)
-        self.assertIn("This field is required.", response.content)
+        self.assertIn("This field is required.", response.content.decode("utf-8"))
 
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
         response = self.client.get(recover_url)
         self.assertEquals(200, response.status_code)
         self.assertTrue(response.context['form'])
@@ -600,7 +605,7 @@ class UserTest(TestCase):
 
         # if the token is valid we get a form to fill with new password
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
         response = self.client.get(recover_url)
         self.assertEquals(200, response.status_code)
         self.assertTrue(response.context['form'])
@@ -614,17 +619,17 @@ class UserTest(TestCase):
         response = self.client.post(recover_url, post_data, follow=True)
         # form submitted successfull
         self.assertEquals(200, response.status_code)
-        
+
         # now the user cannot login with the old password but can login with the new one
         self.assertFalse(self.client.login(username='user1', password='user1'))
         self.client.logout()
         self.assertTrue(self.client.login(username='user1', password='user1_newpasswd'))
         self.client.logout()
         self.assertFalse(RecoveryToken.objects.all())
-        
+
         # second click on the link
         recover_url = reverse('users.user_recover', args=[recovery_token.token])
-        
+
         response = self.client.get(recover_url)
         self.assertEquals(302, response.status_code)
 
@@ -643,7 +648,7 @@ class UserTest(TestCase):
         response = self.client.post(recover_url, post_data, follow=True)
         # form submitted successfull
         self.assertEquals(200, response.status_code)
-        
+
         # password must not change
         self.assertFalse(self.client.login(username='user1', password='user1_newpasswd_2'))
         self.client.logout()
@@ -676,7 +681,7 @@ class UserTest(TestCase):
 class UserTestCase(TestCase):
 
     def test_reverse(self):
-        # the reverse tag here should be blog.user_list, not auth.user_list, since the 
+        # the reverse tag here should be blog.user_list, not auth.user_list, since the
         # CRUDL objects is defined in the blog app
         response = self.client.get(reverse('blog.user_list'))
         self.assertEquals(200, response.status_code)
@@ -729,7 +734,9 @@ class TagTestCase(TestCase):
 
     def test_map(self):
         from smartmin.templatetags.smartmin import map
-        self.assertEquals("title: First Post id: 1", map("title: %(title)s id: %(id)d", self.post))
+        kwargs = {'title': self.post.title, 'id': self.post.pk}
+        self.assertEquals("title: {title} id: {id}".format(**kwargs),
+                          map("title: %(title)s id: %(id)d", self.post))
 
     def test_gmail_time(self):
         import pytz
@@ -737,7 +744,7 @@ class TagTestCase(TestCase):
 
         # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
         now = timezone.now()
-        modified_now = now.replace(hour=17, minute=05)
+        modified_now = now.replace(hour=17, minute=5)
         self.assertEquals("7:05 pm", gmail_time(modified_now))
 
         # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
@@ -750,12 +757,12 @@ class TagTestCase(TestCase):
         self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
 
         # but a different year is different
-        jan_2 = datetime(2012, 01, 02, 17, 05, 00, 00).replace(tzinfo = pytz.utc)
+        jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo = pytz.utc)
         self.assertEquals("2/1/12", gmail_time(jan_2, now))
 
     def test_user_as_string(self):
         from smartmin.templatetags.smartmin import user_as_string
-        
+
         # plain user have both first and last names
         self.plain.first_name = "Mr"
         self.plain.last_name = "Chips"
@@ -800,7 +807,8 @@ class UserLockoutTestCase(TestCase):
         response = self.client.get(reverse('users.user_login'))
 
         # make sure there is no reset link
-        self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+        content = response.content.decode("utf-8")
+        self.assertTrue(content.find(reverse('users.user_forget')) == -1);
 
         # also make sure we can't actually do a reset
         post_data = dict(email="nicpottier@gmail.com")
@@ -817,13 +825,15 @@ class UserLockoutTestCase(TestCase):
         # on the fifth time it should fail
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
         self.assertFalse(response.context['user'].is_authenticated())
-        self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+        content = response.content.decode("utf-8")
+        self.assertTrue(content.find(reverse('users.user_forget')) == -1);
 
         # even with right password, no dice
         post_data = dict(username='plain', password='plain')
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
         self.assertFalse(response.context['user'].is_authenticated())
-        self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+        content = response.content.decode("utf-8")
+        self.assertTrue(content.find(reverse('users.user_forget')) == -1);
 
     def testNoRecovery(self):
         with self.settings(USER_ALLOW_EMAIL_RECOVERY=False):
@@ -854,7 +864,8 @@ class UserLockoutTestCase(TestCase):
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
 
             # should say nothing about 10 minutes
-            self.assertTrue(response.content.find("10 minutes") == -1)
+            content = response.content.decode("utf-8")
+            self.assertTrue(content.find("10 minutes") == -1)
 
             # move all our lockout events to 11 minutes in the past
             ten_minutes = timedelta(minutes=10)
@@ -866,10 +877,11 @@ class UserLockoutTestCase(TestCase):
             post_data = dict(username='plain', password='plain')
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
             self.assertContains(response, "cannot log")
-            self.assertTrue(response.content.find(reverse('users.user_forget')) == -1);
+            content = response.content.decode("utf-8")
+            self.assertTrue(content.find(reverse('users.user_forget')) == -1);
 
             # log in as superuser
-            response = self.client.post(reverse('users.user_login'), 
+            response = self.client.post(reverse('users.user_login'),
                                         dict(username='superuser', password='superuser'))
 
             # go edit our 'plain' user
@@ -916,7 +928,7 @@ class PasswordExpirationTestCase(TestCase):
 
     def testPasswordRepeat(self):
         history = PasswordHistory.objects.create(user=self.plain,
-                                                 password=self.plain.password)        
+                                                 password=self.plain.password)
 
         with self.settings(USER_PASSWORD_REPEAT_WINDOW=365):
             self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1"))
@@ -950,7 +962,7 @@ class PasswordExpirationTestCase(TestCase):
 
             history.set_on = ninety_days_ago
             history.save()
-            
+
             # log in
             self.client.logout()
             post_data = dict(username='plain', password='Password1')
@@ -990,6 +1002,6 @@ class PasswordExpirationTestCase(TestCase):
 
             post_data = dict(username='plain', password='Password2')
             response = self.client.post(reverse('users.user_login'), post_data)
-            
+
             self.assertEquals(302, response.status_code)
             self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)

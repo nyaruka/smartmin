@@ -1,8 +1,9 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.http import HttpResponse
-import sys, StringIO, os
+import sys, os
 from django.utils import timezone
 from django.conf import settings
+from six.moves import StringIO
 
 class AjaxRedirect(object):
     def process_response(self, request, response):
@@ -18,10 +19,10 @@ class AjaxRedirect(object):
 class ProfileMiddleware():
     def __init__(self):
         pass
-    
+
     def process_view(self, request, view, *args, **kwargs):
         import hotshot, hotshot.stats
-        
+
         for item in request.META['QUERY_STRING'].split('&'):
             if item.split('=')[0] == 'profile': # profile in query string
                 # catch the output, must happen before stats object is created
