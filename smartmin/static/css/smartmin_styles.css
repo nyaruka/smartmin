@@ -63,7 +63,7 @@ div.page-header {
 
 .smartmin-form-field ul li input {
   width: 30px
-  
+
 }
 input.form-control, textarea.form-control, select.form-control {
   width: 500px;
@@ -81,7 +81,7 @@ input.form-control, textarea.form-control, select.form-control {
     background-color: #fff;
     padding: 20px;
     padding-top: 10px;
-    margin: 0 -20px; 
+    margin: 0 -20px;
     -webkit-border-radius: 0 0 6px 6px;
     -moz-border-radius: 0 0 6px 6px;
     border-radius: 0 0 6px 6px;
@@ -132,6 +132,10 @@ form div.clearfix.form-field.error {
 
 input, textarea, select, .uneditable-input {
     width: 500px;
+}
+
+input[type="checkbox"] {
+    width: initial;
 }
 
 .help-inline, .help-block {
@@ -220,4 +224,4 @@ input[readonly].datepicker {
 
 .navbar-toggle .icon-bar {
   background-color: #333;
-} 
+}
