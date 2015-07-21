@@ -1,3 +1,4 @@
+from django.core import mail
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -522,6 +523,12 @@ class UserTest(TestCase):
         post_data['email'] = 'nouser@nouser.com'
 
         response = self.client.post(forget_url, post_data, follow=True)
+        self.assertEquals(1, len(mail.outbox))
+        sent_email = mail.outbox[0]
+        self.assertEqual(len(sent_email.to), 1)
+        self.assertEqual(sent_email.to[0], 'nouser@nouser.com')
+        self.assertTrue("we don't have an account associated with it" in sent_email.body)
+        self.assertNotIn("Clicking on the following link will allow you to reset the password", sent_email.body)
 
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
@@ -536,6 +543,12 @@ class UserTest(TestCase):
 
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
+        self.assertEquals(2, len(mail.outbox))
+        sent_email = mail.outbox[1]
+        self.assertEqual(len(sent_email.to), 1)
+        self.assertEqual(sent_email.to[0], 'user1@user1.com')
+        self.assertNotIn("we don't have an account associated with it", sent_email.body)
+        self.assertTrue("Clicking on the following link will allow you to reset the password", sent_email.body)
 
         # now there is a token generated
         recovery_token = RecoveryToken.objects.get(user=user1)
