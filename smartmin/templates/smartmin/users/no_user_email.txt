@@ -1,4 +1,4 @@
-Hi from {{ website }},
+Hi from {{ hostname }},
 
 Someone has requested that the password for this email address be reset, however we don't have an account associated with it.
 

@@ -1,10 +1,10 @@
-Hi from {{ website }},
+Hi from {{ hostname }},
 
 Someone has requested that the password for this email address be reset.
 
 Clicking on the following link will allow you to reset the password for the account {{user.username}}:
 
-{{link}}
+{{protocol}}://{{hostname}}/{{path}}
 
 If you did not request this, don't worry, this email has only been sent to you and your account remains secure.
 

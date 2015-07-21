@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import login as django_login
 from django import forms
 from django.conf import settings
+from django.utils.module_loading import import_string
 from .models import *
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, render
@@ -274,6 +275,22 @@ class UserCRUDL(SmartCRUDL):
         success_url = "@users.user_login"
         fields = ('email', )
 
+        def build_email_context(self):
+            context = Context()
+
+            processors = []
+            collect = []
+            collect.extend(('smartmin.users.context_processors.links_components',))
+            collect.extend(getattr(settings, "EMAIL_CONTEXT_PROCESSORS", ()))
+            for path in collect:
+                func = import_string(path)
+                processors.append(func)
+
+            for processor in processors:
+                context.update(processor(self.request))
+
+            return context
+
         def form_valid(self, form):
             email = form.cleaned_data['email']
             hostname = getattr(settings, 'HOSTNAME', self.request.get_host())
@@ -282,25 +299,23 @@ class UserCRUDL(SmartCRUDL):
             domain = hostname[:col_index] if col_index > 0 else hostname
 
             from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
+            user_email_template = getattr(settings, "USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/user_email.txt")
+            no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/no_user_email.txt")
 
-            protocol = 'https' if self.request.is_secure() else 'http'
+            context = self.build_email_context()
 
-            user = User.objects.filter(email=email)
+            email_template = loader.get_template(no_user_email_template)
+            user = User.objects.filter(email=email).first()
             if user:
-                user = user[0]
-
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token, user=user)
-                email_template = loader.get_template('smartmin/users/user_email.txt')
+                email_template = loader.get_template(user_email_template)
                 FailedLogin.objects.filter(user=user).delete()
-                context = Context(dict(website=hostname, user=user,
-                                       link='%s://%s/users/user/recover/%s/' % (protocol, hostname, token)))
-                user.email_user(_("Password Recovery"), email_template.render(context) , from_email)
-            else:
-                email_template = loader.get_template('smartmin/users/no_user_email.txt')
-                context = Context(dict(website=hostname))
-                send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
-                          [email], fail_silently=False)
+                context['user'] = user
+                context['path'] = "%s" % reverse('users.user_recover', args=[token])
+
+            send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
+                      [email], fail_silently=False)
 
             response = super(UserCRUDL.Forget, self).form_valid(form)
             return response
