@@ -1,8 +1,6 @@
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import login as django_login
 from django import forms
-from django.conf import settings
-from django.utils.module_loading import import_string
 from .models import *
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, render
@@ -20,7 +18,7 @@ import string
 from django.utils import timezone
 from datetime import timedelta
 
-from django.template import loader, Context
+from django.template import loader
 from smartmin.views import *
 
 import re
@@ -275,22 +273,6 @@ class UserCRUDL(SmartCRUDL):
         success_url = "@users.user_login"
         fields = ('email', )
 
-        def build_email_context(self):
-            context = Context()
-
-            processors = []
-            collect = []
-            collect.extend(('smartmin.users.context_processors.link_components',))
-            collect.extend(getattr(settings, "EMAIL_CONTEXT_PROCESSORS", ()))
-            for path in collect:
-                func = import_string(path)
-                processors.append(func)
-
-            for processor in processors:
-                context.update(processor(self.request))
-
-            return context
-
         def form_valid(self, form):
             email = form.cleaned_data['email']
             hostname = getattr(settings, 'HOSTNAME', self.request.get_host())
@@ -302,10 +284,11 @@ class UserCRUDL(SmartCRUDL):
             user_email_template = getattr(settings, "USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/user_email.txt")
             no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/no_user_email.txt")
 
-            context = self.build_email_context()
-
             email_template = loader.get_template(no_user_email_template)
             user = User.objects.filter(email=email).first()
+
+            context = build_email_context(self.request, user)
+
             if user:
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token, user=user)
