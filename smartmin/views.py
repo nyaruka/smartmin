@@ -27,6 +27,7 @@ import string
 from smartmin.csv_imports.models import ImportTask
 from . import widgets
 
+
 def smart_url(url, obj=None):
     """
     URLs that start with @ are reversed, using the passed in arguments.

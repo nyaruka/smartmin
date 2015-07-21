@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import login as django_login
 from django import forms
-from django.conf import settings
 from .models import *
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, render
@@ -19,7 +18,8 @@ import string
 from django.utils import timezone
 from datetime import timedelta
 
-from django.template import loader, Context
+from django.template import loader
+from smartmin.email import build_email_context
 from smartmin.views import *
 
 import re
@@ -282,25 +282,24 @@ class UserCRUDL(SmartCRUDL):
             domain = hostname[:col_index] if col_index > 0 else hostname
 
             from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
+            user_email_template = getattr(settings, "USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/user_email.txt")
+            no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/no_user_email.txt")
 
-            protocol = 'https' if self.request.is_secure() else 'http'
+            email_template = loader.get_template(no_user_email_template)
+            user = User.objects.filter(email=email).first()
 
-            user = User.objects.filter(email=email)
+            context = build_email_context(self.request, user)
+
             if user:
-                user = user[0]
-
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token, user=user)
-                email_template = loader.get_template('smartmin/users/user_email.txt')
+                email_template = loader.get_template(user_email_template)
                 FailedLogin.objects.filter(user=user).delete()
-                context = Context(dict(website=hostname, user=user,
-                                       link='%s://%s/users/user/recover/%s/' % (protocol, hostname, token)))
-                user.email_user(_("Password Recovery"), email_template.render(context) , from_email)
-            else:
-                email_template = loader.get_template('smartmin/users/no_user_email.txt')
-                context = Context(dict(website=hostname))
-                send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
-                          [email], fail_silently=False)
+                context['user'] = user
+                context['path'] = "%s" % reverse('users.user_recover', args=[token])
+
+            send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
+                      [email], fail_silently=False)
 
             response = super(UserCRUDL.Forget, self).form_valid(form)
             return response
