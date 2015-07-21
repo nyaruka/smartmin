@@ -280,7 +280,7 @@ class UserCRUDL(SmartCRUDL):
 
             processors = []
             collect = []
-            collect.extend(('smartmin.users.context_processors.links_components',))
+            collect.extend(('smartmin.users.context_processors.link_components',))
             collect.extend(getattr(settings, "EMAIL_CONTEXT_PROCESSORS", ()))
             for path in collect:
                 func = import_string(path)
