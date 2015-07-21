@@ -19,6 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from django.template import loader
+from smartmin.email import build_email_context
 from smartmin.views import *
 
 import re

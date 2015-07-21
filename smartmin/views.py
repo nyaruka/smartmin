@@ -1,8 +1,6 @@
 from django.db import models
-from django.template import Context
 
 from django.utils.encoding import force_text
-from django.utils.module_loading import import_string
 from django.views.generic.edit import FormMixin, ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView, View
 from django.views.generic import DetailView, ListView
@@ -28,23 +26,6 @@ import six
 import string
 from smartmin.csv_imports.models import ImportTask
 from . import widgets
-
-
-def build_email_context(request=None, user=None):
-    context = Context({'user': user})
-
-    processors = []
-    collect = []
-    collect.extend(('smartmin.users.context_processors.link_components',))
-    collect.extend(getattr(settings, "EMAIL_CONTEXT_PROCESSORS", ()))
-    for path in collect:
-        func = import_string(path)
-        processors.append(func)
-
-    for processor in processors:
-        context.update(processor(request))
-
-    return context
 
 
 def smart_url(url, obj=None):
