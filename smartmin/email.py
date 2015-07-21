@@ -17,7 +17,7 @@ def build_email_context(request=None, user=None):
     processors = []
     collect = []
     collect.extend(getattr(settings, "EMAIL_CONTEXT_PROCESSORS",
-                           ('smartmin.emaile.link_components',)))
+                           ('smartmin.email.link_components',)))
     for path in collect:
         func = import_string(path)
         processors.append(func)
