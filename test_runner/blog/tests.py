@@ -1,3 +1,4 @@
+from mock import patch
 from django.core import mail
 from django.test import TestCase
 from django.test.client import Client
@@ -539,16 +540,57 @@ class UserTest(TestCase):
         post_data = dict()
         post_data['email'] = 'user1@user1.com'
 
+        with patch('django.http.request.HttpRequest.get_host') as request_get_host_mock:
+            request_get_host_mock.return_value = 'nyaruka.com'
+            with patch('django.http.request.HttpRequest.is_secure') as request_secure_mock:
+                request_secure_mock.return_value = False
+                response = self.client.post(forget_url, post_data, follow=True)
+
+                # email form submitted successfully
+                self.assertEquals(200, response.status_code)
+                self.assertEquals(2, len(mail.outbox))
+                sent_email = mail.outbox[1]
+                self.assertEqual(len(sent_email.to), 1)
+                self.assertEqual(sent_email.to[0], 'user1@user1.com')
+                self.assertNotIn("we don't have an account associated with it", sent_email.body)
+                self.assertTrue("Clicking on the following link will allow you to reset the password", sent_email.body)
+
+                # now there is a token generated
+                recovery_token = RecoveryToken.objects.get(user=user1)
+                self.assertNotEquals(None,recovery_token.token)
+
+                self.assertTrue("http://nyaruka.com/users/user/recover/%s" % recovery_token.token in sent_email.body)
+                self.assertFalse("http://nyaruka.com//users/user/recover/%s" % recovery_token.token in sent_email.body)
+
+                # delete the recovery tokens we have
+                RecoveryToken.objects.all().delete()
+
+                request_secure_mock.return_value = True
+                response = self.client.post(forget_url, post_data, follow=True)
+
+                # email form submitted successfully
+                self.assertEquals(200, response.status_code)
+                self.assertEquals(3, len(mail.outbox))
+                sent_email = mail.outbox[2]
+                self.assertEqual(len(sent_email.to), 1)
+                self.assertEqual(sent_email.to[0], 'user1@user1.com')
+                self.assertNotIn("we don't have an account associated with it", sent_email.body)
+                self.assertTrue("Clicking on the following link will allow you to reset the password", sent_email.body)
+
+                # now there is a token generated
+                recovery_token = RecoveryToken.objects.get(user=user1)
+                self.assertNotEquals(None,recovery_token.token)
+
+                self.assertTrue("https://nyaruka.com/users/user/recover/%s" % recovery_token.token in sent_email.body)
+                self.assertFalse("https://nyaruka.com//users/user/recover/%s" % recovery_token.token in sent_email.body)
+
+                # delete the recovery tokens we have
+                RecoveryToken.objects.all().delete()
+
         response = self.client.post(forget_url, post_data, follow=True)
 
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
-        self.assertEquals(2, len(mail.outbox))
-        sent_email = mail.outbox[1]
-        self.assertEqual(len(sent_email.to), 1)
-        self.assertEqual(sent_email.to[0], 'user1@user1.com')
-        self.assertNotIn("we don't have an account associated with it", sent_email.body)
-        self.assertTrue("Clicking on the following link will allow you to reset the password", sent_email.body)
 
         # now there is a token generated
         recovery_token = RecoveryToken.objects.get(user=user1)
