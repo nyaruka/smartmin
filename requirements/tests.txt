@@ -1,2 +1,4 @@
 django_nose
 psycopg2
+mock
+funcsigs
