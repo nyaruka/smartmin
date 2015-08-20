@@ -1,8 +1,11 @@
 from six.moves.urllib.parse import urlparse
-from django.contrib.auth.models import Group, User
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
 from django.conf import settings
+
 
 class SmartminTest(TestCase):
 
@@ -48,7 +51,7 @@ class SmartminTest(TestCase):
 
     def create_user(self, username, group_names=[]):
         # Create a user to run our CRUDL tests
-        user = User.objects.create_user(username, "%s@nyaruka.com" % username)
+        user = get_user_model().objects.create_user(username, "%s@nyaruka.com" % username)
         user.set_password(username)
         user.save()
         for group in group_names:
