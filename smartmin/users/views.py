@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.auth.views import login as django_login
 from django import forms
 from .models import *
@@ -57,7 +58,7 @@ class UserForm(forms.ModelForm):
 
         return user
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active')
 
 class UserUpdateForm(UserForm):
@@ -154,7 +155,7 @@ class SetPasswordForm(UserForm):
 
 
 class UserCRUDL(SmartCRUDL):
-    model = User
+    model = get_user_model()
     permissions = True
     actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic')
 
@@ -286,7 +287,7 @@ class UserCRUDL(SmartCRUDL):
             no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/no_user_email.txt")
 
             email_template = loader.get_template(no_user_email_template)
-            user = User.objects.filter(email=email).first()
+            user = get_user_model().objects.filter(email=email).first()
 
             context = build_email_context(self.request, user)
 
@@ -413,7 +414,7 @@ def login(request, template_name='smartmin/users/login.html',
         if 'username' in request.POST and 'password' in request.POST:
             username = request.POST['username']
 
-            user = User.objects.filter(username=username)
+            user = get_user_model().objects.filter(username=username)
 
             # this could be a valid login by a user
             if user:

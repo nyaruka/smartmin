@@ -10,7 +10,7 @@ from django.utils.http import urlquote
 from django.db.models import Q
 from django.db import IntegrityError
 from django.conf import settings
-from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
 from django.http import HttpResponseRedirect, HttpResponse
 from guardian.shortcuts import get_objects_for_user, assign_perm
 from django.core.exceptions import ImproperlyConfigured
@@ -19,7 +19,6 @@ import json
 from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 import six
 
@@ -667,7 +666,7 @@ class SmartListView(SmartView, ListView):
                 user = self.request.user
                 # guardian only behaves with model users
                 if settings.ANONYMOUS_USER_ID and user.is_anonymous():
-                    user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+                    user = get_user_model().objects.get(pk=settings.ANONYMOUS_USER_ID)
                 queryset = queryset.filter(id__in=get_objects_for_user(user, self.list_permission))
 
         return self.order_queryset(queryset)
