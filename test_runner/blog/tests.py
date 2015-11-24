@@ -520,6 +520,10 @@ class UserTest(TestCase):
         # invalid user
         forget_url = reverse('users.user_forget')
 
+        response = self.client.get(forget_url)
+        self.assertNotEqual(response.context['view'].template_name, '/smartmin/users/user_forget.html')
+        self.assertEqual(response.context['view'].template_name, 'smartmin/users/user_forget.html')
+
         post_data = dict()
         post_data['email'] = 'nouser@nouser.com'
 
@@ -608,6 +612,7 @@ class UserTest(TestCase):
         response = self.client.get(recover_url)
         self.assertEquals(200, response.status_code)
         self.assertTrue(response.context['form'])
+        self.assertEqual(response.context['view'].template_name, 'smartmin/users/user_recover.html')
         self.assertTrue('new_password' in response.context['form'].fields)
         self.assertTrue('confirm_new_password' in response.context['form'].fields)
 

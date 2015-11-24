@@ -268,7 +268,7 @@ class UserCRUDL(SmartCRUDL):
 
     class Forget(SmartFormView):
         title = _("Password Recovery")
-        template_name = '/smartmin/users/user_forget.html'
+        template_name = 'smartmin/users/user_forget.html'
         form_class = UserForgetForm
         permission = None
         success_message = _("An Email has been sent to your account with further instructions.")
@@ -353,6 +353,7 @@ class UserCRUDL(SmartCRUDL):
         success_url = '@users.user_login'
         fields = ('new_password', 'confirm_new_password')
         title = _("Reset your Password")
+        template_name = 'smartmin/users/user_recover.html'
 
         @classmethod
         def derive_url_pattern(cls, path, action):
