@@ -222,7 +222,7 @@ class SmartModel(models.Model):
         if import_results is not None:
             import_results['records'] = len(records)
             import_results['errors'] = num_errors + len(error_messages)
-            import_results['error_description'] = error_messages[:20]
+            import_results['error_messages'] = error_messages[:20]
 
         return records
 
@@ -323,7 +323,7 @@ class SmartModel(models.Model):
         if import_results is not None:
             import_results['records'] = len(records)
             import_results['errors'] = num_errors + len(error_messages)
-            import_results['error_description'] = error_messages[:20]
+            import_results['error_messages'] = error_messages[:20]
 
         return records
 
