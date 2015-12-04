@@ -9,6 +9,14 @@ import pytz
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
 
 
+class SmartminImportRowError(Exception):
+    def __unicode__(self):  # pragma: no cover
+        return self.message
+
+    def __str__(self):
+        return str(self.__unicode__())
+
+
 class SmartModel(models.Model):
     """
     Useful abstract base class that adds the concept of something being active,
@@ -168,7 +176,7 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
-        error_description = ''
+        error_description = dict()
 
         for sheet in workbook.sheets():
             # read our header
@@ -195,16 +203,15 @@ class SmartModel(models.Model):
                     field_values = cls.prepare_fields(field_values, import_params, user)
                     record = cls.create_instance(field_values)
 
-                    record_error_description = ''
-                    if isinstance(record, tuple):
-                        record_error_description = record[1]
-                        record = record[0]
-
                     if record:
                         records.append(record)
                     else:
                         num_errors += 1
-                        error_description += "Row %d: %s\n" % (line_number + 1, record_error_description)
+
+                except SmartminImportRowError as e:
+                    num_errors += 1
+                    error_description[line_number + 1] += str(e)
+
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
@@ -283,7 +290,7 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
-        error_description = ''
+        error_description = dict()
 
         for row in reader:
             # trim all our values
@@ -301,17 +308,15 @@ class SmartModel(models.Model):
             try:
                 field_values = cls.prepare_fields(field_values, import_params, user)
                 record = cls.create_instance(field_values)
-
-                record_error_description = ''
-                if isinstance(record, tuple):
-                    record_error_description = record[1]
-                    record = record[0]
-
                 if record:
                     records.append(record)
                 else:
                     num_errors += 1
-                    error_description += "Row %d: %s\n" % (line_number + 1, record_error_description)
+
+            except SmartminImportRowError as e:
+                num_errors += 1
+                error_description[line_number + 1] += str(e)
+
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
