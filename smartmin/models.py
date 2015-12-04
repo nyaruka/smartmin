@@ -168,6 +168,7 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
+        error_description = ''
 
         for sheet in workbook.sheets():
             # read our header
@@ -193,10 +194,17 @@ class SmartModel(models.Model):
                 try:
                     field_values = cls.prepare_fields(field_values, import_params, user)
                     record = cls.create_instance(field_values)
+
+                    record_error_description = ''
+                    if isinstance(record, tuple):
+                        record_error_description = record[1]
+                        record = record[0]
+
                     if record:
                         records.append(record)
                     else:
                         num_errors += 1
+                        error_description += "Row %d: %s\n" % (line_number, record_error_description)
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
@@ -208,6 +216,7 @@ class SmartModel(models.Model):
         if import_results is not None:
             import_results['records'] = len(records)
             import_results['errors'] = num_errors
+            import_results['error_description'] = error_description
 
         return records
 
@@ -274,6 +283,7 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
+        error_description = ''
 
         for row in reader:
             # trim all our values
@@ -291,10 +301,17 @@ class SmartModel(models.Model):
             try:
                 field_values = cls.prepare_fields(field_values, import_params, user)
                 record = cls.create_instance(field_values)
+
+                record_error_description = ''
+                if isinstance(record, tuple):
+                    record_error_description = record[1]
+                    record = record[0]
+
                 if record:
                     records.append(record)
                 else:
                     num_errors += 1
+                    error_description += "Row %d: %s\n" % (line_number, record_error_description)
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
@@ -303,6 +320,7 @@ class SmartModel(models.Model):
         if import_results is not None:
             import_results['records'] = len(records)
             import_results['errors'] = num_errors
+            import_results['error_description'] = error_description
 
         return records
 
