@@ -9,7 +9,7 @@ import pytz
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
 
 
-class SmartminImportRowError(Exception):
+class SmartImportRowError(Exception):
     def __unicode__(self):  # pragma: no cover
         return self.message
 
@@ -176,7 +176,7 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
-        error_description = dict()
+        error_messages = []
 
         for sheet in workbook.sheets():
             # read our header
@@ -208,9 +208,8 @@ class SmartModel(models.Model):
                     else:
                         num_errors += 1
 
-                except SmartminImportRowError as e:
-                    num_errors += 1
-                    error_description[line_number + 1] += str(e)
+                except SmartImportRowError as e:
+                    error_messages.append(dict(line=line_number+1, error=str(e)))
 
                 except Exception as e:
                     if log:
@@ -222,8 +221,8 @@ class SmartModel(models.Model):
 
         if import_results is not None:
             import_results['records'] = len(records)
-            import_results['errors'] = num_errors
-            import_results['error_description'] = error_description
+            import_results['errors'] = num_errors + len(error_messages)
+            import_results['error_description'] = error_messages[:20]
 
         return records
 
@@ -290,7 +289,7 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
-        error_description = dict()
+        error_messages = []
 
         for row in reader:
             # trim all our values
@@ -313,9 +312,8 @@ class SmartModel(models.Model):
                 else:
                     num_errors += 1
 
-            except SmartminImportRowError as e:
-                num_errors += 1
-                error_description[line_number + 1] += str(e)
+            except SmartImportRowError as e:
+                error_messages.append(dict(line=line_number+1, error=str(e)))
 
             except Exception as e:
                 if log:
@@ -324,8 +322,8 @@ class SmartModel(models.Model):
 
         if import_results is not None:
             import_results['records'] = len(records)
-            import_results['errors'] = num_errors
-            import_results['error_description'] = error_description
+            import_results['errors'] = num_errors + len(error_messages)
+            import_results['error_description'] = error_messages[:20]
 
         return records
 
