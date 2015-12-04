@@ -3,9 +3,6 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-import sys
-TESTING = sys.argv[1:2] == ['test']
-
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -227,7 +224,3 @@ BROKER_BACKEND = 'redis'
 BROKER_HOST = 'localhost'
 BROKER_PORT = 6379
 BROKER_VHOST = '4'
-
-if TESTING:
-    CELERY_ALWAYS_EAGER =True
-    CELERY_RESULT_BACKEND = None
