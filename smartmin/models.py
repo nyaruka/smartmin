@@ -204,7 +204,7 @@ class SmartModel(models.Model):
                         records.append(record)
                     else:
                         num_errors += 1
-                        error_description += "Row %d: %s\n" % (line_number, record_error_description)
+                        error_description += "Row %d: %s\n" % (line_number + 1, record_error_description)
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
@@ -311,7 +311,7 @@ class SmartModel(models.Model):
                     records.append(record)
                 else:
                     num_errors += 1
-                    error_description += "Row %d: %s\n" % (line_number, record_error_description)
+                    error_description += "Row %d: %s\n" % (line_number + 1, record_error_description)
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
