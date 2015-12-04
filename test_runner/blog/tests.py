@@ -304,7 +304,7 @@ class SmartminTest(TestCase):
         self.assertEquals(2, Post.active.all().count())
 
     def test_csv_import(self):
-        with self.settings(CELERY_ALWAYS_EAGER=True, CELERY_RESULT_BACKEND='db+sqlite:///results.db'):
+        with self.settings(CELERY_ALWAYS_EAGER=True, CELERY_RESULT_BACKEND='cache', CELERY_CACHE_BACKEND='memory'):
             import_url = reverse('blog.post_csv_import')
 
             response = self.client.get(import_url)
