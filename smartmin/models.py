@@ -313,7 +313,7 @@ class SmartModel(models.Model):
                     num_errors += 1
 
             except SmartImportRowError as e:
-                error_messages.append(dict(line=line_number+1, error=str(e)))
+                error_messages.append(dict(line=line_number, error=str(e)))
 
             except Exception as e:
                 if log:

@@ -4,6 +4,8 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
+from smartmin.csv_imports.models import ImportTask
+from smartmin.models import SmartImportRowError
 from test_runner.blog.models import Post, Category
 from smartmin.management import check_role_permissions
 import json
@@ -15,6 +17,7 @@ from django.conf import settings
 from smartmin.users.models import *
 from datetime import date, datetime, timedelta
 from django.utils import timezone
+
 
 class SmartminTest(TestCase):
 
@@ -117,7 +120,6 @@ class SmartminTest(TestCase):
         response = self.client.get(update_url)
         self.assertEquals(200, response.status_code)
 
-
     def test_create(self):
         self.client.login(username='author', password='author')
 
@@ -209,8 +211,6 @@ class SmartminTest(TestCase):
         self.assertTrue('results' in select2)
         self.assertEquals(5, len(select2['results']))
 
-
-
     def test_success_url(self):
         self.client.login(username='author', password='author')
 
@@ -255,7 +255,6 @@ class SmartminTest(TestCase):
         self.assertEquals(1, content.count('Tags'))
         self.assertEquals(0, content.count('input id="id_tags"'))
 
-
     def test_integrity_error(self):
         self.client.login(username='author', password='author')
 
@@ -280,14 +279,13 @@ class SmartminTest(TestCase):
         # reduce our permission set to not include categories
         permissions =  ('blog.post.*', 'blog.post.too.many.dots', 'blog.category.not_valid_either', 'blog.', 'blog.foo.*')
 
-        self.assertEquals(16, authors.permissions.all().count())
+        self.assertEquals(17, authors.permissions.all().count())
 
         # check that they are reassigned
         check_role_permissions(authors, permissions, authors.permissions.all())
 
         # removing all category actions should bring us to 10
-        self.assertEquals(11, authors.permissions.all().count())
-
+        self.assertEquals(12, authors.permissions.all().count())
 
     def test_smart_model(self):
         p1 = Post.objects.create(title="First Post", body="First Post body", order=1, tags="first",
@@ -304,6 +302,72 @@ class SmartminTest(TestCase):
 
         self.assertEquals(3, Post.objects.all().count())
         self.assertEquals(2, Post.active.all().count())
+
+    def test_csv_import(self):
+        import_url = reverse('blog.post_csv_import')
+
+        response = self.client.get(import_url)
+        self.assertRedirect(response, reverse('users.user_login'))
+
+        self.client.login(username='author', password='author')
+
+        response = self.client.get(import_url)
+        self.assertTrue(200, response.status_code)
+        self.assertEquals(response.request['PATH_INFO'], import_url)
+
+        csv_file = open('test_runner/blog/test_files/posts.csv', 'rb')
+        post_data = dict(csv_file=csv_file)
+
+        response = self.client.post(import_url, post_data, follow=True)
+        self.assertEqual(200, response.status_code)
+
+        task = ImportTask.objects.get()
+        self.assertEqual(json.loads(task.import_results), dict(records=4, errors=0, error_messages=[]))
+
+        ImportTask.objects.all().delete()
+
+        csv_file = open('test_runner/blog/test_files/posts.xls', 'rb')
+        post_data = dict(csv_file=csv_file)
+
+        response = self.client.post(import_url, post_data, follow=True)
+        self.assertEqual(200, response.status_code)
+
+        task = ImportTask.objects.get()
+        self.assertEqual(json.loads(task.import_results), dict(records=4, errors=0, error_messages=[]))
+
+        ImportTask.objects.all().delete()
+
+        with patch('test_runner.blog.models.Post.create_instance') as mock_create_instance:
+            mock_create_instance.side_effect = SmartImportRowError('foo')
+
+            csv_file = open('test_runner/blog/test_files/posts.csv', 'rb')
+            post_data = dict(csv_file=csv_file)
+            response = self.client.post(import_url, post_data, follow=True)
+            self.assertEqual(200, response.status_code)
+
+            task = ImportTask.objects.get()
+            self.assertEqual(json.loads(task.import_results), dict(records=0, errors=4,
+                                                                   error_messages=[dict(line=2, error='foo'),
+                                                                                   dict(line=3, error='foo'),
+                                                                                   dict(line=4, error='foo'),
+                                                                                   dict(line=5, error='foo')]))
+
+            ImportTask.objects.all().delete()
+
+            csv_file = open('test_runner/blog/test_files/posts.xls', 'rb')
+            post_data = dict(csv_file=csv_file)
+            response = self.client.post(import_url, post_data, follow=True)
+            self.assertEqual(200, response.status_code)
+
+            task = ImportTask.objects.get()
+            self.assertEqual(json.loads(task.import_results), dict(records=0, errors=4,
+                                                                   error_messages=[dict(line=2, error='foo'),
+                                                                                   dict(line=3, error='foo'),
+                                                                                   dict(line=4, error='foo'),
+                                                                                   dict(line=5, error='foo')]))
+
+
+
 
 class UserTest(TestCase):
 

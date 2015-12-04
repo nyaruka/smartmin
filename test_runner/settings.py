@@ -3,6 +3,9 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+import sys
+TESTING = sys.argv[1:2] == ['test']
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -184,7 +187,7 @@ PERMISSIONS = {
           'update', # can update an object
           'delete', # can delete an object,
           'list'),  # can view a list of the objects
-    'blog.post': ('author', 'exclude', 'exclude2', 'readonly', 'readonly2', 'messages'),
+    'blog.post': ('author', 'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import'),
     'auth.user': ('profile',),
 
     # invalid content type for test
@@ -224,3 +227,7 @@ BROKER_BACKEND = 'redis'
 BROKER_HOST = 'localhost'
 BROKER_PORT = 6379
 BROKER_VHOST = '4'
+
+if TESTING:
+    CELERY_ALWAYS_EAGER =True
+    CELERY_RESULT_BACKEND = None
