@@ -1,4 +1,3 @@
-import StringIO
 from smartmin import class_from_string
 from django.utils import timezone
 from .models import ImportTask
@@ -7,6 +6,13 @@ from distutils.version import StrictVersion
 import django
 
 from celery.task import task
+
+# python2 and python3 support
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 @task(track_started=True)
 def csv_import(task_id):  #pragma: no cover
@@ -27,7 +33,7 @@ def csv_import(task_id):  #pragma: no cover
             else:
                 sleep(1)
 
-    log = StringIO.StringIO()
+    log = StringIO()
 
     if StrictVersion(django.get_version()) < StrictVersion('1.6'):
 

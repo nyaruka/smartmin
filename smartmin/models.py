@@ -7,6 +7,17 @@ from django.db import models
 from django.utils import timezone
 import pytz
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
+import six
+
+class SmartImportRowError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __unicode__(self):  # pragma: no cover
+        return self.message
+
+    def __str__(self):
+        return str(self.__unicode__())
 
 
 class SmartModel(models.Model):
@@ -60,7 +71,7 @@ class SmartModel(models.Model):
                 # read our header
                 header = []
                 for col in range(sheet.ncols):
-                    header.append(unicode(sheet.cell(0, col).value))
+                    header.append(six.text_type(sheet.cell(0, col).value))
                 headers = [cls.normalize_value(_).lower() for _ in header]
 
                 #only care for the first sheet
@@ -74,7 +85,12 @@ class SmartModel(models.Model):
             for byte in reader.read():
                 # these are latin accented characterse in mac_roman, if we see them then our alternative
                 # encoding should be mac_roman
-                if ord(byte) in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
+                try:
+                    byte_number = ord(byte)
+                except TypeError:
+                    byte_number = byte
+
+                if byte_number in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
                     ascii_codec = 'mac_roman'
                     break
             reader.close()
@@ -87,9 +103,9 @@ class SmartModel(models.Model):
                     encoded = []
                     for cell in row:
                         try:
-                            cell = unicode(cell)
+                            cell = six.text_type(cell)
                         except:
-                            cell = unicode(cell.decode(ascii_codec))
+                            cell = six.text_type(cell.decode(ascii_codec))
 
                         encoded.append(cell)
 
@@ -100,10 +116,10 @@ class SmartModel(models.Model):
             # read in our header
             line_number = 0
 
-            header = reader.next()
+            header = six.next(reader)
             line_number += 1
             while header is not None and len(header[0]) > 1 and header[0][0] == "#":
-                header = reader.next()
+                header = six.next(reader)
                 line_number += 1
 
             # do some sanity checking to make sure they uploaded the right kind of file
@@ -168,12 +184,13 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
+        error_messages = []
 
         for sheet in workbook.sheets():
             # read our header
             header = []
             for col in range(sheet.ncols):
-                header.append(unicode(sheet.cell(0, col).value))
+                header.append(six.text_type(sheet.cell(0, col).value))
             header = [cls.normalize_value(_).lower() for _ in header]
 
             cls.validate_import_header(header)
@@ -193,10 +210,15 @@ class SmartModel(models.Model):
                 try:
                     field_values = cls.prepare_fields(field_values, import_params, user)
                     record = cls.create_instance(field_values)
+
                     if record:
                         records.append(record)
                     else:
                         num_errors += 1
+
+                except SmartImportRowError as e:
+                    error_messages.append(dict(line=line_number+1, error=str(e)))
+
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
@@ -207,7 +229,8 @@ class SmartModel(models.Model):
 
         if import_results is not None:
             import_results['records'] = len(records)
-            import_results['errors'] = num_errors
+            import_results['errors'] = num_errors + len(error_messages)
+            import_results['error_messages'] = error_messages[:20]
 
         return records
 
@@ -218,7 +241,7 @@ class SmartModel(models.Model):
             date = xldate_as_tuple(cell.value, workbook.datemode)
             return datetime.datetime(*date, tzinfo=tz)
         else:
-            return cls.normalize_value(unicode(cell.value))
+            return cls.normalize_value(six.text_type(cell.value))
 
 
     @classmethod
@@ -231,7 +254,12 @@ class SmartModel(models.Model):
         for byte in reader.read():
             # these are latin accented characterse in mac_roman, if we see them then our alternative
             # encoding should be mac_roman
-            if ord(byte) in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
+            try:
+                byte_number = ord(byte)
+            except TypeError:
+                byte_number = byte
+
+            if byte_number in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
                 ascii_codec = 'mac_roman'
                 break
         reader.close()
@@ -244,9 +272,9 @@ class SmartModel(models.Model):
                 encoded = []
                 for cell in row:
                     try:
-                        cell = unicode(cell)
+                        cell = six.text_type(cell)
                     except:
-                        cell = unicode(cell.decode(ascii_codec))
+                        cell = six.text_type(cell.decode(ascii_codec))
 
                     encoded.append(cell)
 
@@ -257,10 +285,10 @@ class SmartModel(models.Model):
         # read in our header
         line_number = 0
 
-        header = reader.next()
+        header = six.next(reader)
         line_number += 1
         while header is not None and len(header[0]) > 1 and header[0][0] == "#":
-            header = reader.next()
+            header = six.next(reader)
             line_number += 1
 
         # do some sanity checking to make sure they uploaded the right kind of file
@@ -274,8 +302,9 @@ class SmartModel(models.Model):
 
         records = []
         num_errors = 0
+        error_messages = []
 
-        for row in reader:
+        for row in list(reader):
             # trim all our values
             row = [cls.normalize_value(_) for _ in row]
 
@@ -295,6 +324,10 @@ class SmartModel(models.Model):
                     records.append(record)
                 else:
                     num_errors += 1
+
+            except SmartImportRowError as e:
+                error_messages.append(dict(line=line_number, error=str(e)))
+
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
@@ -302,7 +335,8 @@ class SmartModel(models.Model):
 
         if import_results is not None:
             import_results['records'] = len(records)
-            import_results['errors'] = num_errors
+            import_results['errors'] = num_errors + len(error_messages)
+            import_results['error_messages'] = error_messages[:20]
 
         return records
 

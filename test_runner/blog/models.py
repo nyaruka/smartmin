@@ -1,6 +1,7 @@
 from django.db import models
 from smartmin.models import SmartModel, ActiveManager
 
+
 class Post(SmartModel):
     title = models.CharField(max_length=128,
                              help_text="The title of this blog post, keep it relevant")
@@ -9,13 +10,17 @@ class Post(SmartModel):
     tags = models.CharField(max_length=128,
                             help_text="Any tags for this post")
 
-
     objects = models.Manager()
     active = ActiveManager()
 
     @classmethod
     def pre_create_instance(cls, field_dict):
         field_dict['body'] = "Body: %s" % field_dict['body']
+        return field_dict
+
+    @classmethod
+    def prepare_fields(cls, field_dict, import_params=None, user=None):
+        field_dict['order'] = int(float(field_dict['order']))
         return field_dict
 
     def __unicode__(self):
