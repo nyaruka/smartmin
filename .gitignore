@@ -15,8 +15,6 @@ celerybeat-schedule
 
 *.DS_Store
 .tox/
-/smartmin/.DS_Store
-/smartmin/static/.DS_Store
-/smartmin/static/img/.DS_Store
-/test-runner/env/
-/test-runner/smartmin
+test-runner/env/
+test-runner/smartmin
+csv_imports/

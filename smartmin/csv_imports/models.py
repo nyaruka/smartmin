@@ -1,9 +1,10 @@
-from django.db import models, transaction
-from smartmin import class_from_string
-from django.utils import timezone
-from django.conf import settings
-from celery.result import EagerResult, AsyncResult
+from __future__ import unicode_literals
 
+from celery.result import EagerResult, AsyncResult
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
+from smartmin import class_from_string
 from smartmin.models import SmartModel
 
 

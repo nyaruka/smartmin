@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, url
+from __future__ import unicode_literals
 
-from .views import *
-from django.contrib.auth.views import logout
 from django.conf import settings
+from django.conf.urls import patterns, url
+from django.contrib.auth.views import logout
+from .views import login, UserCRUDL
 
 logout_url = getattr(settings, 'LOGOUT_REDIRECT_URL', None)
 
@@ -12,6 +13,3 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += UserCRUDL().as_urlpatterns()
-
-
-

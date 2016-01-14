@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.db import models
 from smartmin.models import SmartModel, ActiveManager
 
@@ -30,4 +32,3 @@ class Post(SmartModel):
 class Category(SmartModel):
     name = models.SlugField(max_length=64, unique=True,
                             help_text="The name of this category")
-

@@ -1,4 +1,7 @@
+from __future__ import unicode_literals
+
 __version__ = '1.8.1'
+
 
 def class_from_string(class_name):
     """

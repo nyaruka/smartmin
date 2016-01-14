@@ -1,22 +1,24 @@
-from mock import patch
+from __future__ import unicode_literals
+
+import json
+
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.contrib.auth.models import User, Group
 from django.core import mail
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User, Group
-from smartmin.csv_imports.models import ImportTask
-from smartmin.models import SmartImportRowError
-from test_runner.blog.models import Post, Category
-from smartmin.management import check_role_permissions
-import json
-from .views import PostCRUDL
-from smartmin.views import smart_url
-from guardian.shortcuts import assign_perm
-from django.conf import settings
-
-from smartmin.users.models import *
-from datetime import date, datetime, timedelta
 from django.utils import timezone
+from guardian.shortcuts import assign_perm
+from mock import patch
+from smartmin.csv_imports.models import ImportTask
+from smartmin.management import check_role_permissions
+from smartmin.models import SmartImportRowError
+from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
+from smartmin.views import smart_url
+from test_runner.blog.models import Post, Category
+from .views import PostCRUDL
 
 
 class SmartminTest(TestCase):

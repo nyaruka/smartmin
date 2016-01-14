@@ -1,11 +1,13 @@
-from smartmin import class_from_string
-from django.utils import timezone
-from .models import ImportTask
-from time import sleep
-from distutils.version import StrictVersion
+from __future__ import unicode_literals
+
 import django
 
 from celery.task import task
+from distutils.version import StrictVersion
+from django.utils import timezone
+from time import sleep
+from smartmin import class_from_string
+from .models import ImportTask
 
 # python2 and python3 support
 try:
@@ -15,7 +17,7 @@ except ImportError:
 
 
 @task(track_started=True)
-def csv_import(task_id):  #pragma: no cover
+def csv_import(task_id):  # pragma: no cover
     from django.db import transaction
 
     # there is a possible race condition between this task starting

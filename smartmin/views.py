@@ -1,28 +1,27 @@
-from django.db import models
+from __future__ import unicode_literals
 
-from django.utils.encoding import force_text
-from django.views.generic.edit import FormMixin, ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
-from django.views.generic.base import TemplateView, View
-from django.views.generic import DetailView, ListView
 import django.forms.models as model_forms
-from guardian.utils import get_anonymous_user
-from django.utils.http import urlquote
-from django.db.models import Q
-from django.db import IntegrityError
-from django.conf import settings
-from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
-from django.http import HttpResponseRedirect, HttpResponse
-from guardian.shortcuts import get_objects_for_user, assign_perm
-from django.core.exceptions import ImproperlyConfigured
-from django import forms
 import json
-from django.conf.urls import patterns, url
-from django.core.urlresolvers import reverse
-from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
 import six
 
-import string
+from django import forms
+from django.conf import settings
+from django.conf.urls import patterns, url
+from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import reverse
+from django.db import IntegrityError
+from django.db.models import Q
+from django.http import HttpResponseRedirect, HttpResponse
+from django.utils.encoding import force_text
+from django.utils.http import urlquote
+from django.utils.translation import ugettext_lazy as _
+from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
+from django.views.generic.base import TemplateView
+from django.views.generic import DetailView, ListView
+from guardian.shortcuts import get_objects_for_user, assign_perm
+from guardian.utils import get_anonymous_user
 from smartmin.csv_imports.models import ImportTask
 from . import widgets
 
@@ -46,6 +45,7 @@ def smart_url(url, obj=None):
             return url
         else:
             return url % obj.id
+
 
 class SmartView(object):
     fields = None
@@ -422,9 +422,8 @@ class SmartReadView(SmartView, DetailView):
     default_template = 'smartmin/read.html'
     edit_button = None
 
-    field_config = { 'modified_blurb': dict(label="Modified"),
-                     'created_blurb': dict(label="Created") }
-
+    field_config = {'modified_blurb': dict(label="Modified"),
+                    'created_blurb': dict(label="Created")}
 
     def derive_queryset(self):
         return super(SmartReadView, self).get_queryset()
@@ -473,6 +472,7 @@ class SmartReadView(SmartView, DetailView):
     def get_created_blurb(self, obj):
         return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
 
+
 class SmartDeleteView(SmartView, DetailView, ProcessFormView):
     default_template = 'smartmin/delete_confirm.html'
     name_field = 'name'
@@ -517,6 +517,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
         context['name_field'] = self.name_field
         context['cancel_url'] = self.get_cancel_url()
         return context
+
 
 class SmartListView(SmartView, ListView):
     default_template = 'smartmin/list.html'
@@ -721,7 +722,6 @@ class SmartListView(SmartView, ListView):
                     fields.append(field.name)
             return fields
 
-
     def get_is_active(self, obj):
         """
         Default implementation of get_is_active which returns a simple div so as to
@@ -757,6 +757,7 @@ class SmartListView(SmartView, ListView):
         # otherwise, return normally
         else:
             return super(SmartListView, self).render_to_response(context)
+
 
 class SmartCsvView(SmartListView):
 
@@ -1073,6 +1074,7 @@ class SmartFormMixin(object):
         context['submit_button_name'] = self.derive_submit_button_name()
         return context
 
+
 class SmartFormView(SmartFormMixin, SmartView, FormView):
     default_template = 'smartmin/form.html'
 
@@ -1080,6 +1082,7 @@ class SmartFormView(SmartFormMixin, SmartView, FormView):
         # plug in our success message
         messages.success(self.request, self.derive_success_message())
         return super(SmartFormView, self).form_valid(form)
+
 
 class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
     grant_permissions = None
@@ -1109,8 +1112,6 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
         """
         self.object.save()
         self.save_m2m()
-
-
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -1158,6 +1159,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
         context = super(SmartModelFormView, self).get_context_data(**kwargs)
         context['javascript_submit'] = self.javascript_submit
         return context
+
 
 class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = 'smartmin/update.html'
@@ -1209,6 +1211,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
     def get_created_blurb(self, obj):
         return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
 
+
 class SmartMultiFormView(SmartView, TemplateView):
     default_template = 'smartmin/multi_form.html'
     forms = {}
@@ -1254,6 +1257,7 @@ class SmartMultiFormView(SmartView, TemplateView):
 
         return context
 
+
 class SmartCreateView(SmartModelFormView, CreateView):
     default_template = 'smartmin/create.html'
     exclude = ('created_by', 'modified_by', 'is_active')
@@ -1286,6 +1290,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
         else:
             return self.title
 
+
 class SmartCSVImportView(SmartCreateView):
     success_url = 'id@csv_imports.importtask_read'
 
@@ -1308,6 +1313,7 @@ class SmartCSVImportView(SmartCreateView):
         task.start()
 
         return task
+
 
 class SmartCRUDL(object):
     actions = ('create', 'read', 'update', 'delete', 'list')
@@ -1423,22 +1429,19 @@ class SmartCRUDL(object):
                 options['permission'] = self.permission_for_action(action)
 
             if action == 'create':
-                view = type("%sCreateView" % self.model_name, (SmartCreateView,),
-                    options)
+                view = type(str("%sCreateView" % self.model_name), (SmartCreateView,), options)
 
             elif action == 'read':
                 if 'update' in self.actions:
                     options['edit_button'] = True
 
-                view = type("%sReadView" % self.model_name, (SmartReadView,),
-                    options)
+                view = type(str("%sReadView" % self.model_name), (SmartReadView,), options)
 
             elif action == 'update':
                 if 'delete' in self.actions:
                     options['delete_url'] = 'id@%s' % self.url_name_for_action('delete')
 
-                view = type("%sUpdateView" % self.model_name, (SmartUpdateView,),
-                    options)
+                view = type(str("%sUpdateView" % self.model_name), (SmartUpdateView,), options)
 
             elif action == 'delete':
                 if 'list' in self.actions:
@@ -1448,7 +1451,7 @@ class SmartCRUDL(object):
                 elif 'update' in self.actions:
                     options['cancel_url'] = '@%s' % self.url_name_for_action('update')
 
-                view = type("%sDeleteView" % self.model_name, (SmartDeleteView,), options)
+                view = type(str("%sDeleteView" % self.model_name), (SmartDeleteView,), options)
 
             elif action == 'list':
                 if 'read' in self.actions:
@@ -1461,12 +1464,11 @@ class SmartCRUDL(object):
                 if 'create' in self.actions:
                     options['add_button'] = True
 
-                view = type("%sListView" % self.model_name, (SmartListView,),
-                    options)
+                view = type(str("%sListView" % self.model_name), (SmartListView,), options)
 
             elif action == 'csv_import':
                 options['model'] = ImportTask
-                view = type("%sCSVImportView" % self.model_name, (SmartCSVImportView,), options)
+                view = type(str("%sCSVImportView" % self.model_name), (SmartCSVImportView,), options)
 
         if not view:
             # couldn't find a view?  blow up
@@ -1509,6 +1511,3 @@ class SmartCRUDL(object):
             urlpatterns += patterns('', url(view_pattern, view_class.as_view(), name=name))
 
         return urlpatterns
-
-
-

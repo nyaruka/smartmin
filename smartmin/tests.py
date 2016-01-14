@@ -1,10 +1,11 @@
-from six.moves.urllib.parse import urlparse
+from __future__ import unicode_literals
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
-from django.conf import settings
+from six.moves.urllib.parse import urlparse
 
 
 class SmartminTest(TestCase):
@@ -13,7 +14,6 @@ class SmartminTest(TestCase):
         """
         Fetches the given url. Fails if it can be fetched without first logging in as given user
         """
-
         # make sure we are logged out before testing permissions
         self.client.logout()
 
@@ -71,8 +71,11 @@ class SmartminTest(TestCase):
                     errors.append("%s=%s" % (k,v.as_text()))
                 self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
 
-class _CRUDLTest(SmartminTest):
 
+class _CRUDLTest(SmartminTest):
+    """
+    Base class for standard CRUDL test cases
+    """
     crudl = None
     user = None
     object = None
@@ -81,6 +84,11 @@ class _CRUDLTest(SmartminTest):
         self.crudl = None
         self.user = None
         super(_CRUDLTest, self).setUp()
+
+    def run(self, result=None):
+        # only actually run sub classes of this
+        if self.__class__ != _CRUDLTest:
+            super(_CRUDLTest, self).run(result)
 
     def getCRUDL(self):
         if self.crudl:

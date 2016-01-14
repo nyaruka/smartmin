@@ -1,9 +1,10 @@
-from django.forms import fields
-from django.forms import widgets
-from django.utils.safestring import mark_safe
-from django.utils.html import escape, conditional_escape
-from django.utils import timezone
+from __future__ import unicode_literals
+
 from datetime import datetime
+from django.forms import widgets
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
+
 
 class VisibleHiddenWidget(widgets.Widget):
 
@@ -44,13 +45,14 @@ class DatePickerWidget(widgets.Widget):
         try:
             parsed = datetime.strptime(val, "%B %d, %Y")
             return parsed.date()
-        except:
+        except Exception:
             # invalid format?  say so
             return None
 
     class Media:
        js = ('js/datepicker.js',)
-       css = { 'all': ('css/datepicker.css',) }
+       css = {'all': ('css/datepicker.css',)}
+
 
 class ImageThumbnailWidget(widgets.ClearableFileInput): 
 
@@ -69,4 +71,3 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         thumb_html += '</tr></table>'
 
         return mark_safe(unicode('<div class="image-picker">%s</div>' % thumb_html))
-

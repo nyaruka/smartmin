@@ -1,29 +1,27 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-from django.contrib.auth.views import login as django_login
-from django import forms
-from .models import *
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, render
-from django.contrib.auth import login, authenticate, REDIRECT_FIELD_NAME
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
+from __future__ import unicode_literals
 
-from django.shortcuts import render
-from django.core.mail import send_mail
 import random
 import string
 
-from django.utils import timezone
 from datetime import timedelta
-
+from django import forms
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login, REDIRECT_FIELD_NAME
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import Group
+from django.contrib.auth.views import login as django_login
+from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.template import loader
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+from django.views.generic import TemplateView
 from smartmin.email import build_email_context
-from smartmin.views import *
+from smartmin.views import SmartCRUDL, SmartView, SmartFormView, SmartListView, SmartCreateView, SmartUpdateView
+from .models import RecoveryToken, PasswordHistory, FailedLogin, is_password_complex
 
-import re
 
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput)
@@ -54,9 +52,11 @@ class UserForm(forms.ModelForm):
         new_pass = self.cleaned_data['new_password']
         if new_pass:
             user.set_password(new_pass)
-            if commit: user.save()
+            if commit:
+                user.save()
 
         return user
+
     class Meta:
         model = get_user_model()
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active')
@@ -401,6 +401,7 @@ class UserCRUDL(SmartCRUDL):
             context['allow_email_recovery'] = allow_email_recovery
 
             return context
+
 
 def login(request, template_name='smartmin/users/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
