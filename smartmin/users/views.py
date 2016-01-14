@@ -415,11 +415,10 @@ def login(request, template_name='smartmin/users/login.html',
         if 'username' in request.POST and 'password' in request.POST:
             username = request.POST['username']
 
-            user = get_user_model().objects.filter(username=username)
+            user = get_user_model().objects.filter(username__iexact=username).first()
 
             # this could be a valid login by a user
             if user:
-                user = user[0]
 
                 # incorrect password?  create a failed login token
                 valid_password = user.check_password(request.POST['password'])
