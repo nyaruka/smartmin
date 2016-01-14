@@ -1,13 +1,17 @@
+from __future__ import absolute_import, unicode_literals
+
 import csv
 import datetime
 import traceback
 import json
+import pytz
+import six
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-import pytz
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
-import six
+
 
 class SmartImportRowError(Exception):
     def __init__(self, message):
@@ -131,7 +135,6 @@ class SmartModel(models.Model):
 
         return headers
 
-
     @classmethod
     def import_csv(cls, task, log=None):
         filename = task.csv_file.file
@@ -156,7 +159,6 @@ class SmartModel(models.Model):
 
         return records
 
-
     @classmethod
     def normalize_value(cls, val):
         # remove surrounding whitespace
@@ -171,7 +173,6 @@ class SmartModel(models.Model):
             val = val[1:-1]
 
         return val
-
 
     @classmethod
     def import_xls(cls, filename, user, import_params, log=None, import_results=None):
@@ -234,7 +235,6 @@ class SmartModel(models.Model):
 
         return records
 
-
     @classmethod
     def get_cell_value(cls, workbook, tz, cell):
         if cell.ctype == XL_CELL_DATE:
@@ -242,7 +242,6 @@ class SmartModel(models.Model):
             return datetime.datetime(*date, tzinfo=tz)
         else:
             return cls.normalize_value(six.text_type(cell.value))
-
 
     @classmethod
     def import_raw_csv(cls, filename, user, import_params, log=None, import_results=None):

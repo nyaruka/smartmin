@@ -1,13 +1,17 @@
-from django.db.models.signals import post_syncdb
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Permission, Group
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from guardian.shortcuts import assign_perm, remove_perm
-from guardian.utils import get_anonymous_user
-from guardian.management import create_anonymous_user
+from __future__ import absolute_import, unicode_literals
+
 import six
 import sys
+
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission, Group
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.signals import post_syncdb
+from guardian.management import create_anonymous_user
+from guardian.shortcuts import assign_perm, remove_perm
+from guardian.utils import get_anonymous_user
+
 
 def is_last_model(kwargs):
     """
@@ -21,6 +25,7 @@ def is_last_model(kwargs):
 
     # Otherwise, run it for each of the last five apps in INSTALLED_APPS
     return kwargs['app'].__name__ in ["%s.models" % app for app in settings.INSTALLED_APPS[-10:]]
+
 
 def check_role_permissions(role, permissions, current_permissions):
     """
@@ -79,6 +84,7 @@ def check_role_permissions(role, permissions, current_permissions):
         if not key in role_permissions:
             remove_perm(key, role)
 
+
 def check_all_group_permissions(sender, **kwargs):
     """
     Checks that all the permissions specified in our settings.py are set for our groups.
@@ -97,6 +103,7 @@ def check_all_group_permissions(sender, **kwargs):
 
         check_role_permissions(group, permissions, group.permissions.all())
 
+
 def get_or_create_anonymous_user():
     try:
         anon_user = get_anonymous_user()
@@ -105,6 +112,7 @@ def get_or_create_anonymous_user():
         anon_user = get_anonymous_user()
 
     return anon_user
+
 
 def check_all_anon_permissions(sender, **kwargs):
     """
@@ -117,6 +125,7 @@ def check_all_anon_permissions(sender, **kwargs):
     anon_user = get_or_create_anonymous_user()
 
     check_role_permissions(anon_user, permissions, anon_user.get_all_permissions())
+
 
 def add_permission(content_type, permission):
     """
@@ -137,6 +146,7 @@ def add_permission(content_type, permission):
                                   codename=codename,
                                   name="Can %s %s" % (permission, content_type.name))
         # sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
+
 
 def check_all_permissions(sender, **kwargs):
     """
@@ -168,6 +178,7 @@ def check_all_permissions(sender, **kwargs):
             # add each permission
             for permission in permissions:
                 add_permission(content_type, permission)
+
 
 post_syncdb.connect(check_all_permissions)
 post_syncdb.connect(check_all_group_permissions)

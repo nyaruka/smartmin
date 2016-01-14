@@ -1,9 +1,12 @@
-from django.http import HttpResponseRedirect, HttpResponse
-from django.http import HttpResponse
+from __future__ import absolute_import, unicode_literals
+
 import sys, os
-from django.utils import timezone
+
 from django.conf import settings
+from django.http import HttpResponseRedirect, HttpResponse
+from django.utils import timezone
 from six.moves import StringIO
+
 
 class AjaxRedirect(object):
     def process_response(self, request, response):
@@ -15,6 +18,7 @@ class AjaxRedirect(object):
                 response = HttpResponse(response["Location"])
                 response.status_code = 302
         return response
+
 
 class ProfileMiddleware():
     def __init__(self):
@@ -55,6 +59,7 @@ class ProfileMiddleware():
                 return HttpResponse('<pre>%s</pre>' % std_new.getvalue())
 
         return None
+
 
 class TimezoneMiddleware(object):
     def process_request(self, request):

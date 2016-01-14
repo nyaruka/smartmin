@@ -1,19 +1,24 @@
-from django import template
-from datetime import datetime, timedelta
+from __future__ import absolute_import, unicode_literals
+
 import json
-from django.template import TemplateSyntaxError
-from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.utils import timezone
 import pytz
 
+from datetime import datetime, timedelta
+from django import template
+from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.template import TemplateSyntaxError
+from django.utils import timezone
+
 register = template.Library()
+
 
 @register.assignment_tag
 def get_hostname():
     if settings.HOSTNAME:
         return settings.HOSTNAME
     return "localhost"
+
 
 @register.simple_tag(takes_context=True)
 def get_list_class(context, list):
@@ -23,6 +28,7 @@ def get_list_class(context, list):
     """
     css = "list_%s_%s" % (list.model._meta.app_label, list.model._meta.model_name)
     return css
+
 
 def format_datetime(time):
     """
@@ -35,6 +41,7 @@ def format_datetime(time):
 
     time = time.astimezone(user_time_zone)
     return time.strftime("%b %d, %Y %H:%M")
+
 
 @register.simple_tag(takes_context=True)
 def get_value_from_view(context, field):
@@ -57,6 +64,7 @@ def get_value_from_view(context, field):
 
     return value
 
+
 @register.simple_tag(takes_context=True)
 def get_value(context, obj, field):
     """
@@ -72,6 +80,7 @@ def get_value(context, obj, field):
 
     return value
 
+
 @register.simple_tag(takes_context=True)
 def get_class(context, field, obj=None):
     """
@@ -79,6 +88,7 @@ def get_class(context, field, obj=None):
     """
     view = context['view']
     return view.lookup_field_class(field, obj, "field_" + field)
+
 
 @register.simple_tag(takes_context=True)
 def get_label(context, field, obj=None):
@@ -92,6 +102,7 @@ def get_label(context, field, obj=None):
     view = context['view']
     return view.lookup_field_label(context, field, obj)
 
+
 @register.simple_tag(takes_context=True)
 def get_field_link(context, field, obj=None):
     """
@@ -99,6 +110,7 @@ def get_field_link(context, field, obj=None):
     """
     view = context['view']
     return view.lookup_field_link(context, field, obj)
+
 
 @register.simple_tag(takes_context=True)
 def view_as_json(context):
@@ -108,6 +120,7 @@ def view_as_json(context):
     view = context['view']
     return json.dumps(view.as_json(context))
 
+
 @register.simple_tag(takes_context=True)
 def ssl_url(context, url_name, args=None):
     path = reverse(url_name, args)
@@ -116,6 +129,7 @@ def ssl_url(context, url_name, args=None):
     else:
         return path
 
+
 @register.simple_tag(takes_context=True)
 def non_ssl_url(context, url_name, args=None):
     path = reverse(url_name, args)
@@ -123,12 +137,14 @@ def non_ssl_url(context, url_name, args=None):
         return "http://%s%s" % (settings.HOSTNAME, path)
     return path
 
+
 @register.filter
 def field(form, field):
     try:
         return form[field]
     except KeyError:
         return None
+
 
 @register.filter(name='add_css')
 def add_css(field, css):
@@ -141,9 +157,11 @@ def add_css(field, css):
 
     return field.as_widget(attrs=custom_attrs)
 
+
 @register.filter
 def map(string, args):
     return string % args.__dict__
+
 
 @register.filter
 def gmail_time(dtime, now=None):
@@ -169,6 +187,7 @@ def gmail_time(dtime, now=None):
     else:
         return "%d/%d/%s" % (int(dtime.strftime("%d")), int(dtime.strftime("%m")), dtime.strftime("%y"))
 
+
 @register.filter
 def user_as_string(user):
     full_name = user.get_full_name()
@@ -177,12 +196,14 @@ def user_as_string(user):
     else:
         return user.username
 
+
 @register.filter
 def field_help(view, field):
     """
     Returns the field help for the passed in field
     """
     return view.lookup_field_help(field)
+
 
 @register.filter
 def get(dictionary, key):
@@ -194,12 +215,14 @@ def get(dictionary, key):
     else:
         return ''
 
+
 @register.filter
 def is_smartobject(obj):
     """
     Returns whether the passed in object is a smart object
     """
     return hasattr(obj, 'is_active')
+
 
 @register.filter
 def field_orderable(view, field):
@@ -208,16 +231,19 @@ def field_orderable(view, field):
     """
     return view.lookup_field_orderable(field)
 
-#
-# Woot woot, simple pdb debugging. {% pdb %}
-#
+
 class PDBNode(template.Node):
+    """
+    Woot woot, simple pdb debugging. {% pdb %}
+    """
     def render(self, context):
         import pdb; pdb.set_trace()
+
 
 @register.tag
 def pdb(parser, token):
     return PDBNode()
+
 
 @register.simple_tag(takes_context=True)
 def getblock(context, prefix, suffix=None):
@@ -233,6 +259,7 @@ def getblock(context, prefix, suffix=None):
     else:
         return ""
 
+
 def setblock(parser, token):
     args = token.split_contents()
     if len(args) < 2:
@@ -243,6 +270,7 @@ def setblock(parser, token):
     nodelist = parser.parse(('endsetblock',))
     parser.delete_first_token()
     return SetBlockNode(key, nodelist)
+
 
 class SetBlockNode(template.Node):
     def __init__(self, key, nodelist):
@@ -259,6 +287,7 @@ class SetBlockNode(template.Node):
 
 # register our tag
 setblock = register.tag(setblock)
+
 
 @register.inclusion_tag('smartmin/field.html', takes_context=True)
 def render_field(context, field):
@@ -279,6 +308,7 @@ def render_field(context, field):
         inclusion_context['object'] = context['object']
 
     return inclusion_context
+
 
 @register.simple_tag
 def active(request, pattern):

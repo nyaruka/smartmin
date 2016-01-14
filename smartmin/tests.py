@@ -1,10 +1,11 @@
-from six.moves.urllib.parse import urlparse
+from __future__ import absolute_import, unicode_literals
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
-from django.conf import settings
+from six.moves.urllib.parse import urlparse
 
 
 class SmartminTest(TestCase):
@@ -13,7 +14,6 @@ class SmartminTest(TestCase):
         """
         Fetches the given url. Fails if it can be fetched without first logging in as given user
         """
-
         # make sure we are logged out before testing permissions
         self.client.logout()
 

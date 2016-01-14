@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 
 # simple mixins that keep you from writing so much code
 class PassRequestToFormMixin(object):
