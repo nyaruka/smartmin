@@ -133,8 +133,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django_nose',
-
     'guardian',
     'smartmin',
     'smartmin.users',
@@ -207,12 +205,6 @@ GROUP_PERMISSIONS = {
 ANONYMOUS_USER_ID = -1
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = "/blog/post/"
-
-#-----------------------------------------------------------------------------------
-# Django-Nose config
-#-----------------------------------------------------------------------------------
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 #-----------------------------------------------------------------------------------
 # Async tasks with celery

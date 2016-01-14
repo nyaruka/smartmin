@@ -71,8 +71,11 @@ class SmartminTest(TestCase):
                     errors.append("%s=%s" % (k,v.as_text()))
                 self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
 
-class _CRUDLTest(SmartminTest):
 
+class _CRUDLTest(SmartminTest):
+    """
+    Base class for standard CRUDL test cases
+    """
     crudl = None
     user = None
     object = None
@@ -81,6 +84,11 @@ class _CRUDLTest(SmartminTest):
         self.crudl = None
         self.user = None
         super(_CRUDLTest, self).setUp()
+
+    def run(self, result=None):
+        # only actually run sub classes of this
+        if self.__class__ != _CRUDLTest:
+            super(_CRUDLTest, self).run(result)
 
     def getCRUDL(self):
         if self.crudl:
