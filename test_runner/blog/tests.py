@@ -930,7 +930,7 @@ class UserLockoutTestCase(TestCase):
 
         # make sure there is no reset link
         content = response.content.decode("utf-8")
-        self.assertTrue(content.find(reverse('users.user_forget')) == -1);
+        self.assertTrue(content.find(reverse('users.user_forget')) == -1)
 
         # also make sure we can't actually do a reset
         post_data = dict(email="nicpottier@gmail.com")
@@ -940,7 +940,7 @@ class UserLockoutTestCase(TestCase):
 
         # try logging in four times, get account locked
         for i in range(4):
-            post_data = dict(username='plain', password='plain2')
+            post_data = dict(username='Plain', password='plain2')
             response = self.client.post(reverse('users.user_login'), post_data)
             self.assertTrue(response.context['form'].errors)
 
@@ -955,7 +955,7 @@ class UserLockoutTestCase(TestCase):
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
         self.assertFalse(response.context['user'].is_authenticated())
         content = response.content.decode("utf-8")
-        self.assertTrue(content.find(reverse('users.user_forget')) == -1);
+        self.assertTrue(content.find(reverse('users.user_forget')) == -1)
 
     def testNoRecovery(self):
         with self.settings(USER_ALLOW_EMAIL_RECOVERY=False):
