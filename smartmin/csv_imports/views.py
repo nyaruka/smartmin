@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
 
 from smartmin import class_from_string
 from smartmin.csv_imports.models import ImportTask

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import unicode_literals
 
 import django
 
@@ -17,7 +17,7 @@ except ImportError:
 
 
 @task(track_started=True)
-def csv_import(task_id):  #pragma: no cover
+def csv_import(task_id):  # pragma: no cover
     from django.db import transaction
 
     # there is a possible race condition between this task starting

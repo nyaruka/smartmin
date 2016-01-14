@@ -1,10 +1,12 @@
-from datetime import datetime
+from __future__ import unicode_literals
+
+import django.views.static
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from .models import PasswordHistory
-import django.views.static
+
 
 class ChangePasswordMiddleware:
     """

@@ -1,9 +1,12 @@
-from django.db import models
+from __future__ import unicode_literals
+
+import re
+
+from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
-from datetime import timedelta
+from django.db import models
 from django.utils import timezone
-import re
 
 
 def is_password_complex(password):
@@ -16,14 +19,17 @@ def is_password_complex(password):
     else:
         return True
 
+
 class RecoveryToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     token = models.CharField(max_length=32, unique=True, default=None, help_text="token to reset password")
     created_on = models.DateTimeField(auto_now_add=True)
 
+
 class FailedLogin(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     failed_on = models.DateTimeField(auto_now_add=True)
+
 
 class PasswordHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -72,6 +78,3 @@ class PasswordHistory(models.Model):
 
         # return whether that is expired
         return difference.days > password_expiration
-
-
-
