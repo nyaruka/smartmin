@@ -25,6 +25,11 @@ class Post(SmartModel):
         field_dict['order'] = int(float(field_dict['order']))
         return field_dict
 
+    @classmethod
+    def validate_import_header(cls, header):
+        if 'title' not in header:
+             raise Exception('missing "title" header')
+
     def __unicode__(self):
         return self.title
 
