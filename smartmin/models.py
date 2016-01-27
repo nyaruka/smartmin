@@ -113,7 +113,7 @@ class SmartModel(models.Model):
 
                         encoded.append(cell)
 
-                yield encoded
+                    yield encoded
 
             reader = unicode_csv_reader(reader)
 
