@@ -218,12 +218,12 @@ class SmartModel(models.Model):
                         num_errors += 1
 
                 except SmartImportRowError as e:
-                    error_messages.append(dict(line=line_number+1, error=str(e)))
+                    error_messages.append(dict(line=line_number+1, error=unicode(e)))
 
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
-                    raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
+                    raise Exception("Line %d: %s\n\n%s" % (line_number, unicode(e), field_values))
                 line_number += 1
             # only care about the first sheet
             break
