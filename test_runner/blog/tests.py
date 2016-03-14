@@ -11,6 +11,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils import timezone
+from guardian.conf import settings as guardian_settings
 from guardian.shortcuts import assign_perm
 from mock import patch
 from smartmin.csv_imports.models import ImportTask
@@ -117,7 +118,7 @@ class SmartminTest(TestCase):
 
         # now grant object level permission to update a single post for anonymous user
         self.client.logout()
-        anon = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+        anon = User.objects.get(username=guardian_settings.ANONYMOUS_USER_NAME)
         assign_perm('blog.post_update', anon, self.post)
 
         response = self.client.get(update_url)
@@ -408,7 +409,6 @@ class UserTest(TestCase):
         response = self.client.post(login_url, dict(username='withcaps', password='thepassword'), follow=True)
         self.assertTrue('form' in response.context)
         self.assertTrue(response.context['form'].errors)
-
 
     def test_crudl(self):
         self.client.login(username='superuser', password='superuser')
