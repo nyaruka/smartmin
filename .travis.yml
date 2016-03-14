@@ -5,8 +5,10 @@ python:
 env:
   - TOXENV=py2.7-django1.7
   - TOXENV=py2.7-django1.8
+  - TOXENV=py2.7-django1.9
   - TOXENV=py3.4-django1.7
   - TOXENV=py3.4-django1.8
+  - TOXENV=py2.7-django1.9
 install:
   - pip install -q --use-mirrors tox
 before_script:
