@@ -7,24 +7,24 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import post_syncdb
+from django.db.models.signals import post_migrate
 from guardian.management import create_anonymous_user
 from guardian.shortcuts import assign_perm, remove_perm
 from guardian.utils import get_anonymous_user
 
 
-def is_last_model(kwargs):
+def is_last_model(app_config):
     """
-    Returns whether this is the last post_syncdb called in the application.
+    Returns whether this is the last post_migrate called in the application.
     """
     # If the application specifies it, use their permissions app. This app should be
     # the last app needs to be the last app in INSTALLED_APPS which uses smartmin permissions.
     permissions_app = getattr(settings, 'PERMISSIONS_APP', None)
     if permissions_app:
-        return kwargs['app'].__name__ == "%s.models" % permissions_app
+        return app_config.name == "%s.models" % permissions_app
 
     # Otherwise, run it for each of the last five apps in INSTALLED_APPS
-    return kwargs['app'].__name__ in ["%s.models" % app for app in settings.INSTALLED_APPS[-10:]]
+    return app_config.name in settings.INSTALLED_APPS[-10:]
 
 
 def check_role_permissions(role, permissions, current_permissions):
@@ -89,7 +89,7 @@ def check_all_group_permissions(sender, **kwargs):
     """
     Checks that all the permissions specified in our settings.py are set for our groups.
     """
-    if not is_last_model(kwargs):
+    if not is_last_model(sender):
         return
 
     config = getattr(settings, 'GROUP_PERMISSIONS', dict())
@@ -107,7 +107,7 @@ def check_all_group_permissions(sender, **kwargs):
 def get_or_create_anonymous_user():
     try:
         anon_user = get_anonymous_user()
-    except:
+    except Exception:
         create_anonymous_user(None)
         anon_user = get_anonymous_user()
 
@@ -118,7 +118,7 @@ def check_all_anon_permissions(sender, **kwargs):
     """
     Checks that all our anonymous permissions have been granted
     """
-    if not is_last_model(kwargs):
+    if not is_last_model(sender):
         return
 
     permissions = getattr(settings, 'ANONYMOUS_PERMISSIONS', [])
@@ -153,7 +153,7 @@ def check_all_permissions(sender, **kwargs):
     This syncdb checks our PERMISSIONS setting in settings.py and makes sure all those permissions
     actually exit.
     """
-    if not is_last_model(kwargs):
+    if not is_last_model(sender):
         return
 
     config = getattr(settings, 'PERMISSIONS', dict())
@@ -180,6 +180,6 @@ def check_all_permissions(sender, **kwargs):
                 add_permission(content_type, permission)
 
 
-post_syncdb.connect(check_all_permissions)
-post_syncdb.connect(check_all_group_permissions)
-post_syncdb.connect(check_all_anon_permissions)
+post_migrate.connect(check_all_permissions)
+post_migrate.connect(check_all_group_permissions)
+post_migrate.connect(check_all_anon_permissions)
