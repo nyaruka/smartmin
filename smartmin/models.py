@@ -7,6 +7,7 @@ import json
 import pytz
 import six
 
+from six import text_type
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -113,7 +114,7 @@ class SmartModel(models.Model):
 
                         encoded.append(cell)
 
-                yield encoded
+                    yield encoded
 
             reader = unicode_csv_reader(reader)
 
@@ -218,12 +219,12 @@ class SmartModel(models.Model):
                         num_errors += 1
 
                 except SmartImportRowError as e:
-                    error_messages.append(dict(line=line_number+1, error=str(e)))
+                    error_messages.append(dict(line=line_number+1, error=text_type(e)))
 
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
-                    raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
+                    raise Exception("Line %d: %s\n\n%s" % (line_number, text_type(e), field_values))
                 line_number += 1
             # only care about the first sheet
             break
