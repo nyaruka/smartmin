@@ -352,12 +352,12 @@ class SmartView(object):
         # are used to build pagination URLs
         url_params = "?"
         order_params = ""
-        for key in self.request.REQUEST.keys():
+        for key in self.request.GET.keys():
             if key != 'page' and key != 'pjax' and key[0] != '_':
-                for value in self.request.REQUEST.getlist(key):
+                for value in self.request.GET.getlist(key):
                     url_params += "%s=%s&" % (key, urlquote(value))
             elif key == '_order':
-                order_params = "&".join(["%s=%s" % (key, _) for _ in self.request.REQUEST.getlist(key)])
+                order_params = "&".join(["%s=%s" % (key, _) for _ in self.request.GET.getlist(key)])
 
         context['url_params'] = url_params
         context['order_params'] = order_params + "&"
@@ -378,7 +378,7 @@ class SmartView(object):
 
         # by default, our base is 'base.html', but we might be pjax
         base_template = "base.html"
-        if 'pjax' in self.request.REQUEST or 'pjax' in self.request.POST:
+        if 'pjax' in self.request.GET or 'pjax' in self.request.POST:
             base_template = "smartmin/pjax.html"
 
         if 'HTTP_X_PJAX' in self.request.META:
@@ -405,9 +405,9 @@ class SmartView(object):
         Overloaded to deal with _format arguments.
         """
         # should we actually render in json?
-        if '_format' in self.request.REQUEST and self.request.REQUEST['_format'] == 'json':
-          json_data = self.as_json(context)
-          return HttpResponse(json.dumps(json_data), content_type='application/javascript')
+        if '_format' in self.request.GET and self.request.GET['_format'] == 'json':
+            json_data = self.as_json(context)
+            return HttpResponse(json.dumps(json_data), content_type='application/javascript')
 
         # otherwise, return normally
         else:
@@ -606,8 +606,8 @@ class SmartListView(SmartView, ListView):
         context['link_fields'] = self.link_fields
 
         # our search term if any
-        if 'search' in self.request.REQUEST:
-            context['search'] = self.request.REQUEST['search']
+        if 'search' in self.request.GET:
+            context['search'] = self.request.GET['search']
 
         # our ordering field if any
         order = self.derive_ordering()
@@ -633,8 +633,8 @@ class SmartListView(SmartView, ListView):
 
         # apply any filtering
         search_fields = self.derive_search_fields()
-        if search_fields and 'search' in self.request.REQUEST:
-            terms = self.request.REQUEST['search'].split()
+        if search_fields and 'search' in self.request.GET:
+            terms = self.request.GET['search'].split()
 
             query = Q(pk__gt=0)
             for term in terms:
@@ -678,8 +678,8 @@ class SmartListView(SmartView, ListView):
 
         If the default order of the queryset should be used, returns None
         """
-        if '_order' in self.request.REQUEST:
-            return self.request.REQUEST['_order']
+        if '_order' in self.request.GET:
+            return self.request.GET['_order']
         elif self.default_order:
             return self.default_order
         else:
@@ -694,10 +694,9 @@ class SmartListView(SmartView, ListView):
 
         # if we get our order from the request
         # make sure it is a valid field in the list
-        if '_order' in self.request.REQUEST:
+        if '_order' in self.request.GET:
             if order not in self.derive_fields():
                 order = None
-
 
         if order:
             # if our order is a single string, convert to a simple list
@@ -739,7 +738,7 @@ class SmartListView(SmartView, ListView):
         Overloaded to deal with _format arguments.
         """
         # is this a select2 format response?
-        if self.request.REQUEST.get('_format', 'html') == 'select2':
+        if self.request.GET.get('_format', 'html') == 'select2':
 
             results = []
             for obj in context['object_list']:
