@@ -694,7 +694,7 @@ class SmartListView(SmartView, ListView):
 
         # if we get our order from the request
         # make sure it is a valid field in the list
-        if '_order' in self.request.REQUEST:
+        if '_order' in self.request.GET:
             if order.lstrip('-') not in self.derive_fields():
                 order = None
 
