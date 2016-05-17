@@ -9,7 +9,9 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.test.utils import override_settings
 from django.utils import timezone
+from guardian.conf import settings as guardian_settings
 from guardian.shortcuts import assign_perm
 from mock import patch
 from smartmin.csv_imports.models import ImportTask
@@ -116,7 +118,7 @@ class SmartminTest(TestCase):
 
         # now grant object level permission to update a single post for anonymous user
         self.client.logout()
-        anon = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
+        anon = User.objects.get(username=guardian_settings.ANONYMOUS_USER_NAME)
         assign_perm('blog.post_update', anon, self.post)
 
         response = self.client.get(update_url)
@@ -420,7 +422,6 @@ class UserTest(TestCase):
         response = self.client.post(login_url, dict(username='withcaps', password='thepassword'), follow=True)
         self.assertTrue('form' in response.context)
         self.assertTrue(response.context['form'].errors)
-
 
     def test_crudl(self):
         self.client.login(username='superuser', password='superuser')
@@ -1039,6 +1040,7 @@ class UserLockoutTestCase(TestCase):
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
             self.assertTrue(response.context['user'].is_authenticated())
 
+
 class PasswordExpirationTestCase(TestCase):
 
     def setUp(self):
@@ -1090,55 +1092,55 @@ class PasswordExpirationTestCase(TestCase):
 
             self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
 
-    def testExpiration(self):
-        with self.settings(USER_PASSWORD_EXPIRATION=60, USER_PASSWORD_REPEAT_WINDOW=365):
-            # create a fake password set 90 days ago
-            ninety_days_ago = timezone.now() - timedelta(days=90)
-            history = PasswordHistory.objects.create(user=self.plain,
-                                                     password=self.plain.password)
+    @override_settings(USER_PASSWORD_EXPIRATION=60, USER_PASSWORD_REPEAT_WINDOW=365)
+    def test_expiration(self):
+        # create a fake password set 90 days ago
+        ninety_days_ago = timezone.now() - timedelta(days=90)
+        history = PasswordHistory.objects.create(user=self.plain,
+                                                 password=self.plain.password)
 
-            history.set_on = ninety_days_ago
-            history.save()
+        history.set_on = ninety_days_ago
+        history.save()
 
-            # log in
-            self.client.logout()
-            post_data = dict(username='plain', password='Password1')
-            response = self.client.post(reverse('users.user_login'), post_data, follow=True)
+        # log in
+        self.client.logout()
+        post_data = dict(username='plain', password='Password1')
+        response = self.client.post(reverse('users.user_login'), post_data, follow=True)
 
-            # assert we are being taken to our new password page
-            self.assertTrue('form' in response.context)
-            self.assertTrue('new_password' in response.context['form'].fields)
+        # assert we are being taken to our new password page
+        self.assertTrue('form' in response.context)
+        self.assertTrue('new_password' in response.context['form'].fields)
 
-            # try to go to a different page
-            response = self.client.get(reverse('blog.post_list'), follow=True)
+        # try to go to a different page
+        response = self.client.get(reverse('blog.post_list'), follow=True)
 
-            # redirected again
-            self.assertTrue('form' in response.context)
-            self.assertTrue('new_password' in response.context['form'].fields)
+        # redirected again
+        self.assertTrue('form' in response.context)
+        self.assertTrue('new_password' in response.context['form'].fields)
 
-            # ok, set our new password
-            post_data = dict(old_password='Password1', new_password='Password1', confirm_new_password='Password1')
-            response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
+        # ok, set our new password
+        post_data = dict(old_password='Password1', new_password='Password1', confirm_new_password='Password1')
+        response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
 
-            # we should get a failure that our new password is a repeat
-            self.assertTrue('confirm_new_password' in response.context['form'].errors)
+        # we should get a failure that our new password is a repeat
+        self.assertTrue('confirm_new_password' in response.context['form'].errors)
 
-            # use a different password
-            post_data = dict(old_password='Password1', new_password='Password2', confirm_new_password='Password2')
-            response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
+        # use a different password
+        post_data = dict(old_password='Password1', new_password='Password2', confirm_new_password='Password2')
+        response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
 
-            # should be redirected to the normal redirect page
-            self.assertEquals(302, response.status_code)
-            self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)
+        # should be redirected to the normal redirect page
+        self.assertEquals(302, response.status_code)
+        self.assertIn(reverse('blog.post_list'), response['location'])
 
-            # should now have two password histories
-            self.assertEquals(2, PasswordHistory.objects.filter(user=self.plain).count())
+        # should now have two password histories
+        self.assertEquals(2, PasswordHistory.objects.filter(user=self.plain).count())
 
-            # should be able to log in normally
-            self.client.logout()
+        # should be able to log in normally
+        self.client.logout()
 
-            post_data = dict(username='plain', password='Password2')
-            response = self.client.post(reverse('users.user_login'), post_data)
+        post_data = dict(username='plain', password='Password2')
+        response = self.client.post(reverse('users.user_login'), post_data)
 
-            self.assertEquals(302, response.status_code)
-            self.assertTrue(response['location'].find(reverse('blog.post_list')) > 0)
+        self.assertEquals(302, response.status_code)
+        self.assertIn(reverse('blog.post_list'), response['location'])

@@ -3,28 +3,43 @@ from __future__ import unicode_literals
 import six
 import sys
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import post_syncdb
+from django.db.models.signals import post_migrate
 from guardian.management import create_anonymous_user
 from guardian.shortcuts import assign_perm, remove_perm
 from guardian.utils import get_anonymous_user
 
 
-def is_last_model(kwargs):
-    """
-    Returns whether this is the last post_syncdb called in the application.
-    """
-    # If the application specifies it, use their permissions app. This app should be
-    # the last app needs to be the last app in INSTALLED_APPS which uses smartmin permissions.
-    permissions_app = getattr(settings, 'PERMISSIONS_APP', None)
-    if permissions_app:
-        return kwargs['app'].__name__ == "%s.models" % permissions_app
+permissions_app_name = None
 
-    # Otherwise, run it for each of the last five apps in INSTALLED_APPS
-    return kwargs['app'].__name__ in ["%s.models" % app for app in settings.INSTALLED_APPS[-10:]]
+
+def get_permissions_app_name():
+    """
+    Gets the app after which smartmin permissions should be installed. This can be specified by PERMISSIONS_APP in the
+    Django settings or defaults to the last app with models
+    """
+    global permissions_app_name
+
+    if not permissions_app_name:
+        permissions_app_name = getattr(settings, 'PERMISSIONS_APP', None)
+
+        if not permissions_app_name:
+            app_names_with_models = [a.name for a in apps.get_app_configs() if a.models_module is not None]
+            if app_names_with_models:
+                permissions_app_name = app_names_with_models[-1]
+
+    return permissions_app_name
+
+
+def is_permissions_app(app_config):
+    """
+    Returns whether this is the app after which permissions should be installed.
+    """
+    return app_config.name == get_permissions_app_name()
 
 
 def check_role_permissions(role, permissions, current_permissions):
@@ -89,7 +104,7 @@ def check_all_group_permissions(sender, **kwargs):
     """
     Checks that all the permissions specified in our settings.py are set for our groups.
     """
-    if not is_last_model(kwargs):
+    if not is_permissions_app(sender):
         return
 
     config = getattr(settings, 'GROUP_PERMISSIONS', dict())
@@ -107,7 +122,7 @@ def check_all_group_permissions(sender, **kwargs):
 def get_or_create_anonymous_user():
     try:
         anon_user = get_anonymous_user()
-    except:
+    except Exception:
         create_anonymous_user(None)
         anon_user = get_anonymous_user()
 
@@ -118,7 +133,7 @@ def check_all_anon_permissions(sender, **kwargs):
     """
     Checks that all our anonymous permissions have been granted
     """
-    if not is_last_model(kwargs):
+    if not is_permissions_app(sender):
         return
 
     permissions = getattr(settings, 'ANONYMOUS_PERMISSIONS', [])
@@ -132,9 +147,6 @@ def add_permission(content_type, permission):
     Adds the passed in permission to that content type.  Note that the permission passed
     in should be a single word, or verb.  The proper 'codename' will be generated from that.
     """
-    # bail if we already handled this model
-    key = "%s:%s" % (content_type.model, permission)
-
     # build our permission slug
     codename = "%s_%s" % (content_type.model, permission)
 
@@ -153,7 +165,7 @@ def check_all_permissions(sender, **kwargs):
     This syncdb checks our PERMISSIONS setting in settings.py and makes sure all those permissions
     actually exit.
     """
-    if not is_last_model(kwargs):
+    if not is_permissions_app(sender):
         return
 
     config = getattr(settings, 'PERMISSIONS', dict())
@@ -180,6 +192,6 @@ def check_all_permissions(sender, **kwargs):
                 add_permission(content_type, permission)
 
 
-post_syncdb.connect(check_all_permissions)
-post_syncdb.connect(check_all_group_permissions)
-post_syncdb.connect(check_all_anon_permissions)
+post_migrate.connect(check_all_permissions)
+post_migrate.connect(check_all_group_permissions)
+post_migrate.connect(check_all_anon_permissions)
