@@ -23,6 +23,7 @@ from django.views.generic import DetailView, ListView
 from guardian.shortcuts import get_objects_for_user, assign_perm
 from guardian.utils import get_anonymous_user
 from smartmin.csv_imports.models import ImportTask
+from smartmin.mixins import NonAtomicMixin
 from . import widgets
 
 
@@ -1290,7 +1291,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
             return self.title
 
 
-class SmartCSVImportView(SmartCreateView):
+class SmartCSVImportView(NonAtomicMixin, SmartCreateView):
     success_url = 'id@csv_imports.importtask_read'
 
     fields = ('csv_file',)
