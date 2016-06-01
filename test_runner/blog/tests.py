@@ -192,6 +192,15 @@ class SmartminTest(TestCase):
         self.assertEquals(post3, posts[3])
         self.assertEquals(self.post, posts[4])
 
+        response = self.client.get(reverse('blog.post_list') + "?_order=-title")
+        posts = response.context['post_list']
+
+        self.assertEquals(self.post, posts[0])
+        self.assertEquals(post3, posts[1])
+        self.assertEquals(post2, posts[2])
+        self.assertEquals(post4, posts[3])
+        self.assertEquals(post1, posts[4])
+
         response = self.client.get(reverse('blog.post_author'))
         posts = response.context['post_list']
 
