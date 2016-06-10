@@ -138,7 +138,7 @@ class SmartModel(models.Model):
 
     @classmethod
     def import_csv(cls, task, log=None):
-        filename = task.csv_file.file
+        import_file_obj = task.csv_file.file
         user = task.created_by
 
         import_params = None
@@ -152,9 +152,9 @@ class SmartModel(models.Model):
                 pass
 
         try:
-            records = cls.import_xls(filename, user, import_params, log, import_results)
+            records = cls.import_xls(import_file_obj, user, import_params, log, import_results)
         except XLRDError:
-            records = cls.import_raw_csv(filename, user, import_params, log, import_results)
+            records = cls.import_raw_csv(import_file_obj, user, import_params, log, import_results)
 
         task.import_results = json.dumps(import_results)
 
@@ -176,8 +176,8 @@ class SmartModel(models.Model):
         return val
 
     @classmethod
-    def import_xls(cls, filename, user, import_params, log=None, import_results=None):
-        workbook = open_workbook(filename.name, 'rb')
+    def import_xls(cls, import_file_obj, user, import_params, log=None, import_results=None):
+        workbook = open_workbook(import_file_obj.file.name, 'rb')
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         # use now to determine a relevant timezone
@@ -245,12 +245,13 @@ class SmartModel(models.Model):
             return cls.normalize_value(six.text_type(cell.value))
 
     @classmethod
-    def import_raw_csv(cls, filename, user, import_params, log=None, import_results=None):
+    def import_raw_csv(cls, import_file_obj, user, import_params, log=None, import_results=None):
         # our alternative codec, by default we are the crazy windows encoding
         ascii_codec = 'cp1252'
 
         # read the entire file, look for mac_roman characters
-        reader = open(filename.name, "rb")
+        import_file_obj.open("rb")
+        reader = import_file_obj.file
         for byte in reader.read():
             # these are latin accented characterse in mac_roman, if we see them then our alternative
             # encoding should be mac_roman
@@ -264,7 +265,8 @@ class SmartModel(models.Model):
                 break
         reader.close()
 
-        reader = open(filename.name, "rU")
+        import_file_obj.open("rU")
+        reader = import_file_obj.file
 
         def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
             csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
