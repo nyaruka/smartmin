@@ -64,10 +64,14 @@ class SmartModel(models.Model):
 
     @classmethod
     def get_import_file_headers(cls, csv_file):
-        filename = csv_file
+        import_file_obj = csv_file.file
+
         headers = []
         try:
-            workbook = open_workbook(filename.name, 'rb')
+            import_file_obj.open("rb")
+            file_contents = import_file_obj.read()
+            import_file_obj.close()
+            workbook = open_workbook(file_contents=file_contents)
 
             records = []
 
@@ -86,7 +90,8 @@ class SmartModel(models.Model):
             ascii_codec = 'cp1252'
 
             # read the entire file, look for mac_roman characters
-            reader = open(filename.name, "rb")
+            import_file_obj.open("rb")
+            reader = import_file_obj.file
             for byte in reader.read():
                 # these are latin accented characterse in mac_roman, if we see them then our alternative
                 # encoding should be mac_roman
@@ -100,7 +105,8 @@ class SmartModel(models.Model):
                     break
             reader.close()
 
-            reader = open(filename.name, "rU")
+            import_file_obj.open("rU")
+            reader = import_file_obj.file
 
             def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
                 csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
