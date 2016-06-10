@@ -316,10 +316,6 @@ class SmartminTest(TestCase):
         self.assertEquals(3, Post.objects.all().count())
         self.assertEquals(2, Post.active.all().count())
 
-    def test_get_import_file_headers(self):
-        with open('test_runner/blog/test_files/posts.csv', 'rb') as open_file:
-             self.assertEqual(Post.get_import_file_headers(open_file), ['title', 'body', 'order', 'tags'])
-
     def test_csv_import(self):
         with self.settings(CELERY_ALWAYS_EAGER=True, CELERY_RESULT_BACKEND='cache', CELERY_CACHE_BACKEND='memory'):
             import_url = reverse('blog.post_csv_import')
@@ -340,6 +336,7 @@ class SmartminTest(TestCase):
             self.assertEqual(200, response.status_code)
 
             task = ImportTask.objects.get()
+            self.assertEqual(Post.get_import_file_headers(task.csv_file), ['title', 'body', 'order', 'tags'])
             self.assertEqual(json.loads(task.import_results), dict(records=4, errors=0, error_messages=[]))
 
             ImportTask.objects.all().delete()

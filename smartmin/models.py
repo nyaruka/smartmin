@@ -64,7 +64,27 @@ class SmartModel(models.Model):
 
     @classmethod
     def get_import_file_headers(cls, csv_file):
-        filename = csv_file
+        csv_file.open()
+
+        # this file isn't good enough, lets write it to local disk
+        from django.conf import settings
+        from uuid import uuid4
+        import os
+
+        # make sure our tmp directory is present (throws if already present)
+        try:
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'tmp'))
+        except Exception:
+            pass
+
+        # write our file out
+        tmp_file = os.path.join(settings.MEDIA_ROOT, 'tmp/%s' % str(uuid4()))
+
+        out_file = open(tmp_file, 'w')
+        out_file.write(csv_file.read())
+        out_file.close()
+
+        filename = out_file
         headers = []
         try:
             workbook = open_workbook(filename.name, 'rb')
@@ -133,12 +153,35 @@ class SmartModel(models.Model):
 
             # normalize our header names, removing quotes and spaces
             headers = [cls.normalize_value(_).lower() for _ in header]
+        finally:
+            os.remove(tmp_file)
 
         return headers
 
     @classmethod
     def import_csv(cls, task, log=None):
-        filename = task.csv_file.file
+        csv_file = task.csv_file
+        csv_file.open()
+
+        # this file isn't good enough, lets write it to local disk
+        from django.conf import settings
+        from uuid import uuid4
+        import os
+
+        # make sure our tmp directory is present (throws if already present)
+        try:
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'tmp'))
+        except Exception:
+            pass
+
+        # write our file out
+        tmp_file = os.path.join(settings.MEDIA_ROOT, 'tmp/%s' % str(uuid4()))
+
+        out_file = open(tmp_file, 'w')
+        out_file.write(csv_file.read())
+        out_file.close()
+
+        filename = out_file
         user = task.created_by
 
         import_params = None
