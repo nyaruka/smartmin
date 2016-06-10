@@ -104,6 +104,7 @@ class SmartModel(models.Model):
                     ascii_codec = 'mac_roman'
                     break
             reader.close()
+            import_file_obj.close()
 
             import_file_obj.open("rU")
             reader = import_file_obj.file
@@ -123,6 +124,7 @@ class SmartModel(models.Model):
                     yield encoded
 
             reader = unicode_csv_reader(reader)
+            import_file_obj.close()
 
             # read in our header
             line_number = 0
@@ -273,6 +275,7 @@ class SmartModel(models.Model):
                 ascii_codec = 'mac_roman'
                 break
         reader.close()
+        import_file_obj.close()
 
         import_file_obj.open("rU")
         reader = import_file_obj.file
@@ -292,6 +295,7 @@ class SmartModel(models.Model):
                 yield encoded
 
         reader = unicode_csv_reader(reader)
+        import_file_obj.close()
 
         # read in our header
         line_number = 0
