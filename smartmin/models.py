@@ -198,6 +198,8 @@ class SmartModel(models.Model):
             records = cls.import_xls(filename, user, import_params, log, import_results)
         except XLRDError:
             records = cls.import_raw_csv(filename, user, import_params, log, import_results)
+        finally:
+            os.remove(tmp_file)
 
         task.import_results = json.dumps(import_results)
 
