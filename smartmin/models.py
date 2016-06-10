@@ -177,7 +177,10 @@ class SmartModel(models.Model):
 
     @classmethod
     def import_xls(cls, import_file_obj, user, import_params, log=None, import_results=None):
-        workbook = open_workbook(import_file_obj.name, 'rb')
+        import_file_obj.open("rb")
+        file_contents = import_file_obj.read()
+        import_file_obj.close()
+        workbook = open_workbook(file_contents=file_contents)
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         # use now to determine a relevant timezone
