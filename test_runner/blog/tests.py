@@ -318,7 +318,7 @@ class SmartminTest(TestCase):
 
     def test_get_import_file_headers(self):
         with open('test_runner/blog/test_files/posts.csv', 'rb') as open_file:
-             self.assertEqual(Post.get_import_file_headers(open_file), ['title', 'body', 'order', 'tags'])
+            self.assertEqual(Post.get_import_file_headers(open_file), ['title', 'body', 'order', 'tags'])
 
     def test_csv_import(self):
         with self.settings(CELERY_ALWAYS_EAGER=True, CELERY_RESULT_BACKEND='cache', CELERY_CACHE_BACKEND='memory'):
