@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 
+import six
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
+from django.utils.encoding import force_str
 from six.moves.urllib.parse import urlparse
 
 
@@ -49,7 +52,7 @@ class SmartminTest(TestCase):
             segments = urlparse(response.get('Location', None))
             self.assertNotEqual(segments.path, url, msg=msg)
 
-    def create_user(self, username, group_names=[]):
+    def create_user(self, username, group_names=()):
         # Create a user to run our CRUDL tests
         user = get_user_model().objects.create_user(username, "%s@nyaruka.com" % username)
         user.set_password(username)
@@ -67,8 +70,8 @@ class SmartminTest(TestCase):
 
             if not form.is_valid():
                 errors = []
-                for k,v in form.errors.iteritems():
-                    errors.append("%s=%s" % (k,v.as_text()))
+                for k, v in six.iteritems(form.errors):
+                    errors.append("%s=%s" % (k, force_str(v)))
                 self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
 
 
