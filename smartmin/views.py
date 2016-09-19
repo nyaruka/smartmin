@@ -420,6 +420,8 @@ class SmartTemplateView(SmartView, TemplateView):
 
 
 class SmartReadView(SmartView, DetailView):
+    slug_field = None
+    slug_url_kwarg = None
     default_template = 'smartmin/read.html'
     edit_button = None
 
@@ -444,7 +446,10 @@ class SmartReadView(SmartView, DetailView):
         """
         Returns the URL pattern for this view.
         """
-        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+        if cls.slug_url_kwarg:
+            return r'^%s/%s/(?P<%s>[^/]+)/$' % (path, action, cls.slug_url_kwarg)
+        else:
+            return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def derive_fields(self):
         """

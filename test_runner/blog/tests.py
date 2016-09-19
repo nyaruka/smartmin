@@ -17,13 +17,14 @@ from mock import patch
 from smartmin.csv_imports.models import ImportTask
 from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
+from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
 from smartmin.views import smart_url
 from test_runner.blog.models import Post, Category
 from .views import PostCRUDL
 
 
-class SmartminTest(TestCase):
+class BlogTest(SmartminTest):
 
     def setUp(self):
         self.client = Client()
@@ -46,11 +47,6 @@ class SmartminTest(TestCase):
 
         self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post", tags="testing_tag", order=0,
                                         created_by=self.author, modified_by=self.author)
-
-    def assertRedirect(self, response, url):
-        self.assertEquals(302, response.status_code)
-        self.assertTrue(response.get('Location', None).find(reverse('users.user_login')) != -1,
-                        "Did not redirect to expected URL, expected: %s, got %s" % (url, response.get('Location', None)))
 
     def assertNoAccess(self, user, url):
         self.client.login(username=user.username, password=user.username)
