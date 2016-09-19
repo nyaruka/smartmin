@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.models import User
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartListView, SmartUpdateView
+from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartListView, SmartUpdateView
 from .models import Post, Category
 
 
@@ -43,7 +43,7 @@ class CategoryCRUDL(SmartCRUDL):
 class PostCRUDL(SmartCRUDL):
     model = Post
     actions = ('create', 'read', 'update', 'delete', 'list', 'author',
-               'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import')
+               'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import', 'by_uuid')
 
     class List(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')
@@ -90,3 +90,7 @@ class PostCRUDL(SmartCRUDL):
             messages.info(request,"Info Messages")
             messages.warning(request,"Warning Messages")
             messages.debug(request,"Debug Messages")
+
+    class ByUuid(SmartReadView):
+        slug_field = 'uuid'
+        slug_url_kwarg = 'uuid'

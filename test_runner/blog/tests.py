@@ -24,10 +24,10 @@ from test_runner.blog.models import Post, Category
 from .views import PostCRUDL
 
 
-class BlogTest(SmartminTest):
+class PostTest(SmartminTest):
 
     def setUp(self):
-        self.client = Client()
+        super(PostTest, self).setUp()
 
         # no groups
         self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'plain')
@@ -61,11 +61,21 @@ class BlogTest(SmartminTest):
     def assertIsLogin(self, response):
         self.assertRedirect(response, reverse('users.user_login'))
 
+    def test_crudl_urls(self):
+        self.assertEqual(reverse('blog.post_create'), '/blog/post/create/')
+        self.assertEqual(reverse('blog.post_read', args=[self.post.id]), '/blog/post/read/%d/' % self.post.id)
+        self.assertEqual(reverse('blog.post_update', args=[self.post.id]), '/blog/post/update/%d/' % self.post.id)
+        self.assertEqual(reverse('blog.post_delete', args=[self.post.id]), '/blog/post/delete/%d/' % self.post.id)
+        self.assertEqual(reverse('blog.post_list'), '/blog/post/')
+        self.assertEqual(reverse('blog.post_author'), '/blog/post/author/')
+        self.assertEqual(reverse('blog.post_by_uuid', args=[self.post.uuid]), '/blog/post/by_uuid/%s/' % self.post.uuid)
+
     def test_smart_url(self):
-        self.assertEquals(reverse('blog.post_create'), smart_url("@blog.post_create"))
-        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("id@blog.post_update", self.post))
-        self.assertEquals(reverse('blog.post_create'), smart_url("/blog/post/create/"))
-        self.assertEquals(reverse('blog.post_update', args=[self.post.id]), smart_url("/blog/post/update/%d/", self.post))
+        self.assertEqual(smart_url("@blog.post_create"), '/blog/post/create/')
+        self.assertEqual(smart_url("id@blog.post_update", self.post), '/blog/post/update/%d/' % self.post.id)
+        self.assertEqual(smart_url("/blog/post/create/"), '/blog/post/create/')
+        self.assertEqual(smart_url("/blog/post/update/%d/", self.post), '/blog/post/update/%d/' % self.post.id)
+        self.assertEqual(smart_url("uuid@blog.post_by_uuid", self.post), '/blog/post/by_uuid/%s/' % self.post.uuid)
 
     def test_permissions(self):
         create_url = reverse('blog.post_create')
