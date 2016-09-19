@@ -14,7 +14,7 @@ class Post(SmartModel):
     tags = models.CharField(max_length=128,
                             help_text="Any tags for this post")
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    uuid = models.CharField(max_length=36, default=uuid.uuid4, editable=False)  # UUID field only added in Django 1.8
 
     objects = models.Manager()
     active = ActiveManager()

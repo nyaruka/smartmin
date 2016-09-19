@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='post',
             name='uuid',
-            field=models.UUIDField(default=uuid.uuid4, editable=False),
+            field=models.CharField(max_length=36, default=uuid.uuid4, editable=False),
         ),
     ]
