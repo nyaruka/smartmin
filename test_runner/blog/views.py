@@ -92,5 +92,4 @@ class PostCRUDL(SmartCRUDL):
             messages.debug(request,"Debug Messages")
 
     class ByUuid(SmartReadView):
-        slug_field = 'uuid'
         slug_url_kwarg = 'uuid'

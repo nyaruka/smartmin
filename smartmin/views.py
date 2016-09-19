@@ -428,6 +428,12 @@ class SmartReadView(SmartView, DetailView):
     field_config = {'modified_blurb': dict(label="Modified"),
                     'created_blurb': dict(label="Created")}
 
+    def get_slug_field(self):
+        """
+        If `slug_field` isn't specified it defaults to `slug_url_kwarg`
+        """
+        return self.slug_field if self.slug_field else self.slug_url_kwarg
+
     def derive_queryset(self):
         return super(SmartReadView, self).get_queryset()
 
