@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import uuid
+
 from django.db import models
 from smartmin.models import SmartModel, ActiveManager
 
@@ -11,6 +13,8 @@ class Post(SmartModel):
     order = models.IntegerField(help_text="The order for this post, posts with smaller orders come first")
     tags = models.CharField(max_length=128,
                             help_text="Any tags for this post")
+
+    uuid = models.CharField(max_length=36, default=uuid.uuid4, editable=False)  # UUID field only added in Django 1.8
 
     objects = models.Manager()
     active = ActiveManager()

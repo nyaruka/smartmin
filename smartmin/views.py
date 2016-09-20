@@ -420,11 +420,19 @@ class SmartTemplateView(SmartView, TemplateView):
 
 
 class SmartReadView(SmartView, DetailView):
+    slug_field = None
+    slug_url_kwarg = None
     default_template = 'smartmin/read.html'
     edit_button = None
 
     field_config = {'modified_blurb': dict(label="Modified"),
                     'created_blurb': dict(label="Created")}
+
+    def get_slug_field(self):
+        """
+        If `slug_field` isn't specified it defaults to `slug_url_kwarg`
+        """
+        return self.slug_field if self.slug_field else self.slug_url_kwarg
 
     def derive_queryset(self):
         return super(SmartReadView, self).get_queryset()
@@ -444,7 +452,10 @@ class SmartReadView(SmartView, DetailView):
         """
         Returns the URL pattern for this view.
         """
-        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+        if cls.slug_url_kwarg:
+            return r'^%s/%s/(?P<%s>[^/]+)/$' % (path, action, cls.slug_url_kwarg)
+        else:
+            return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def derive_fields(self):
         """
