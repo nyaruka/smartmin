@@ -670,6 +670,18 @@ class UserTest(TestCase):
                 # delete the recovery tokens we have
                 RecoveryToken.objects.all().delete()
 
+        # email are case insensitive
+        response = self.client.post(forget_url, dict(email='USer1@user1.com'), follow=True)
+        # email form submitted successfully
+        self.assertEquals(200, response.status_code)
+
+        # now there is a token generated
+        recovery_token = RecoveryToken.objects.get(user=user1)
+        self.assertNotEquals(None,recovery_token.token)
+
+        # delete the recovery tokens we have
+        RecoveryToken.objects.all().delete()
+
         response = self.client.post(forget_url, post_data, follow=True)
 
         # email form submitted successfully
