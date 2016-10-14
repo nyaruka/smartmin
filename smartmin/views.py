@@ -882,9 +882,9 @@ class SmartFormMixin(object):
 
         if fields is not None:
             # filter out our form fields
-            for name, field in self.form.fields.items():
-                if not name in fields:
-                    del self.form.fields[name]
+            remove = [name for name in self.form.fields.keys() if name not in fields]
+            for name in remove:
+                del self.form.fields[name]
 
         # stuff in our referer as the default location for where to return
         location = forms.CharField(widget=forms.widgets.HiddenInput(), required=False)
