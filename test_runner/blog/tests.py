@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
@@ -20,6 +21,7 @@ from smartmin.models import SmartImportRowError
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
 from smartmin.views import smart_url
+from smartmin.widgets import ImageThumbnailWidget
 from test_runner.blog.models import Post, Category
 from .views import PostCRUDL
 
@@ -1150,3 +1152,18 @@ class PasswordExpirationTestCase(TestCase):
 
         self.assertEquals(302, response.status_code)
         self.assertIn(reverse('blog.post_list'), response['location'])
+
+
+class WidgetsTest(SmartminTest):
+    def test_image_thumbnail(self):
+        widget = ImageThumbnailWidget(320, 240)
+        img = SimpleUploadedFile('test_image.jpg', [], content_type='image/jpeg')
+
+        html = widget.render('logo', img)
+
+        self.assertNotIn('img', html)
+
+        img.url = '/media/2423.jpg'
+        html = widget.render('logo', img)
+
+        self.assertIn('<img src="/media/2423.jpg" width="320" width="240" />', html)

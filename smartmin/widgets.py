@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import six
+
 from datetime import datetime
 from django.forms import widgets
 from django.utils.html import escape
@@ -50,8 +52,8 @@ class DatePickerWidget(widgets.Widget):
             return None
 
     class Media:
-       js = ('js/datepicker.js',)
-       css = {'all': ('css/datepicker.css',)}
+        js = ('js/datepicker.js',)
+        css = {'all': ('css/datepicker.css',)}
 
 
 class ImageThumbnailWidget(widgets.ClearableFileInput): 
@@ -70,4 +72,4 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         thumb_html += '<input type="file" name="%s" /></td>' % name
         thumb_html += '</tr></table>'
 
-        return mark_safe(unicode('<div class="image-picker">%s</div>' % thumb_html))
+        return mark_safe(six.text_type('<div class="image-picker">%s</div>' % thumb_html))
