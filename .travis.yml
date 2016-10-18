@@ -1,16 +1,11 @@
 language: python
 sudo: false
 python:
-  - "2.7"
-env:
-  - TOXENV=py2.7-django1.7
-  - TOXENV=py2.7-django1.8
-  - TOXENV=py2.7-django1.9
-  - TOXENV=py3.4-django1.7
-  - TOXENV=py3.4-django1.8
-  - TOXENV=py3.4-django1.9
+ - "2.7"
+ - "3.4"
+ - "3.5"
 install:
-  - pip install -q --use-mirrors tox
+  - pip install tox-travis
 before_script:
   - createdb -E UTF-8 dash -U postgres -O $USER
 script:
