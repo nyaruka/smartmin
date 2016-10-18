@@ -1,13 +1,7 @@
 language: python
 sudo: false
 python:
-  - "2.7"
-addons:
-  apt:
-    sources:
-      - deadsnakes
-    packages:
-      - python3.5
+  - "3.5"
 env:
   - TOXENV=py2.7-django1.7
   - TOXENV=py2.7-django1.8
