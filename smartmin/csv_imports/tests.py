@@ -13,12 +13,9 @@ class ImportTest(TestCase):
         self.assertEquals(generate_file_path(ImportTask(), 'allo.xlsx'), 'csv_imports/allo.xlsx')
         self.assertEquals(generate_file_path(ImportTask(), 'allo.foo.bar'), 'csv_imports/allo.foo.bar')
 
-        self.assertEquals(generate_file_path(ImportTask(),
-                                             'some_import_file_name_really_very_long_to_need_to_truncated_at_'
-                                             'the_maximum_lenght_allowed_by_django_file_field.abc.xls.csv'),
-                          'csv_imports/some_import_file_name_really_very_long_to_need_to_truncated_.csv')
+        long_name = 'foo' * 100
+        self.assertEquals(generate_file_path(ImportTask(), '%s.xls.csv' % long_name),
+                          'csv_imports/%s.csv' % long_name[:96])
 
-        self.assertEquals(generate_file_path(ImportTask(),
-                                             'some_import_file_name_really_very_long_to_need_to_truncated_at_'
-                                             'the_maximum_lenght_allowed_by_django_file_field.abc.xlsx'),
-                          'csv_imports/some_import_file_name_really_very_long_to_need_to_truncated.xlsx')
+        self.assertEquals(generate_file_path(ImportTask(), '%s.abc.xlsx' % long_name),
+                          'csv_imports/%s.xlsx' % long_name[:95])

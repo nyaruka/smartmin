@@ -12,8 +12,8 @@ from smartmin.models import SmartModel
 
 def generate_file_path(instance, filename):
     name, extension = os.path.splitext(filename)
-    if len(name) + len(extension) > 64:
-        name = name[:64-len(extension)]
+    if len(name) + len(extension) >= 100:
+        name = name[:100-len(extension)]
 
     return "csv_imports/%s%s" % (name, extension)
 
