@@ -291,7 +291,7 @@ class UserCRUDL(SmartCRUDL):
             no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/no_user_email.txt")
 
             email_template = loader.get_template(no_user_email_template)
-            user = get_user_model().objects.filter(email=email).first()
+            user = get_user_model().objects.filter(email__iexact=email).first()
 
             context = build_email_context(self.request, user)
 
