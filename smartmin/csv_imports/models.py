@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import os
+
 from celery.result import EagerResult, AsyncResult
 from django.db import models
 from django.conf import settings
@@ -8,8 +10,16 @@ from smartmin import class_from_string
 from smartmin.models import SmartModel
 
 
+def generate_file_path(instance, filename):
+    name, extension = os.path.splitext(filename)
+    if len(name) + len(extension) >= 100:
+        name = name[:100-len(extension)]
+
+    return "csv_imports/%s%s" % (name, extension)
+
+
 class ImportTask(SmartModel):
-    csv_file = models.FileField(upload_to="csv_imports", verbose_name="Import file", help_text="A comma delimited file of records to import")
+    csv_file = models.FileField(upload_to=generate_file_path, verbose_name="Import file", help_text="A comma delimited file of records to import")
 
     model_class = models.CharField(max_length=255, help_text="The model we are importing for")
 
