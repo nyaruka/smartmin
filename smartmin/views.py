@@ -6,7 +6,7 @@ import six
 
 from django import forms
 from django.conf import settings
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
 from django.core.exceptions import ImproperlyConfigured
@@ -1510,15 +1510,15 @@ class SmartCRUDL(object):
 
     def as_urlpatterns(self):
         """
-        Creates the appropriate URL patterns for this object.
+        Creates the appropriate URLs for this object.
         """
-        urlpatterns = patterns('')
+        urls = []
 
         # for each of our actions
         for action in self.actions:
             view_class = self.view_for_action(action)
             view_pattern = self.pattern_for_view(view_class, action)
             name = self.url_name_for_action(action)
-            urlpatterns += patterns('', url(view_pattern, view_class.as_view(), name=name))
+            urls.append(url(view_pattern, view_class.as_view(), name=name))
 
-        return urlpatterns
+        return urls
