@@ -4,9 +4,18 @@ python:
  - "2.7"
  - "3.4"
  - "3.5"
+env:
+ - DJANGO_VERSION=1.8.16
+ - DJANGO_VERSION=1.9.11
+ - DJANGO_VERSION=1.10.4
 install:
-  - pip install tox-travis
+ - pip install -q -rrequirements/base.txt
+ - pip install -q -rrequirements/tests.txt
+ - pip install -q django==$DJANGO_VERSION
+ - pip install coveralls
 before_script:
-  - createdb -E UTF-8 dash -U postgres -O $USER
+ - createdb -E UTF-8 dash -U postgres -O $USER
 script:
-  - tox -- --settings=test_runner.settings_travis
+ - python manage.py test --settings=test_runner.settings_travis
+after_success:
+ - coveralls
