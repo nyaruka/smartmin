@@ -1,5 +1,12 @@
 from setuptools import setup, find_packages
 
+try:
+    from pypandoc import convert
+    read_md = lambda f: convert(f, 'rst')  # noqa
+except ImportError:
+    print("warning: pypandoc module not found, could not convert Markdown to RST")
+    read_md = lambda f: open(f, 'r').read()  # noqa
+
 
 def _is_requirement(line):
     """Returns whether the line is a valid package requirement."""
@@ -17,25 +24,12 @@ def _read_requirements(filename):
 setup(
     name='smartmin',
     version=__import__('smartmin').__version__,
-    license="BSD",
-
-    install_requires=_read_requirements("requirements/base.txt"),
-    tests_require=_read_requirements("requirements/tests.txt"),
-
     description="Scaffolding system for Django object management.",
-    long_description=open('README.rst').read(),
+    long_description=read_md('README.md'),
 
     author='Nyaruka Ltd',
     author_email='code@nyaruka.com',
 
-    url='http://github.com/nyaruka/smartmin',
-    download_url='http://github.com/nyaruka/smartmin/downloads',
-
-    include_package_data=True,
-
-    packages=find_packages(),
-
-    zip_safe=False,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -44,5 +38,15 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Framework :: Django',
-    ]
+    ],
+    keywords='django scaffolding crudl',
+    url='http://github.com/nyaruka/smartmin',
+    license="BSD",
+
+    packages=find_packages(),
+    install_requires=_read_requirements("requirements/base.txt"),
+    tests_require=_read_requirements("requirements/tests.txt"),
+
+    include_package_data=True,
+    zip_safe=False
 )
