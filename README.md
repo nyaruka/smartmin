@@ -6,7 +6,7 @@ Django Smartmin
 [![PyPI Release](https://img.shields.io/pypi/v/smartmin.svg)](https://pypi.python.org/pypi/smartmin/)
 
 Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients. 
-Smartmin aims to allow you to quickly build scaffolding which you can customize by using Django views.
+It aims to allow you to quickly build scaffolding which you can customize by using Django views.
 
 It is very opinionated in how it works, if you don't agree, Smartmin may not be for you:
 
@@ -31,4 +31,4 @@ The full documentation can be found at: http://readthedocs.org/docs/smartmin/en/
 
 The official source code repository is: http://www.github.com/nyaruka/smartmin/
 
-Built in Rwanda by []Nyaruka Ltd]()http://www.nyaruka.com).
+Built in Rwanda by [Nyaruka Ltd]()http://www.nyaruka.com).
