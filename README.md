@@ -31,4 +31,4 @@ The full documentation can be found at: http://readthedocs.org/docs/smartmin/en/
 
 The official source code repository is: http://www.github.com/nyaruka/smartmin/
 
-Built in Rwanda by [Nyaruka Ltd]()http://www.nyaruka.com).
+Built in Rwanda by [Nyaruka Ltd](http://www.nyaruka.com).
