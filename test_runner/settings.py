@@ -1,4 +1,6 @@
-# Django settings for proj project.
+from __future__ import unicode_literals
+
+import warnings
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -11,12 +13,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'smartmin.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'smartmin.db',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -81,7 +83,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -97,8 +98,8 @@ MIDDLEWARE_CLASSES = (
     'smartmin.middleware.TimezoneMiddleware',
 )
 
-import warnings
-warnings.filterwarnings('error', r"DateTimeField received a naive datetime", RuntimeWarning, r'django\.db\.models\.fields')
+warnings.filterwarnings('error', r"DateTimeField received a naive datetime", RuntimeWarning,
+                        r'django\.db\.models\.fields')
 
 
 ROOT_URLCONF = 'test_runner.urls'
@@ -180,11 +181,11 @@ AUTHENTICATION_BACKENDS = (
 
 # create the smartmin CRUDL permissions on all objects
 PERMISSIONS = {
-    '*': ('create', # can create an object
-          'read',   # can read an object, viewing it's details
-          'update', # can update an object
-          'delete', # can delete an object,
-          'list'),  # can view a list of the objects
+    '*': ('create',  # can create an object
+          'read',    # can read an object, viewing it's details
+          'update',  # can update an object
+          'delete',  # can delete an object,
+          'list'),   # can view a list of the objects
     'blog.post': ('author', 'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import'),
     'auth.user': ('profile',),
 
@@ -202,15 +203,15 @@ ANONYMOUS_PERMISSIONS = (
 GROUP_PERMISSIONS = {
     "Administrator": ('auth.user.*',),
     "Editors": ('blog.post_update', 'blog.post_list', 'auth.user_profile'),
-    "Authors": ('blog.post.*','blog.category.*'),
+    "Authors": ('blog.post.*', 'blog.category.*'),
 }
 
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = "/blog/post/"
 
-#-----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 # Async tasks with celery
-#-----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
 
 CELERY_RESULT_BACKEND = 'database'
 

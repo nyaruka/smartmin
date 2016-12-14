@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import json
+import pytz
+import smartmin
 
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -18,6 +20,7 @@ from mock import patch
 from smartmin.csv_imports.models import ImportTask
 from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
+from smartmin.templatetags.smartmin import view_as_json, get_value_from_view, get, user_as_string
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
 from smartmin.views import smart_url
@@ -47,7 +50,8 @@ class PostTest(SmartminTest):
         self.superuser.is_superuser = True
         self.superuser.save()
 
-        self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post", tags="testing_tag", order=0,
+        self.post = Post.objects.create(title="Test Post", body="This is the body of my first test post",
+                                        tags="testing_tag", order=0,
                                         created_by=self.author, modified_by=self.author)
 
     def assertNoAccess(self, user, url):
@@ -136,7 +140,7 @@ class PostTest(SmartminTest):
         self.client.login(username='author', password='author')
 
         post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
-        response = self.client.post(reverse('blog.post_create'), post_data, follow=True)
+        self.client.post(reverse('blog.post_create'), post_data, follow=True)
 
         # get the last post
         post = list(Post.objects.all())[-1]
@@ -279,7 +283,7 @@ class PostTest(SmartminTest):
     def test_integrity_error(self):
         self.client.login(username='author', password='author')
 
-        first_category = Category.objects.create(name="History", created_by=self.author, modified_by=self.author)
+        Category.objects.create(name="History", created_by=self.author, modified_by=self.author)
 
         post_data = dict(name="History")
         response = self.client.post(reverse('blog.category_create'), post_data)
@@ -291,14 +295,14 @@ class PostTest(SmartminTest):
         self.assertEquals(1, len(response.context['form'].errors))
 
     def test_version(self):
-        import smartmin
         self.assertTrue(smartmin.__version__ is not None)
 
     def test_management(self):
         authors = Group.objects.get(name="Authors")
 
         # reduce our permission set to not include categories
-        permissions =  ('blog.post.*', 'blog.post.too.many.dots', 'blog.category.not_valid_either', 'blog.', 'blog.foo.*')
+        permissions = ('blog.post.*', 'blog.post.too.many.dots', 'blog.category.not_valid_either', 'blog.',
+                       'blog.foo.*')
 
         self.assertEquals(17, authors.permissions.all().count())
 
@@ -309,8 +313,8 @@ class PostTest(SmartminTest):
         self.assertEquals(12, authors.permissions.all().count())
 
     def test_smart_model(self):
-        p1 = Post.objects.create(title="First Post", body="First Post body", order=1, tags="first",
-                                 created_by=self.author, modified_by=self.author)
+        Post.objects.create(title="First Post", body="First Post body", order=1, tags="first",
+                            created_by=self.author, modified_by=self.author)
         p2 = Post.objects.create(title="Second Post", body="Second Post body", order=1, tags="second",
                                  created_by=self.author, modified_by=self.author)
 
@@ -566,7 +570,7 @@ class UserTest(TestCase):
 
         # check if he can mismatch new password and its confirmation
         post_data = dict(old_password="plain", new_password="NewPassword1", confirm_new_password="confirmnewpassword")
-        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
+        self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
 
         # check if he can fill old and new password only without the confirm new password
         post_data = dict(old_password="plain", new_password="NewPassword1")
@@ -574,8 +578,9 @@ class UserTest(TestCase):
         self.assertIn("Confirm the new password by filling the this field", response.content.decode("utf-8"))
 
         # actually change the password
-        post_data = dict(old_password="googleIsNumber1", new_password="NewPassword1", confirm_new_password="NewPassword1")
-        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
+        post_data = dict(old_password="googleIsNumber1", new_password="NewPassword1",
+                         confirm_new_password="NewPassword1")
+        self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
 
         # assert new password works
         self.assertTrue(self.client.login(username='steve', password='NewPassword1'))
@@ -587,7 +592,7 @@ class UserTest(TestCase):
 
         # but with the new password we can
         post_data = dict(email="new@foo.com", old_password='NewPassword1')
-        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
+        self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertTrue(User.objects.get(email='new@foo.com'))
 
     def test_token(self):
@@ -648,7 +653,7 @@ class UserTest(TestCase):
 
                 # now there is a token generated
                 recovery_token = RecoveryToken.objects.get(user=user1)
-                self.assertNotEquals(None,recovery_token.token)
+                self.assertIsNotNone(recovery_token.token)
 
                 self.assertTrue("http://nyaruka.com/users/user/recover/%s" % recovery_token.token in sent_email.body)
                 self.assertFalse("http://nyaruka.com//users/user/recover/%s" % recovery_token.token in sent_email.body)
@@ -670,7 +675,7 @@ class UserTest(TestCase):
 
                 # now there is a token generated
                 recovery_token = RecoveryToken.objects.get(user=user1)
-                self.assertNotEquals(None,recovery_token.token)
+                self.assertIsNotNone(recovery_token.token)
 
                 self.assertTrue("https://nyaruka.com/users/user/recover/%s" % recovery_token.token in sent_email.body)
                 self.assertFalse("https://nyaruka.com//users/user/recover/%s" % recovery_token.token in sent_email.body)
@@ -685,7 +690,7 @@ class UserTest(TestCase):
 
         # now there is a token generated
         recovery_token = RecoveryToken.objects.get(user=user1)
-        self.assertNotEquals(None,recovery_token.token)
+        self.assertIsNotNone(recovery_token.token)
 
         # delete the recovery tokens we have
         RecoveryToken.objects.all().delete()
@@ -697,7 +702,7 @@ class UserTest(TestCase):
 
         # now there is a token generated
         recovery_token = RecoveryToken.objects.get(user=user1)
-        self.assertNotEquals(None,recovery_token.token)
+        self.assertIsNotNone(recovery_token.token)
 
         # still the user can login with usual password and cannot login with the new password test
         self.assertTrue(self.client.login(username='user1', password='user1'))
@@ -815,9 +820,9 @@ class UserTest(TestCase):
 
     def test_lockout(self):
         # first create a user to use on the test
-        user2 = User.objects.create_user("user2", 'user2@user2.com', 'user2')
+        User.objects.create_user("user2", 'user2@user2.com', 'user2')
 
-        #be sure no user os logged in
+        # be sure no user os logged in
         self.client.logout()
 
         # login page
@@ -829,12 +834,13 @@ class UserTest(TestCase):
 
         # try to log in four times
         for i in range(4):
-            response = self.client.post(login_url,post_data)
-            self.assertFalse( response.context['user'].is_authenticated())
+            response = self.client.post(login_url, post_data)
+            self.assertFalse(response.context['user'].is_authenticated())
 
         # on the fifth failed login we get redirected
         response = self.client.post(login_url, post_data)
         self.assertEquals(302, response.status_code)
+
 
 class UserTestCase(TestCase):
 
@@ -846,6 +852,7 @@ class UserTestCase(TestCase):
 
         # also make sure the proper template is used (should be /blog/user_list.html)
         self.assertContains(response, "Custom Pre-Content")
+
 
 class TagTestCase(TestCase):
 
@@ -863,28 +870,21 @@ class TagTestCase(TestCase):
                                         created_by=self.author, modified_by=self.author)
 
     def test_value_from_view(self):
-        from smartmin.templatetags.smartmin import get_value_from_view
-        import pytz
-
         context = dict(view=self.read_view, object=self.post)
         self.assertEquals(self.post.title, get_value_from_view(context, 'title'))
         local_created = self.post.created_on.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Africa/Kigali'))
         self.assertEquals(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, 'created_on'))
 
     def test_view_as_json(self):
-        from smartmin.templatetags.smartmin import view_as_json
-
         self.list_view.object_list = Post.objects.all()
         context = dict(view=self.list_view)
 
-        foo = view_as_json(context)
+        view_as_json(context)
         json_data = json.loads(view_as_json(context))
         self.assertEquals(1, len(json_data))
         self.assertEquals(self.post.title, json_data[0]['title'])
 
     def test_get(self):
-        from smartmin.templatetags.smartmin import get
-
         test_dict = dict(key="value")
 
         self.assertEquals("value", get(test_dict, 'key'))
@@ -915,12 +915,10 @@ class TagTestCase(TestCase):
         self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
 
         # but a different year is different
-        jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo = pytz.utc)
+        jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo=pytz.utc)
         self.assertEquals("2/1/12", gmail_time(jan_2, now))
 
     def test_user_as_string(self):
-        from smartmin.templatetags.smartmin import user_as_string
-
         # plain user have both first and last names
         self.plain.first_name = "Mr"
         self.plain.last_name = "Chips"
@@ -943,6 +941,7 @@ class TagTestCase(TestCase):
         self.plain.first_name = ''
         self.plain.save()
         self.assertEquals("plain", user_as_string(self.plain))
+
 
 class UserLockoutTestCase(TestCase):
 
@@ -984,14 +983,14 @@ class UserLockoutTestCase(TestCase):
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
         self.assertFalse(response.context['user'].is_authenticated())
         content = response.content.decode("utf-8")
-        self.assertTrue(content.find(reverse('users.user_forget')) == -1);
+        self.assertEqual(content.find(reverse('users.user_forget')), -1)
 
         # even with right password, no dice
         post_data = dict(username='plain', password='plain')
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
         self.assertFalse(response.context['user'].is_authenticated())
         content = response.content.decode("utf-8")
-        self.assertTrue(content.find(reverse('users.user_forget')) == -1)
+        self.assertEqual(content.find(reverse('users.user_forget')), -1)
 
     def testNoRecovery(self):
         with self.settings(USER_ALLOW_EMAIL_RECOVERY=False):
@@ -1011,7 +1010,7 @@ class UserLockoutTestCase(TestCase):
 
             # should now be able to log in
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
-            self.assertTrue( response.context['user'].is_authenticated())
+            self.assertTrue(response.context['user'].is_authenticated())
 
     def testNoRecoveryNoTimeout(self):
         with self.settings(USER_ALLOW_EMAIL_RECOVERY=False, USER_LOCKOUT_TIMEOUT=-1):
@@ -1036,19 +1035,17 @@ class UserLockoutTestCase(TestCase):
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
             self.assertContains(response, "cannot log")
             content = response.content.decode("utf-8")
-            self.assertTrue(content.find(reverse('users.user_forget')) == -1);
+            self.assertEqual(content.find(reverse('users.user_forget')), -1)
 
             # log in as superuser
-            response = self.client.post(reverse('users.user_login'),
-                                        dict(username='superuser', password='superuser'))
+            self.client.post(reverse('users.user_login'), dict(username='superuser', password='superuser'))
 
             # go edit our 'plain' user
-            response = self.client.get(reverse('users.user_update', args=[self.plain.id]))
+            self.client.get(reverse('users.user_update', args=[self.plain.id]))
 
             # change the password
             post_data = dict(new_password='Password1', username='plain', groups='1', is_active='1')
-            response = self.client.post(reverse('users.user_update', args=[self.plain.id]),
-                                        post_data)
+            self.client.post(reverse('users.user_update', args=[self.plain.id]), post_data)
 
             # assert our lockouts got cleared
             self.assertFalse(FailedLogin.objects.filter(user=self.plain))

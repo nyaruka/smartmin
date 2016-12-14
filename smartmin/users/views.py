@@ -7,7 +7,7 @@ from datetime import timedelta
 from django import forms
 from django.conf import settings
 from django.contrib import messages, auth
-from django.contrib.auth import get_user_model, login, REDIRECT_FIELD_NAME
+from django.contrib.auth import get_user_model, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import login as django_login
@@ -26,14 +26,16 @@ from .models import RecoveryToken, PasswordHistory, FailedLogin, is_password_com
 
 class UserForm(forms.ModelForm):
     new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput)
-    groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, queryset=Group.objects.all(), required=False)
+    groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple,
+                                            queryset=Group.objects.all(), required=False)
 
     def clean_new_password(self):
         password = self.cleaned_data['new_password']
 
         # if they specified a new password
         if password and not is_password_complex(password):
-            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number"))
+            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, "
+                                          "one lowercase and one number"))
 
         return password
 
@@ -62,6 +64,7 @@ class UserForm(forms.ModelForm):
         model = get_user_model()
         fields = ('username', 'new_password', 'first_name', 'last_name', 'email', 'groups', 'is_active')
 
+
 class UserUpdateForm(UserForm):
     new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, required=False)
 
@@ -69,12 +72,15 @@ class UserUpdateForm(UserForm):
         password = self.cleaned_data['new_password']
 
         if password and not is_password_complex(password):
-            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number"))
+            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, "
+                                          "one lowercase and one number"))
 
         if password and PasswordHistory.is_password_repeat(self.instance, password):
-            raise forms.ValidationError(_("You have used this password before in the past year, please use a new password."))
+            raise forms.ValidationError(_("You have used this password before in the past year, "
+                                          "please use a new password."))
 
         return password
+
 
 class UserProfileForm(UserForm):
     old_password = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
@@ -90,23 +96,26 @@ class UserProfileForm(UserForm):
         return self.cleaned_data['old_password']
 
     def clean_confirm_new_password(self):
-        if not 'new_password' in self.cleaned_data:
+        if 'new_password' not in self.cleaned_data:
             return None
 
-        if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
+        if not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']:
             raise forms.ValidationError(_("Confirm the new password by filling the this field"))
 
-        if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
+        if self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']:
             raise forms.ValidationError(_("New password doesn't match with its confirmation"))
 
         password = self.cleaned_data['new_password']
         if password and not is_password_complex(password):
-            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number"))
+            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, "
+                                          "one lowercase and one number"))
 
         if password and PasswordHistory.is_password_repeat(self.instance, password):
-            raise forms.ValidationError(_("You have used this password before in the past year, please use a new password."))
+            raise forms.ValidationError(_("You have used this password before in the past year, "
+                                          "please use a new password."))
 
         return self.cleaned_data['new_password']
+
 
 class UserForgetForm(forms.Form):
     email = forms.EmailField(label=_("Your Email"),)
@@ -116,9 +125,11 @@ class UserForgetForm(forms.Form):
 
         allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
         if not allow_email_recovery:
-            raise forms.ValidationError(_("E-mail recovery is not supported, please contact the website administrator to reset your password manually."))
+            raise forms.ValidationError(_("E-mail recovery is not supported, "
+                                          "please contact the website administrator to reset your password manually."))
 
         return email
+
 
 class SetPasswordForm(UserForm):
     old_password = forms.CharField(label=_("Current Password"), widget=forms.PasswordInput, required=True,
@@ -130,27 +141,29 @@ class SetPasswordForm(UserForm):
 
     def clean_old_password(self):
         user = self.instance
-        if(not user.check_password(self.cleaned_data['old_password'])):
+        if not user.check_password(self.cleaned_data['old_password']):
             raise forms.ValidationError(_("Please enter your password to save changes"))
 
         return self.cleaned_data['old_password']
 
     def clean_confirm_new_password(self):
-        if not 'new_password' in self.cleaned_data:
+        if 'new_password' not in self.cleaned_data:
             return None
 
-        if(not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']):
+        if not self.cleaned_data['confirm_new_password'] and self.cleaned_data['new_password']:
             raise forms.ValidationError(_("Confirm your new password by entering it here"))
 
-        if(self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']):
+        if self.cleaned_data['new_password'] != self.cleaned_data['confirm_new_password']:
             raise forms.ValidationError(_("Mismatch between your new password and confirmation, try again"))
 
         password = self.cleaned_data['new_password']
         if password and not is_password_complex(password):
-            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number"))
+            raise forms.ValidationError(_("Passwords must have at least 8 characters, including one uppercase, "
+                                          "one lowercase and one number"))
 
         if password and PasswordHistory.is_password_repeat(self.instance, password):
-            raise forms.ValidationError(_("You have used this password before in the past year, please use a new password."))
+            raise forms.ValidationError(_("You have used this password before in the past year, "
+                                          "please use a new password."))
 
         return self.cleaned_data['new_password']
 
@@ -161,7 +174,7 @@ class UserCRUDL(SmartCRUDL):
     actions = ('create', 'list', 'update', 'profile', 'forget', 'recover', 'expired', 'failed', 'newpassword', 'mimic')
 
     class List(SmartListView):
-        search_fields = ('username__icontains','first_name__icontains', 'last_name__icontains')
+        search_fields = ('username__icontains', 'first_name__icontains', 'last_name__icontains')
         fields = ('username', 'name', 'group', 'last_login')
         link_fields = ('username', 'name')
         default_order = 'username'
@@ -202,7 +215,8 @@ class UserCRUDL(SmartCRUDL):
         success_message = _("New user created successfully.")
 
         field_config = {
-            'groups': dict(label=_("Groups"), help=_("Users will only get those permissions that are allowed for their group.")),
+            'groups': dict(label=_("Groups"),
+                           help=_("Users will only get those permissions that are allowed for their group.")),
             'new_password': dict(label=_("Password"), help=_("Set the user's initial password here.")),
         }
 
@@ -224,8 +238,10 @@ class UserCRUDL(SmartCRUDL):
         field_config = {
             'last_login': dict(readonly=True, label=_("Last Login")),
             'is_active': dict(label=_("Is Active"), help=_("Whether this user is allowed to log into the site")),
-            'groups': dict(label=_("Groups"), help=_("Users will only get those permissions that are allowed for their group")),
-            'new_password': dict(label=_("New Password"), help=_("You can reset the user's password by entering a new password here")),
+            'groups': dict(label=_("Groups"),
+                           help=_("Users will only get those permissions that are allowed for their group")),
+            'new_password': dict(label=_("New Password"),
+                                 help=_("You can reset the user's password by entering a new password here")),
         }
 
         def post_save(self, obj):
@@ -288,7 +304,8 @@ class UserCRUDL(SmartCRUDL):
 
             from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
             user_email_template = getattr(settings, "USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/user_email.txt")
-            no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/no_user_email.txt")
+            no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE",
+                                             "smartmin/users/no_user_email.txt")
 
             email_template = loader.get_template(no_user_email_template)
             user = get_user_model().objects.filter(email__iexact=email).first()
@@ -344,7 +361,7 @@ class UserCRUDL(SmartCRUDL):
 
         def pre_process(self, request, *args, **kwargs):
             user = self.get_object()
-            login(request, user)
+            login(request)
 
             # After logging in it is important to change the user stored in the session
             # otherwise the user will remain the same
@@ -371,13 +388,14 @@ class UserCRUDL(SmartCRUDL):
             validity_time = timezone.now() - timedelta(hours=48)
             recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time, token=token)
             if not recovery_token:
-                messages.info(request, _("Your link has expired for security reasons. Please reinitiate the process by entering your email here."))
+                messages.info(request, _("Your link has expired for security reasons. "
+                                         "Please reinitiate the process by entering your email here."))
                 return HttpResponseRedirect(reverse("users.user_forget"))
             return super(UserCRUDL.Recover, self).pre_process(request, args, kwargs)
 
         def get_object(self, queryset=None):
             token = self.kwargs.get('token')
-            recovery_token= RecoveryToken.objects.get(token=token)
+            recovery_token = RecoveryToken.objects.get(token=token)
             return recovery_token.user
 
         def post_save(self, obj):

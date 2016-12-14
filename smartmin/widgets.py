@@ -37,12 +37,12 @@ class DatePickerWidget(widgets.Widget):
         if value:
             str_value = "%s %d, %d" % (value.strftime("%B"), value.day, value.year)
 
-        html += '<input type="text" class="datepicker" data-provide="datepicker" name="%s" value="%s" data-date-format="MM d, yyyy" data-date-autoclose="true">' % (escape(name), escape(str_value))
+        html += '<input type="text" class="datepicker" data-provide="datepicker" name="%s" value="%s" data-date-format="MM d, yyyy" data-date-autoclose="true">' % (escape(name), escape(str_value))  # noqa
         return mark_safe(html)
 
     def value_from_datadict(self, data, files, name):
         val = data.get(name)
-        
+
         # try parsing it
         try:
             parsed = datetime.strptime(val, "%B %d, %Y")
@@ -56,17 +56,17 @@ class DatePickerWidget(widgets.Widget):
         css = {'all': ('css/datepicker.css',)}
 
 
-class ImageThumbnailWidget(widgets.ClearableFileInput): 
+class ImageThumbnailWidget(widgets.ClearableFileInput):
 
-    def __init__(self, thumb_width=75, thumb_height=75): 
-        self.width = thumb_width 
-        self.height = thumb_height 
-        super(ImageThumbnailWidget, self).__init__({}) 
+    def __init__(self, thumb_width=75, thumb_height=75):
+        self.width = thumb_width
+        self.height = thumb_height
+        super(ImageThumbnailWidget, self).__init__({})
 
     def render(self, name, value, attrs=None):
         thumb_html = '<table><tr>'
-        if value and hasattr(value, "url"): 
-            thumb_html += '<td><img src="%s" width="%s" width="%s" /></td>' % (value.url, self.width, self.height) 
+        if value and hasattr(value, "url"):
+            thumb_html += '<td><img src="%s" width="%s" width="%s" /></td>' % (value.url, self.width, self.height)
 
         thumb_html += '<td><input type="checkbox" name="%s-clear" /> Clear' % name
         thumb_html += '<input type="file" name="%s" /></td>' % name

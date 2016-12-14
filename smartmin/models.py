@@ -61,15 +61,12 @@ class SmartModel(models.Model):
     def validate_import_header(cls, header):
         return
 
-
     @classmethod
     def get_import_file_headers(cls, csv_file):
         filename = csv_file
         headers = []
         try:
             workbook = open_workbook(filename.name, 'rb')
-
-            records = []
 
             for sheet in workbook.sheets():
 
@@ -79,7 +76,7 @@ class SmartModel(models.Model):
                     header.append(six.text_type(sheet.cell(0, col).value))
                 headers = [cls.normalize_value(_).lower() for _ in header]
 
-                #only care for the first sheet
+                # only care for the first sheet
                 break
         except XLRDError:
             # our alternative codec, by default we are the crazy windows encoding
@@ -109,7 +106,7 @@ class SmartModel(models.Model):
                     for cell in row:
                         try:
                             cell = six.text_type(cell)
-                        except:
+                        except Exception:
                             cell = six.text_type(cell.decode(ascii_codec))
 
                         encoded.append(cell)
@@ -169,7 +166,7 @@ class SmartModel(models.Model):
         if task.import_params:
             try:
                 import_params = json.loads(task.import_params)
-            except:
+            except Exception:
                 pass
 
         try:
@@ -204,7 +201,8 @@ class SmartModel(models.Model):
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         # use now to determine a relevant timezone
-        naive_timezone = pytz.timezone(import_params['timezone']) if import_params and 'timezone' in import_params else pytz.UTC
+        naive_timezone = pytz.timezone(import_params['timezone']) \
+            if import_params and 'timezone' in import_params else pytz.UTC
         tz = timezone.now().astimezone(naive_timezone).tzinfo
 
         records = []
@@ -335,7 +333,8 @@ class SmartModel(models.Model):
 
             # make sure there are same number of fields
             if len(row) != len(header):
-                raise Exception("Line %d: The number of fields for this row is incorrect. Expected %d but found %d." % (line_number, len(header), len(row)))
+                raise Exception("Line %d: The number of fields for this row is incorrect. Expected %d but found %d."
+                                % (line_number, len(header), len(row)))
 
             field_values = dict(zip(header, row))
             field_values['created_by'] = user

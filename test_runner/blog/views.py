@@ -85,11 +85,11 @@ class PostCRUDL(SmartCRUDL):
 
     class Messages(SmartListView):
         def pre_process(self, request, *args, **kwargs):
-            messages.error(request,"Error Messages")
-            messages.success(request,"Success Messages")
-            messages.info(request,"Info Messages")
-            messages.warning(request,"Warning Messages")
-            messages.debug(request,"Debug Messages")
+            messages.error(request, "Error Messages")
+            messages.success(request, "Success Messages")
+            messages.info(request, "Info Messages")
+            messages.warning(request, "Warning Messages")
+            messages.debug(request, "Debug Messages")
 
     class ByUuid(SmartReadView):
         slug_url_kwarg = 'uuid'

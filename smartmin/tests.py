@@ -22,7 +22,8 @@ class SmartminTest(TestCase):
 
         # can't load if we aren't logged in
         response = self.client.get(url)
-        self.assertRedirect(response, reverse("users.user_login"), msg="'%s' loaded without being logged in first" % url)
+        self.assertRedirect(response, reverse("users.user_login"),
+                            msg="'%s' loaded without being logged in first" % url)
         self.login(user)
 
         # but now we can!
@@ -62,7 +63,8 @@ class SmartminTest(TestCase):
         return user
 
     def login(self, user):
-        self.assertTrue(self.client.login(username=user.username, password=user.username), "Couldn't login as %(user)s / %(user)s" % dict(user=user.username))
+        self.assertTrue(self.client.login(username=user.username, password=user.username),
+                        "Couldn't login as %(user)s / %(user)s" % dict(user=user.username))
 
     def assertNoFormErrors(self, response, post_data=None):
         if response.status_code == 200 and 'form' in response.context:
@@ -182,7 +184,8 @@ class _CRUDLTest(SmartminTest):
 
         view = self.getCRUDL().view_for_action(action)
         if self.getCRUDL().permissions and view.permission is not None:
-            self.assertRedirect(response, reverse("users.user_login"), msg="Page for '%s' loaded without being logged in first" % action)
+            self.assertRedirect(response, reverse("users.user_login"),
+                                msg="Page for '%s' loaded without being logged in first" % action)
             self.login(self.getUser())
             response = self.client.get(url)
 

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import json
 import pytz
+import re
 
 from datetime import datetime, timedelta
 from django import template
@@ -26,8 +27,7 @@ def get_list_class(context, list):
     Returns the class to use for the passed in list.  We just build something up
     from the object type for the list.
     """
-    css = "list_%s_%s" % (list.model._meta.app_label, list.model._meta.model_name)
-    return css
+    return "list_%s_%s" % (list.model._meta.app_label, list.model._meta.model_name)
 
 
 def format_datetime(time):
@@ -36,7 +36,7 @@ def format_datetime(time):
     """
     user_time_zone = timezone.get_current_timezone()
     if time.tzinfo is None:
-        time = time.replace(tzinfo = pytz.utc)
+        time = time.replace(tzinfo=pytz.utc)
         user_time_zone = pytz.timezone(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
 
     time = time.astimezone(user_time_zone)
@@ -166,7 +166,7 @@ def map(string, args):
 @register.filter
 def gmail_time(dtime, now=None):
     if dtime.tzinfo is None:
-        dtime = dtime.replace(tzinfo = pytz.utc)
+        dtime = dtime.replace(tzinfo=pytz.utc)
         user_time_zone = pytz.timezone(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
         dtime = dtime.astimezone(user_time_zone)
     else:
@@ -176,7 +176,7 @@ def gmail_time(dtime, now=None):
         now = timezone.now()
 
     if now.tzinfo is None:
-        now = now.replace(tzinfo = pytz.utc)
+        now = now.replace(tzinfo=pytz.utc)
 
     twelve_hours_ago = now - timedelta(hours=12)
 
@@ -237,7 +237,7 @@ class PDBNode(template.Node):
     Woot woot, simple pdb debugging. {% pdb %}
     """
     def render(self, context):
-        import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()  # noqa
 
 
 @register.tag
@@ -251,7 +251,7 @@ def getblock(context, prefix, suffix=None):
     if suffix:
         key += str(suffix)
 
-    if not 'blocks' in context:
+    if 'blocks' not in context:
         raise TemplateSyntaxError("setblock/endblock can only be used with SmartView or it's subclasses")
 
     if key in context['blocks']:
@@ -266,7 +266,7 @@ def setblock(parser, token):
         raise TemplateSyntaxError("setblock tag takes one argument, the name of the block got: [%s]" % ",".join(args))
 
     key = "".join(args[1:])
-        
+
     nodelist = parser.parse(('endsetblock',))
     parser.delete_first_token()
     return SetBlockNode(key, nodelist)
@@ -276,14 +276,15 @@ class SetBlockNode(template.Node):
     def __init__(self, key, nodelist):
         self.key = key
         self.nodelist = nodelist
-        
+
     def render(self, context):
-        if not 'blocks' in context:
+        if 'blocks' not in context:
             raise TemplateSyntaxError("setblock/endblock can only be used with SmartView or it's subclasses")
-        
+
         output = self.nodelist.render(context)
         context['blocks'][self.key] = output
         return ""
+
 
 # register our tag
 setblock = register.tag(setblock)
@@ -297,13 +298,13 @@ def render_field(context, field):
     readonly_fields = view.derive_readonly()
 
     # check that this field exists in our form, either as a real field or as a readonly one
-    if not field in form.fields and not field in readonly_fields:
+    if field not in form.fields and field not in readonly_fields:
         raise TemplateSyntaxError("Error: No field '%s' found in form to render" % field)
 
-    inclusion_context = dict(field = field,
-                             form = context['form'],
-                             view = context['view'],
-                             blocks = context['blocks'])
+    inclusion_context = dict(field=field,
+                             form=context['form'],
+                             view=context['view'],
+                             blocks=context['blocks'])
     if 'object' in context:
         inclusion_context['object'] = context['object']
 
@@ -315,7 +316,6 @@ def active(request, pattern):
     """
     Simple tag let us define a regex for the active navigation tab
     """
-    import re
     if re.search(pattern, request.path):
         return 'active'
     return ''

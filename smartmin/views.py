@@ -539,7 +539,7 @@ class SmartListView(SmartView, ListView):
     add_button = None
     search_fields = None
     paginate_by = 25
-    field_config = { 'is_active': dict(label=''), }
+    field_config = {'is_active': dict(label='')}
     default_order = None
     select_related = None
 
@@ -574,7 +574,7 @@ class SmartListView(SmartView, ListView):
         Used to derive which fields should be linked.  This should return a set() containing
         the names of those fields which should be linkable.
         """
-        if not self.link_fields is None:
+        if self.link_fields is not None:
             return self.link_fields
 
         else:
@@ -652,7 +652,7 @@ class SmartListView(SmartView, ListView):
             for term in terms:
                 term_query = Q(pk__lt=0)
                 for field in search_fields:
-                    term_query |= Q(**{ field: term })
+                    term_query |= Q(**{field: term})
                 query &= term_query
 
             queryset = queryset.filter(query)
@@ -1057,7 +1057,6 @@ class SmartFormMixin(object):
 
         raise ImproperlyConfigured("No redirect location found, override get_success_url to not use redirect urls")
 
-
     def derive_initial(self):
         """
         Returns what initial dict should be passed to our form. By default this is empty.
@@ -1099,8 +1098,7 @@ class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
     grant_permissions = None
     javascript_submit = None
 
-    field_config = { 'modified_blurb': dict(label="Modified"),
-                     'created_blurb': dict(label="Created") }
+    field_config = {'modified_blurb': dict(label="Modified"), 'created_blurb': dict(label="Created")}
 
     def derive_title(self):
         """

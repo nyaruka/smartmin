@@ -32,7 +32,7 @@ class Post(SmartModel):
     @classmethod
     def validate_import_header(cls, header):
         if 'title' not in header:
-             raise Exception('missing "title" header')
+            raise Exception('missing "title" header')
 
     def __unicode__(self):
         return self.title

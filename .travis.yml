@@ -16,6 +16,7 @@ install:
 before_script:
  - createdb -E UTF-8 dash -U postgres -O $USER
 script:
- - python manage.py test --settings=test_runner.settings_travis
+ - coverage run python manage.py test --settings=test_runner.settings_travis --verbosity=2 --noinput
+ - flake8
 after_success:
  - coveralls

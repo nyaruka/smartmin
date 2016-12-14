@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-import sys, os
+import os
+import sys
 
 from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponse
@@ -20,15 +21,16 @@ class AjaxRedirect(object):
         return response
 
 
-class ProfileMiddleware():
+class ProfileMiddleware(object):
     def __init__(self):
         pass
 
     def process_view(self, request, view, *args, **kwargs):
-        import hotshot, hotshot.stats
+        import hotshot, hotshot.stats  # noqa
 
         for item in request.META['QUERY_STRING'].split('&'):
-            if item.split('=')[0] == 'profile': # profile in query string
+            if item.split('=')[0] == 'profile':  # profile in query string
+
                 # catch the output, must happen before stats object is created
                 # see https://bugs.launchpad.net/webpy/+bug/133080 for the details
                 std_old, std_new = sys.stdout, StringIO.StringIO()
@@ -39,7 +41,7 @@ class ProfileMiddleware():
                 prof = hotshot.Profile(tmpfile)
 
                 # make a call to the actual view function with the given arguments
-                response = prof.runcall(view, request, *args[0], **args[1])
+                prof.runcall(view, request, *args[0], **args[1])
                 prof.close()
 
                 # and then statistical reporting

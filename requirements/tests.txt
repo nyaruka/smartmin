@@ -1,3 +1,4 @@
 psycopg2
 mock
 funcsigs
+flake8

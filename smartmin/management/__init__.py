@@ -94,9 +94,9 @@ def check_role_permissions(role, permissions, current_permissions):
         if isinstance(permission, six.text_type):
             key = permission
         else:
-            key = "%s.%s"  % (permission.content_type.app_label, permission.codename)
+            key = "%s.%s" % (permission.content_type.app_label, permission.codename)
 
-        if not key in role_permissions:
+        if key not in role_permissions:
             remove_perm(key, role)
 
 
