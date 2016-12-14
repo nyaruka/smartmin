@@ -1,3 +1,8 @@
+1.10.1 (2016-12-14)
+==================
+ * Added missing migration https://github.com/nyaruka/smartmin/pull/86
+ * Fixed using arg for get_form which was removed in Django 1.10 https://github.com/nyaruka/smartmin/pull/88
+ 
 1.10 (2016-12-14)
 ==================
  * Support for Django 1.10
