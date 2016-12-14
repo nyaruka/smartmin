@@ -863,11 +863,11 @@ class SmartFormMixin(object):
         """
         return self.success_message
 
-    def get_form(self, form_class=None):
+    def get_form(self):
         """
         Returns an instance of the form to be used in this view.
         """
-        self.form = super(SmartFormMixin, self).get_form(form_class)
+        self.form = super(SmartFormMixin, self).get_form()
 
         fields = list(self.derive_fields())
 
@@ -992,8 +992,6 @@ class SmartFormMixin(object):
         """
         Returns the form class to use in this view
         """
-        form_class = None
-
         if self.form_class:
             form_class = self.form_class
 
