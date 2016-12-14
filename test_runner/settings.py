@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import warnings
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -123,7 +122,8 @@ TEMPLATES = [
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-            ]
+            ],
+            'debug': DEBUG
         },
     },
 ]
