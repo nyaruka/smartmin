@@ -6,7 +6,7 @@ import string
 from datetime import timedelta
 from django import forms
 from django.conf import settings
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.contrib.auth import get_user_model, login, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
@@ -343,12 +343,15 @@ class UserCRUDL(SmartCRUDL):
             return _("You are now logged in as %s") % self.object.username
 
         def pre_process(self, request, *args, **kwargs):
-                user = self.get_object()
-                login(request, user)
-                # After logging in it is important to change the user stored in the session
-                # otherwise the user will remain the same
-                request.session["_auth_user_id"] = user.id
-                return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+            user = self.get_object()
+            login(request, user)
+
+            # After logging in it is important to change the user stored in the session
+            # otherwise the user will remain the same
+            request.session[auth.SESSION_KEY] = user.id
+            request.session[auth.HASH_SESSION_KEY] = user.get_session_auth_hash()
+
+            return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
     class Recover(SmartUpdateView):
         form_class = SetPasswordForm
