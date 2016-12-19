@@ -19,6 +19,14 @@ def generate_file_path(instance, filename):
 
 
 class ImportTask(SmartModel):
+    PENDING = 'PENDING'
+    STARTED = 'STARTED'
+    RUNNING = 'RUNNING'
+    SUCCESS = 'SUCCESS'
+    FAILURE = 'FAILURE'
+
+    READY_STATES = [SUCCESS, FAILURE]
+
     csv_file = models.FileField(upload_to=generate_file_path, verbose_name="Import file",
                                 help_text="A comma delimited file of records to import")
 
@@ -32,31 +40,23 @@ class ImportTask(SmartModel):
 
     task_id = models.CharField(null=True, max_length=64)
 
+    task_status = models.CharField(max_length=32, default=PENDING)
+
     def start(self):
         from .tasks import csv_import
         self.log("Queued import at %s" % timezone.now())
-        self.save(update_fields=['import_log'])
+        self.task_status = self.STARTED
+        self.save(update_fields=['import_log', 'task_status'])
         result = csv_import.delay(self.pk)
         self.task_id = result.task_id
         self.save(update_fields=['task_id'])
 
     def done(self):
         if self.task_id:
-            if getattr(settings, 'CELERY_ALWAYS_EAGER', False):
-                result = EagerResult(self.task_id, None, 'SUCCESS')
-            else:
-                result = AsyncResult(self.task_id)
-            return result.ready()
+            return self.task_status in self.READY_STATES
 
     def status(self):
-        status = "PENDING"
-        if self.task_id:
-            if getattr(settings, 'CELERY_ALWAYS_EAGER', False):
-                result = EagerResult(self.task_id, None, 'SUCCESS')
-            else:
-                result = AsyncResult(self.task_id)
-            status = result.state
-        return status
+        return self.task_status
 
     def log(self, message):
         self.import_log += "%s\n" % message
