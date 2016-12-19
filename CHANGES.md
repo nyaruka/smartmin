@@ -1,3 +1,7 @@
+1.10.2 (2016-12-19)
+==================
+ * Add task_status field on ImportTask replacing celery result use for task status https://github.com/nyaruka/smartmin/pull/89
+
 1.10.1 (2016-12-14)
 ==================
  * Added missing migration https://github.com/nyaruka/smartmin/pull/86
