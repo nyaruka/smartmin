@@ -15,31 +15,36 @@ except ImportError:
 
 @task(track_started=True)
 def csv_import(task_id):  # pragma: no cover
-    task = ImportTask.objects.get(pk=task_id)
+    task_obj = ImportTask.objects.get(pk=task_id)
     log = StringIO()
 
-    task.task_id = csv_import.request.id
-    task.log("Started import at %s" % timezone.now())
-    task.log("--------------------------------")
-    task.save()
+    task_obj.task_id = csv_import.request.id
+    task_obj.task_status = ImportTask.RUNNING
+    task_obj.log("Started import at %s" % timezone.now())
+    task_obj.log("--------------------------------")
+    task_obj.save()
 
     try:
         with transaction.atomic():
-            model = class_from_string(task.model_class)
-            records = model.import_csv(task, log)
-            task.save()
+            model = class_from_string(task_obj.model_class)
+            records = model.import_csv(task_obj, log)
+            task_obj.task_status = ImportTask.SUCCESS
+            task_obj.save()
 
-            task.log(log.getvalue())
-            task.log("Import finished at %s" % timezone.now())
-            task.log("%d record(s) added." % len(records))
+            task_obj.log(log.getvalue())
+            task_obj.log("Import finished at %s" % timezone.now())
+            task_obj.log("%d record(s) added." % len(records))
 
     except Exception as e:
         import traceback
         traceback.print_exc(e)
 
-        task.log("\nError: %s\n" % e)
-        task.log(log.getvalue())
+        task_obj.task_status = ImportTask.FAILURE
+
+        task_obj.log("\nError: %s\n" % e)
+        task_obj.log(log.getvalue())
+        task_obj.save()
 
         raise e
 
-    return task
+    return task_obj
