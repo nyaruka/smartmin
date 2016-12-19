@@ -2,9 +2,7 @@ from __future__ import unicode_literals
 
 import os
 
-from celery.result import EagerResult, AsyncResult
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from smartmin import class_from_string
 from smartmin.models import SmartModel
