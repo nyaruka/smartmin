@@ -117,12 +117,7 @@ class SmartView(object):
         """
         Checks for object level permission for an arbitrary getter
         """
-        obj = None
         obj_getter = getattr(self, getter_name, None)
-
-        # get object requires pk
-        if getter_name == "get_object" and 'pk' not in self.kwargs:
-            return False
 
         if obj_getter:
             obj = obj_getter()
@@ -419,20 +414,37 @@ class SmartTemplateView(SmartView, TemplateView):
     pass
 
 
-class SmartReadView(SmartView, DetailView):
+def derive_single_object_url_pattern(slug_url_kwarg, path, action):
+    """
+    Utility function called by class methods for single object views
+    """
+    if slug_url_kwarg:
+        return r'^%s/%s/(?P<%s>[^/]+)/$' % (path, action, slug_url_kwarg)
+    else:
+        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+
+
+class SmartSingleObjectView(SmartView):
     slug_field = None
     slug_url_kwarg = None
-    default_template = 'smartmin/read.html'
-    edit_button = None
-
-    field_config = {'modified_blurb': dict(label="Modified"),
-                    'created_blurb': dict(label="Created")}
 
     def get_slug_field(self):
         """
         If `slug_field` isn't specified it defaults to `slug_url_kwarg`
         """
         return self.slug_field if self.slug_field else self.slug_url_kwarg
+
+
+class SmartReadView(SmartSingleObjectView, DetailView):
+    default_template = 'smartmin/read.html'
+    edit_button = None
+
+    field_config = {'modified_blurb': dict(label="Modified"),
+                    'created_blurb': dict(label="Created")}
+
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        return derive_single_object_url_pattern(cls.slug_url_kwarg, path, action)
 
     def derive_queryset(self):
         return super(SmartReadView, self).get_queryset()
@@ -446,16 +458,6 @@ class SmartReadView(SmartView, DetailView):
         By default we just return the string representation of our object
         """
         return str(self.object)
-
-    @classmethod
-    def derive_url_pattern(cls, path, action):
-        """
-        Returns the URL pattern for this view.
-        """
-        if cls.slug_url_kwarg:
-            return r'^%s/%s/(?P<%s>[^/]+)/$' % (path, action, cls.slug_url_kwarg)
-        else:
-            return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def derive_fields(self):
         """
@@ -485,7 +487,7 @@ class SmartReadView(SmartView, DetailView):
         return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
 
 
-class SmartDeleteView(SmartView, DetailView, ProcessFormView):
+class SmartDeleteView(SmartSingleObjectView, DetailView, ProcessFormView):
     default_template = 'smartmin/delete_confirm.html'
     name_field = 'name'
     cancel_url = None
@@ -493,10 +495,7 @@ class SmartDeleteView(SmartView, DetailView, ProcessFormView):
 
     @classmethod
     def derive_url_pattern(cls, path, action):
-        """
-        Returns the URL pattern for this view.
-        """
-        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+        return derive_single_object_url_pattern(cls.slug_url_kwarg, path, action)
 
     def get_cancel_url(self):
         if not self.cancel_url:
@@ -1092,7 +1091,7 @@ class SmartFormView(SmartFormMixin, SmartView, FormView):
         return super(SmartFormView, self).form_valid(form)
 
 
-class SmartModelFormView(SmartFormMixin, SmartView, ModelFormMixin):
+class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
     grant_permissions = None
     javascript_submit = None
 
@@ -1176,19 +1175,16 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
 
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        return derive_single_object_url_pattern(cls.slug_url_kwarg, path, action)
+
     def derive_queryset(self):
         return super(SmartUpdateView, self).get_queryset()
 
     def get_queryset(self):
         self.queryset = self.derive_queryset()
         return self.queryset
-
-    @classmethod
-    def derive_url_pattern(cls, path, action):
-        """
-        Returns the URL pattern for this view.
-        """
-        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
 
     def derive_success_message(self):
         # First check whether a default message has been set
@@ -1217,6 +1213,38 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
     def get_created_blurb(self, obj):
         return "%s by %s" % (obj.created_on.strftime("%B %d, %Y at %I:%M %p"), obj.created_by)
+
+
+class SmartModelActionView(SmartFormMixin, SmartSingleObjectView, DetailView, ProcessFormView):
+
+    @classmethod
+    def derive_url_pattern(cls, path, action):
+        return derive_single_object_url_pattern(cls.slug_url_kwarg, path, action)
+
+    def execute_action(self):
+        """
+        Subclasses should do their work here. They can throw a ValidationError to return
+        control back to the Form input with said error. If no error is thrown page will
+        be redirected to success_url
+        """
+        pass
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(SmartModelActionView, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        try:
+            self.execute_action()
+
+        except forms.ValidationError as e:
+            # turns out we aren't valid after all, stuff our error into our form
+            self.form.add_error(None, e)
+            return self.form_invalid(form)
+
+        # all went well, stuff our success message in and return
+        messages.success(self.request, self.derive_success_message())
+        return super(SmartModelActionView, self).form_valid(form)
 
 
 class SmartMultiFormView(SmartView, TemplateView):
