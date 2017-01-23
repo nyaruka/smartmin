@@ -1298,6 +1298,10 @@ class SmartCreateView(SmartModelFormView, CreateView):
     exclude = ('created_by', 'modified_by', 'is_active')
     submit_button_name = _("Create")
 
+    def has_object_permission(self, getter_name):
+        # create views don't have an object, so this is always False
+        return False
+
     def pre_save(self, obj):
         # auto populate created_by if it is present
         if hasattr(obj, 'created_by_id') and self.request.user.id >= 0:
