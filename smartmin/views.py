@@ -13,7 +13,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.utils.encoding import force_text
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
@@ -402,8 +402,7 @@ class SmartView(object):
         """
         # should we actually render in json?
         if '_format' in self.request.GET and self.request.GET['_format'] == 'json':
-            json_data = self.as_json(context)
-            return HttpResponse(json.dumps(json_data), content_type='application/javascript')
+            return JsonResponse(self.as_json(context), safe=False)
 
         # otherwise, return normally
         else:
@@ -763,7 +762,7 @@ class SmartListView(SmartView, ListView):
                 results.append(result)
 
             json_data = dict(results=results, err='nil', more=context['page_obj'].has_next())
-            return HttpResponse(json.dumps(json_data), content_type='application/javascript')
+            return JsonResponse(json_data)
         # otherwise, return normally
         else:
             return super(SmartListView, self).render_to_response(context)
