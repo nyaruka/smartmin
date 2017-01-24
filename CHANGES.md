@@ -1,3 +1,11 @@
+1.10.5 (2016-01-24)
+==================
+ * JSON views updated to use MIME type application/json
+ 
+1.10.4 (2016-01-23)
+==================
+ * Add SmartObjectActionView
+
 1.10.2 (2016-12-19)
 ==================
  * Add task_status field on ImportTask replacing celery result use for task status https://github.com/nyaruka/smartmin/pull/89
