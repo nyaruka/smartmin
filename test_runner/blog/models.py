@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
+import six
 import uuid
 
 from django.db import models
 from smartmin.models import SmartModel, ActiveManager
 
 
+@six.python_2_unicode_compatible
 class Post(SmartModel):
     title = models.CharField(max_length=128,
                              help_text="The title of this blog post, keep it relevant")
@@ -34,7 +36,7 @@ class Post(SmartModel):
         if 'title' not in header:
             raise Exception('missing "title" header')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 

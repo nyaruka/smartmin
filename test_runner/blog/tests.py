@@ -183,58 +183,62 @@ class PostTest(SmartminTest):
         response = self.client.get(reverse('blog.post_list'))
         self.assertEquals(['blog/post_list.html', 'smartmin/list.html'], response.template_name)
 
-    def test_ordering(self):
-        post1 = Post.objects.create(title="A First Post", body="Post Body", order=3, tags="post",
+    def test_list(self):
+        post1 = Post.objects.create(title="A First Post", body="Apples", order=3, tags="post",
                                     created_by=self.author, modified_by=self.author)
-        post2 = Post.objects.create(title="A Second Post", body="Post Body", order=5, tags="post",
+        post2 = Post.objects.create(title="A Second Post", body="Oranges", order=5, tags="post",
                                     created_by=self.superuser, modified_by=self.superuser)
-        post3 = Post.objects.create(title="A Third Post", body="Post Body", order=1, tags="post",
+        post3 = Post.objects.create(title="A Third Post", body="Apples", order=1, tags="post",
                                     created_by=self.author, modified_by=self.author)
-        post4 = Post.objects.create(title="A Fourth Post", body="Post Body", order=3, tags="post",
+        post4 = Post.objects.create(title="A Fourth Post", body="Oranges", order=3, tags="post",
                                     created_by=self.superuser, modified_by=self.superuser)
 
         self.client.login(username='author', password='author')
 
+        # default ordering is by title
         response = self.client.get(reverse('blog.post_list'))
-        posts = response.context['post_list']
+        self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
 
-        self.assertEquals(post1, posts[0])
-        self.assertEquals(post4, posts[1])
-        self.assertEquals(post2, posts[2])
-        self.assertEquals(post3, posts[3])
-        self.assertEquals(self.post, posts[4])
-
+        # try ordering by title reversed
         response = self.client.get(reverse('blog.post_list') + "?_order=-title")
-        posts = response.context['post_list']
+        self.assertEqual(list(response.context['post_list']), [self.post, post3, post2, post4, post1])
 
-        self.assertEquals(self.post, posts[0])
-        self.assertEquals(post3, posts[1])
-        self.assertEquals(post2, posts[2])
-        self.assertEquals(post4, posts[3])
-        self.assertEquals(post1, posts[4])
-
+        # try different list view which orders by author username
         response = self.client.get(reverse('blog.post_author'))
-        posts = response.context['post_list']
+        self.assertEqual(list(response.context['post_list']), [self.post, post3, post1, post4, post2])
 
-        self.assertEquals(self.post, posts[0])
-        self.assertEquals(post3, posts[1])
-        self.assertEquals(post1, posts[2])
-        self.assertEquals(post4, posts[3])
-        self.assertEquals(post2, posts[4])
+        # try searching (which is case-insensitive)
+        response = self.client.get(reverse('blog.post_list') + "?search=apples")
+        self.assertEqual(list(response.context['post_list']), [post1, post3])
 
-        # get our view as json
+        # multiple terms are AND'ed
+        response = self.client.get(reverse('blog.post_list') + "?search=apples+first")
+        self.assertEqual(list(response.context['post_list']), [post1])
+
+        # matches on different fields are OR'd
+        response = self.client.get(reverse('blog.post_list') + "?search=post")
+        self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
+
+        # change the format to json
         response = self.client.get(reverse('blog.post_list') + "?_format=json")
+        self.assertEqual(json.loads(response.content.decode("utf-8")), [
+            {'tags': 'post', 'title': 'A First Post', 'body': 'Apples'},
+            {'tags': 'post', 'title': 'A Fourth Post', 'body': 'Oranges'},
+            {'tags': 'post', 'title': 'A Second Post', 'body': 'Oranges'},
+            {'tags': 'post', 'title': 'A Third Post', 'body': 'Apples'},
+            {'tags': 'testing_tag', 'title': 'Test Post', 'body': 'This is the body of my first test post'}
+         ])
 
-        # parse the json
-        json_list = json.loads(response.content.decode("utf-8"))
-        self.assertEquals(5, len(json_list))
-        self.assertEquals(post1.title, json_list[0]['title'])
-
-        # ask for select2 format
+        # change the format to select2
         response = self.client.get(reverse('blog.post_list') + "?_format=select2")
-        select2 = json.loads(response.content.decode("utf-8"))
-        self.assertTrue('results' in select2)
-        self.assertEquals(5, len(select2['results']))
+        self.assertEqual(json.loads(response.content.decode("utf-8")), {
+            'results': [
+                {'id': post1.id, 'text': 'A First Post'},
+                {'id': post4.id, 'text': 'A Fourth Post'},
+                {'id': post2.id, 'text': 'A Second Post'},
+                {'id': post3.id, 'text': 'A Third Post'},
+                {'id': self.post.id, 'text': 'Test Post'}
+            ], 'err': 'nil', 'more': False})
 
     def test_success_url(self):
         self.client.login(username='author', password='author')

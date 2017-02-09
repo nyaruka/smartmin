@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import django.forms.models as model_forms
 import json
+import operator
 import six
 
 from django import forms
@@ -20,6 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView
 from django.views.generic import DetailView, ListView
+from functools import reduce
 from guardian.shortcuts import get_objects_for_user, assign_perm
 from guardian.utils import get_anonymous_user
 from smartmin.csv_imports.models import ImportTask
@@ -646,14 +648,14 @@ class SmartListView(SmartView, ListView):
         if search_fields and 'search' in self.request.GET:
             terms = self.request.GET['search'].split()
 
-            query = Q(pk__gt=0)
+            term_queries = []
             for term in terms:
-                term_query = Q(pk__lt=0)
+                field_queries = []
                 for field in search_fields:
-                    term_query |= Q(**{field: term})
-                query &= term_query
+                    field_queries.append(Q(**{field: term}))
+                term_queries.append(reduce(operator.or_, field_queries))
 
-            queryset = queryset.filter(query)
+            queryset = queryset.filter(reduce(operator.and_, term_queries))
 
         # add any select related
         related = self.derive_select_related()
