@@ -233,11 +233,11 @@ class PostTest(SmartminTest):
         response = self.client.get(reverse('blog.post_list') + "?_format=select2")
         self.assertEqual(response.json(), {
             'results': [
-                {'text': 'A First Post', 'id': 2},
-                {'text': 'A Fourth Post', 'id': 5},
-                {'text': 'A Second Post', 'id': 3},
-                {'text': 'A Third Post', 'id': 4},
-                {'text': 'Test Post', 'id': 1}
+                {'id': post1.id, 'text': 'A First Post'},
+                {'id': post4.id, 'text': 'A Fourth Post'},
+                {'id': post2.id, 'text': 'A Second Post'},
+                {'id': post3.id, 'text': 'A Third Post'},
+                {'id': self.post.id, 'text': 'Test Post'}
             ], 'err': 'nil', 'more': False})
 
     def test_success_url(self):
