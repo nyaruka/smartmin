@@ -221,7 +221,7 @@ class PostTest(SmartminTest):
 
         # change the format to json
         response = self.client.get(reverse('blog.post_list') + "?_format=json")
-        self.assertEqual(response.json(), [
+        self.assertEqual(json.loads(response.content.decode("utf-8")), [
             {'tags': 'post', 'title': 'A First Post', 'body': 'Apples'},
             {'tags': 'post', 'title': 'A Fourth Post', 'body': 'Oranges'},
             {'tags': 'post', 'title': 'A Second Post', 'body': 'Oranges'},
@@ -231,7 +231,7 @@ class PostTest(SmartminTest):
 
         # change the format to select2
         response = self.client.get(reverse('blog.post_list') + "?_format=select2")
-        self.assertEqual(response.json(), {
+        self.assertEqual(json.loads(response.content.decode("utf-8")), {
             'results': [
                 {'id': post1.id, 'text': 'A First Post'},
                 {'id': post4.id, 'text': 'A Fourth Post'},
