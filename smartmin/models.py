@@ -7,7 +7,6 @@ import json
 import pytz
 import six
 
-from six import text_type
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -37,14 +36,22 @@ class SmartModel(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    related_name="%(app_label)s_%(class)s_creations",
                                    help_text="The user which originally created this item")
-    created_on = models.DateTimeField(auto_now_add=True,
+    created_on = models.DateTimeField(default=timezone.now, editable=False, blank=True,
                                       help_text="When this item was originally created")
 
     modified_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                     related_name="%(app_label)s_%(class)s_modifications",
                                     help_text="The user which last modified this item")
-    modified_on = models.DateTimeField(auto_now=True,
+    modified_on = models.DateTimeField(default=timezone.now, editable=False, blank=True,
                                        help_text="When this item was last modified")
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields', None)
+
+        if (update_fields is None or 'modified_on' in update_fields) and not kwargs.pop('preserve_modified_on', False):
+            self.modified_on = timezone.now()
+
+        return super(SmartModel, self).save(*args, **kwargs)
 
     class Meta:
         abstract = True
@@ -240,12 +247,12 @@ class SmartModel(models.Model):
                         num_errors += 1
 
                 except SmartImportRowError as e:
-                    error_messages.append(dict(line=line_number+1, error=text_type(e)))
+                    error_messages.append(dict(line=line_number+1, error=six.text_type(e)))
 
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
-                    raise Exception("Line %d: %s\n\n%s" % (line_number, text_type(e), field_values))
+                    raise Exception("Line %d: %s\n\n%s" % (line_number, six.text_type(e), field_values))
                 line_number += 1
             # only care about the first sheet
             break
