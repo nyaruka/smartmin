@@ -317,20 +317,58 @@ class PostTest(SmartminTest):
         self.assertEquals(12, authors.permissions.all().count())
 
     def test_smart_model(self):
-        Post.objects.create(title="First Post", body="First Post body", order=1, tags="first",
-                            created_by=self.author, modified_by=self.author)
-        p2 = Post.objects.create(title="Second Post", body="Second Post body", order=1, tags="second",
-                                 created_by=self.author, modified_by=self.author)
+        d1 = datetime(2016, 12, 31, 9, 20, 30, 123456, tzinfo=pytz.timezone("Africa/Kigali"))
+        d2 = datetime(2017, 1, 10, 10, 20, 30, 123456, tzinfo=pytz.timezone("Africa/Kigali"))
+        d3 = timezone.now()
 
-        self.assertEquals(3, Post.objects.all().count())
-        self.assertEquals(3, Post.active.all().count())
+        p1 = Post.objects.create(title="First Post", body="First Post body", order=1, tags="first",
+                                 created_by=self.author, modified_by=self.author)
+        p2 = Post.objects.create(title="Second Post", body="Second Post body", order=1, tags="second",
+                                 created_on=d1, created_by=self.author,
+                                 modified_on=d2, modified_by=self.author)
+        p3 = Post(title="Third Post", body="Third Post body", order=1, tags="third",
+                  created_on=d1, created_by=self.author,
+                  modified_on=d2, modified_by=self.author)
+        p3.save(preserve_modified_on=True)
+
+        self.assertGreater(p1.created_on, d3)  # defaults to current time
+        self.assertGreater(p1.modified_on, d3)  # defaults to current time
+
+        self.assertEqual(p2.created_on, d1)  # uses provided time
+        self.assertGreater(p2.modified_on, d3)  # ignores provided time (equivalent to auto_now)
+
+        self.assertEqual(p3.created_on, d1)  # uses provided time
+        self.assertEqual(p3.modified_on, d2)  # uses provided time
+
+        d4 = timezone.now()
+
+        p1.save()
+        p2.save(update_fields=('title',))
+        p3.save(update_fields=('title', 'modified_on'))
+        self.post.save(preserve_modified_on=True)
+
+        self.assertLess(p1.created_on, d4)  # not updated
+        self.assertGreater(p1.modified_on, d4)  # updated by save with no args
+
+        self.assertLess(p2.created_on, d4)  # not updated
+        self.assertLess(p2.modified_on, d4)  # not updated because excluded by update_fields arg
+
+        self.assertLess(p3.created_on, d4)  # not updated
+        self.assertGreater(p3.modified_on, d4)  # updated because included by update_fields arg
+
+        self.assertLess(self.post.created_on, d4)  # not updated
+        self.assertLess(self.post.modified_on, d4)  # not updated because preserve_modified_on arg
+
+        # test object managers
+        self.assertEqual(Post.objects.all().count(), 4)
+        self.assertEqual(Post.active.all().count(), 4)
 
         # make p2 inactive
         p2.is_active = False
         p2.save()
 
-        self.assertEquals(3, Post.objects.all().count())
-        self.assertEquals(2, Post.active.all().count())
+        self.assertEqual(Post.objects.all().count(), 4)
+        self.assertEqual(Post.active.all().count(), 3)
 
     def test_get_import_file_headers(self):
         with open('test_runner/blog/test_files/posts.csv', 'rb') as open_file:
