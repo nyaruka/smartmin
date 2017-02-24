@@ -1,3 +1,7 @@
+1.10.6 (2016-02-24)
+===================
+ * Replace usage of auto_now and auto_now_add with overridable defaults https://github.com/nyaruka/smartmin/pull/93
+
 1.10.5 (2016-01-24)
 ==================
  * JSON views updated to use MIME type application/json

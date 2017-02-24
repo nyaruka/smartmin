@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-__version__ = '1.10.5'
+__version__ = '1.10.6'
 
 
 def class_from_string(class_name):
