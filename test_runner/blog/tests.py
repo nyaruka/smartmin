@@ -219,6 +219,10 @@ class PostTest(SmartminTest):
         response = self.client.get(reverse('blog.post_list') + "?search=post")
         self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
 
+        # empty search string should be ignored
+        response = self.client.get(reverse('blog.post_list') + "?search=")
+        self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
+
         # change the format to json
         response = self.client.get(reverse('blog.post_list') + "?_format=json")
         self.assertEqual(json.loads(response.content.decode("utf-8")), [

@@ -645,11 +645,11 @@ class SmartListView(SmartView, ListView):
 
         # apply any filtering
         search_fields = self.derive_search_fields()
-        if search_fields and 'search' in self.request.GET:
-            terms = self.request.GET['search'].split()
+        search_terms = self.request.GET.get('search', '').split(' ')
+        if search_fields and search_terms:
 
             term_queries = []
-            for term in terms:
+            for term in search_terms:
                 field_queries = []
                 for field in search_fields:
                     field_queries.append(Q(**{field: term}))
