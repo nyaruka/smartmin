@@ -1,12 +1,16 @@
-1.10.6 (2016-02-24)
+1.10.7 (2017-03-03)
+===================
+ * Fix bug on list views when search string is empty https://github.com/nyaruka/smartmin/pull/94
+
+1.10.6 (2017-02-24)
 ===================
  * Replace usage of auto_now and auto_now_add with overridable defaults https://github.com/nyaruka/smartmin/pull/93
 
-1.10.5 (2016-01-24)
+1.10.5 (2017-01-24)
 ==================
  * JSON views updated to use MIME type application/json
  
-1.10.4 (2016-01-23)
+1.10.4 (2017-01-23)
 ==================
  * Add SmartObjectActionView
 
