@@ -1,4 +1,4 @@
-1.10.7 (2017-03-03)
+1.10.8 (2017-03-03)
 ===================
  * Fix bug on list views when search string is empty https://github.com/nyaruka/smartmin/pull/94
 
