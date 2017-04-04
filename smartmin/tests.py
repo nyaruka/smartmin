@@ -43,10 +43,10 @@ class SmartminTest(TestCase):
     def assertLoginRedirect(self, response, msg=None):
         self.assertRedirect(response, settings.LOGIN_URL, msg)
 
-    def assertRedirect(self, response, url, msg=None):
-        self.assertEquals(302, response.status_code, msg=msg)
+    def assertRedirect(self, response, url, status_code=302, msg=None):
+        self.assertEqual(response.status_code, status_code, msg=msg)
         segments = urlparse(response.get('Location', None))
-        self.assertEquals(segments.path, url, msg=msg)
+        self.assertEqual(segments.path, url, msg=msg)
 
     def assertNotRedirect(self, response, url, msg=None):
         if response.status_code == 302:
