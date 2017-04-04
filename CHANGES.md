@@ -1,5 +1,5 @@
-1.10.9 (2017-04-04)
-===================
+1.10.10 (2017-04-04)
+====================
  * Add status_code arg to assertRedirect to allow checking of different redirect types
  * Make jQuery inclusion into block which can be overridden
 
