@@ -41,7 +41,7 @@ class SmartminTest(TestCase):
         return response
 
     def assertLoginRedirect(self, response, msg=None):
-        self.assertRedirect(response, settings.LOGIN_URL, msg)
+        self.assertRedirect(response, settings.LOGIN_URL, msg=msg)
 
     def assertRedirect(self, response, url, status_code=302, msg=None):
         self.assertEqual(response.status_code, status_code, msg=msg)
