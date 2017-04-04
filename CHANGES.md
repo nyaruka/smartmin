@@ -1,3 +1,8 @@
+1.10.9 (2017-04-04)
+===================
+ * Add status_code arg to assertRedirect to allow checking of different redirect types
+ * Make jQuery inclusion into block which can be overridden
+
 1.10.8 (2017-03-03)
 ===================
  * Fix bug on list views when search string is empty https://github.com/nyaruka/smartmin/pull/94
