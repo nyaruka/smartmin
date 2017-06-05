@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-from django.template import Context
 from django.utils.module_loading import import_string
 
 
