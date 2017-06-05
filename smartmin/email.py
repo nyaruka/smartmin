@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-from django.template import Context
 from django.utils.module_loading import import_string
 
 
@@ -13,7 +12,7 @@ def link_components(request, user=None):
 
 
 def build_email_context(request=None, user=None):
-    context = Context({'user': user})
+    context = {'user': user}
 
     processors = []
     collect = []
