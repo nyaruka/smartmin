@@ -9,7 +9,7 @@ from django import forms
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import messages
-from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -1051,7 +1051,6 @@ class SmartFormView(SmartFormMixin, SmartView, FormView):
 
 
 class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
-    grant_permissions = None
     javascript_submit = None
 
     field_config = {'modified_blurb': dict(label="Modified"), 'created_blurb': dict(label="Created")}
@@ -1110,14 +1109,6 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
         """
         Called after an object is successfully saved
         """
-        # if we have permissions to grant, do so
-        if self.grant_permissions:
-            for permission in self.grant_permissions:
-                # if the user doesn't have this permission globally already
-                if not self.request.user.has_perm(permission):
-                    # then assign it for this object
-                    assign_perm(permission, self.request.user, self.object)
-
         return obj
 
     def get_context_data(self, **kwargs):
