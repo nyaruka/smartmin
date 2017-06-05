@@ -13,7 +13,7 @@ def link_components(request, user=None):
 
 
 def build_email_context(request=None, user=None):
-    context = Context({'user': user})
+    context = {'user': user}
 
     processors = []
     collect = []

@@ -4,10 +4,11 @@ python:
  - "2.7"
  - "3.4"
  - "3.5"
+ - "3.6"
 env:
- - DJANGO_VERSION=1.8.16
  - DJANGO_VERSION=1.9.11
- - DJANGO_VERSION=1.10.4
+ - DJANGO_VERSION=1.10.5
+ - DJANGO_VERSION=1.11.2
 install:
  - pip install -q -rrequirements/base.txt
  - pip install -q -rrequirements/tests.txt
