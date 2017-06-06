@@ -9,10 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_migrate
-from guardian.management import create_anonymous_user
-from guardian.shortcuts import assign_perm, remove_perm
-from guardian.utils import get_anonymous_user
-
+from smartmin.perms import assign_perm, remove_perm
 
 permissions_app_name = None
 
@@ -119,29 +116,6 @@ def check_all_group_permissions(sender, **kwargs):
         check_role_permissions(group, permissions, group.permissions.all())
 
 
-def get_or_create_anonymous_user():
-    try:
-        anon_user = get_anonymous_user()
-    except Exception:
-        create_anonymous_user(None)
-        anon_user = get_anonymous_user()
-
-    return anon_user
-
-
-def check_all_anon_permissions(sender, **kwargs):
-    """
-    Checks that all our anonymous permissions have been granted
-    """
-    if not is_permissions_app(sender):
-        return
-
-    permissions = getattr(settings, 'ANONYMOUS_PERMISSIONS', [])
-    anon_user = get_or_create_anonymous_user()
-
-    check_role_permissions(anon_user, permissions, anon_user.get_all_permissions())
-
-
 def add_permission(content_type, permission):
     """
     Adds the passed in permission to that content type.  Note that the permission passed
@@ -194,4 +168,3 @@ def check_all_permissions(sender, **kwargs):
 
 post_migrate.connect(check_all_permissions)
 post_migrate.connect(check_all_group_permissions)
-post_migrate.connect(check_all_anon_permissions)

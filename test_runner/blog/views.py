@@ -45,6 +45,9 @@ class PostCRUDL(SmartCRUDL):
     actions = ('create', 'read', 'update', 'delete', 'list', 'author',
                'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import', 'by_uuid')
 
+    class Read(SmartReadView):
+        permission = None
+
     class List(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')
         search_fields = ('title__icontains', 'body__icontains')

@@ -1,6 +1,5 @@
 celery
 django>=1.9,<2.0
-django-guardian
 django_compressor
 pytz
 redis

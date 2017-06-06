@@ -137,7 +137,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'guardian',
     'smartmin',
     'smartmin.users',
 
@@ -176,7 +175,6 @@ LOGGING = {
 
 AUTHENTICATION_BACKENDS = (
     'smartmin.backends.CaseInsensitiveBackend',
-    'guardian.backends.ObjectPermissionBackend',
 )
 
 # create the smartmin CRUDL permissions on all objects
@@ -192,11 +190,6 @@ PERMISSIONS = {
     # invalid content type for test
     'blog.foo': ('nothing',)
 }
-
-# permissions for users that aren't logged in
-ANONYMOUS_PERMISSIONS = (
-    'blog.post_read',
-)
 
 # assigns the permissions that each group should have, here creating an Administrator group with
 # authority to create and change users

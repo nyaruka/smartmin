@@ -14,8 +14,6 @@ from django.test import TestCase
 from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils import timezone
-from guardian.conf import settings as guardian_settings
-from guardian.shortcuts import assign_perm
 from mock import patch
 from smartmin.csv_imports.models import ImportTask
 from smartmin.management import check_role_permissions
@@ -101,12 +99,12 @@ class PostTest(SmartminTest):
         # updating posts
         update_url = reverse('blog.post_update', args=[self.post.id])
 
-        # if not logged in can't read
+        # if not logged in can't update
         self.client.logout()
         response = self.client.get(update_url)
         self.assertIsLogin(response)
 
-        # plain user can't see it either
+        # plain user can't update it either
         self.assertNoAccess(self.plain, update_url)
 
         # but editors can, as can authors and superusers
@@ -114,27 +112,19 @@ class PostTest(SmartminTest):
         self.assertHasAccess(self.author, update_url)
         self.assertHasAccess(self.superuser, update_url)
 
-        # now test reading posts
+        # now test reading posts (doesn't have a set permission)
         read_url = reverse('blog.post_read', args=[self.post.id])
 
-        # if not logged in can still read
+        # even users not logged in can read
         self.client.logout()
         response = self.client.get(read_url)
         self.assertEquals(200, response.status_code)
 
-        # everybody else can read too
+        # along with everyone else
         self.assertHasAccess(self.plain, read_url)
         self.assertHasAccess(self.editor, read_url)
         self.assertHasAccess(self.author, read_url)
         self.assertHasAccess(self.superuser, read_url)
-
-        # now grant object level permission to update a single post for anonymous user
-        self.client.logout()
-        anon = User.objects.get(username=guardian_settings.ANONYMOUS_USER_NAME)
-        assign_perm('blog.post_update', anon, self.post)
-
-        response = self.client.get(update_url)
-        self.assertEquals(200, response.status_code)
 
     def test_create(self):
         self.client.login(username='author', password='author')

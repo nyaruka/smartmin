@@ -9,7 +9,7 @@ from django import forms
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import messages
-from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -22,8 +22,6 @@ from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, Pr
 from django.views.generic.base import TemplateView
 from django.views.generic import DetailView, ListView
 from functools import reduce
-from guardian.shortcuts import get_objects_for_user, assign_perm
-from guardian.utils import get_anonymous_user
 from smartmin.csv_imports.models import ImportTask
 from smartmin.mixins import NonAtomicMixin
 from . import widgets
@@ -97,34 +95,7 @@ class SmartView(object):
         if not getattr(self, 'permission', None):
             return True
         else:
-            # first check our anonymous permissions
-            real_anon = get_anonymous_user()
-            has_perm = real_anon.has_perm(self.permission)
-
-            # if not, then check our real permissions
-            if not has_perm:
-                has_perm = request.user.has_perm(self.permission)
-
-            # if not, perhaps we have it per object
-            if not has_perm:
-                has_perm = self.has_object_permission('get_object')
-
-            # if still no luck, check if we have permissions on the parent object
-            if not has_perm:
-                has_perm = self.has_object_permission('get_parent_object')
-
-            return has_perm
-
-    def has_object_permission(self, getter_name):
-        """
-        Checks for object level permission for an arbitrary getter
-        """
-        obj_getter = getattr(self, getter_name, None)
-
-        if obj_getter:
-            obj = obj_getter()
-            if obj:
-                return self.request.user.has_perm(getattr(self, 'permission', None), obj)
+            return request.user.has_perm(self.permission)
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -543,8 +514,6 @@ class SmartListView(SmartView, ListView):
     default_order = None
     select_related = None
 
-    list_permission = None
-
     @classmethod
     def derive_url_pattern(cls, path, action):
         if action == 'list':
@@ -670,16 +639,6 @@ class SmartListView(SmartView, ListView):
         fields to filter by.
         """
         queryset = self.derive_queryset(**kwargs)
-
-        # if our list should be filtered by a permission as well, do so
-        if self.list_permission:
-            # only filter if this user doesn't have a global permission
-            if not self.request.user.has_perm(self.list_permission):
-                user = self.request.user
-                # guardian only behaves with model users
-                if settings.ANONYMOUS_USER_ID and user.is_anonymous():
-                    user = get_user_model().objects.get(pk=settings.ANONYMOUS_USER_ID)
-                queryset = queryset.filter(id__in=get_objects_for_user(user, self.list_permission))
 
         return self.order_queryset(queryset)
 
@@ -1092,7 +1051,6 @@ class SmartFormView(SmartFormMixin, SmartView, FormView):
 
 
 class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
-    grant_permissions = None
     javascript_submit = None
 
     field_config = {'modified_blurb': dict(label="Modified"), 'created_blurb': dict(label="Created")}
@@ -1151,14 +1109,6 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
         """
         Called after an object is successfully saved
         """
-        # if we have permissions to grant, do so
-        if self.grant_permissions:
-            for permission in self.grant_permissions:
-                # if the user doesn't have this permission globally already
-                if not self.request.user.has_perm(permission):
-                    # then assign it for this object
-                    assign_perm(permission, self.request.user, self.object)
-
         return obj
 
     def get_context_data(self, **kwargs):

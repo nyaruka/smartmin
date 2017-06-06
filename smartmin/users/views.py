@@ -18,7 +18,6 @@ from django.template import loader
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
-from guardian.conf import settings as guardian_settings
 from smartmin.email import build_email_context
 from smartmin.views import SmartCRUDL, SmartView, SmartFormView, SmartListView, SmartCreateView, SmartUpdateView
 from .models import RecoveryToken, PasswordHistory, FailedLogin, is_password_complex
@@ -200,11 +199,8 @@ class UserCRUDL(SmartCRUDL):
             if group_id:
                 queryset = queryset.filter(groups=group_id)
 
-            # Ignore superusers, staff users and anonymous users
-            return queryset.exclude(username=guardian_settings.ANONYMOUS_USER_NAME)\
-                .exclude(is_staff=True)\
-                .exclude(is_superuser=True)\
-                .exclude(password=None)
+            # ignore superusers and staff users
+            return queryset.exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
 
         def get_name(self, obj):
             return obj.get_full_name()
