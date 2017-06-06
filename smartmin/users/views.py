@@ -199,7 +199,7 @@ class UserCRUDL(SmartCRUDL):
             if group_id:
                 queryset = queryset.filter(groups=group_id)
 
-            # gnore superusers and staff users
+            # ignore superusers and staff users
             return queryset.exclude(is_staff=True).exclude(is_superuser=True).exclude(password=None)
 
         def get_name(self, obj):
