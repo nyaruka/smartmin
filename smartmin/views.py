@@ -141,10 +141,6 @@ class SmartView(object):
         # next up is the object itself
         obj_field = getattr(obj, curr_field, None)
 
-        # if it is callable, do so
-        if obj_field and getattr(obj_field, '__call__', None):
-            obj_field = obj_field()
-
         if obj_field and rest:
             return self.lookup_obj_attribute(obj_field, rest)
         else:
