@@ -1,3 +1,9 @@
+1.11 (TBD)
+====================
+ * Add support for Django 1.11, drop support for Django 1.8
+ * Remove django-guardian (no more object-level or anonymous user permissions)
+ * Updated datepicker Javascript library
+
 1.10.10 (2017-04-04)
 ====================
  * Add status_code arg to assertRedirect to allow checking of different redirect types

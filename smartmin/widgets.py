@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import six
 
-from datetime import datetime
 from django.forms import widgets
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -23,37 +22,20 @@ class VisibleHiddenWidget(widgets.Widget):
         return mark_safe(html)
 
 
-class DatePickerWidget(widgets.Widget):
+class DatePickerWidget(widgets.DateInput):
+    """
+    Date input which uses Javascript date picker widget
+    """
+    input_format = ('MM d, yyyy', '%B %d, %Y')  # Javascript and Python format strings
 
     def __init__(self, *args, **kwargs):
+        kwargs['attrs'] = {'data-provide': 'datepicker', 'data-date-format': self.input_format[0]}
+
         super(DatePickerWidget, self).__init__(*args, **kwargs)
 
-    def render(self, name, value, attrs=None):
-        """
-        Renders this widget as HTML.
-        """
-        html = ''
-        str_value = ""
-        if value:
-            str_value = "%s %d, %d" % (value.strftime("%B"), value.day, value.year)
-
-        html += '<input type="text" class="datepicker" data-provide="datepicker" name="%s" value="%s" data-date-format="MM d, yyyy" data-date-autoclose="true">' % (escape(name), escape(str_value))  # noqa
-        return mark_safe(html)
-
-    def value_from_datadict(self, data, files, name):
-        val = data.get(name)
-
-        # try parsing it
-        try:
-            parsed = datetime.strptime(val, "%B %d, %Y")
-            return parsed.date()
-        except Exception:
-            # invalid format?  say so
-            return None
-
     class Media:
-        js = ('js/datepicker.js',)
-        css = {'all': ('css/datepicker.css',)}
+        js = ('js/bootstrap-datepicker.js',)
+        css = {'all': ('css/bootstrap-datepicker3.css',)}
 
 
 class ImageThumbnailWidget(widgets.ClearableFileInput):
