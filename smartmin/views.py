@@ -870,6 +870,7 @@ class SmartFormMixin(object):
         """
         if isinstance(field, forms.fields.DateField) and isinstance(field.widget, forms.widgets.DateInput):
             field.widget = widgets.DatePickerWidget()
+            field.input_formats = [field.widget.input_format[1]] + list(field.input_formats)
 
         if isinstance(field, forms.fields.ImageField) and isinstance(field.widget, forms.widgets.ClearableFileInput):
             field.widget = widgets.ImageThumbnailWidget()
