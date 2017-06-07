@@ -1,8 +1,9 @@
-1.11 (TBD)
+1.11 (2017-06-07)
 ====================
  * Add support for Django 1.11, drop support for Django 1.8
  * Remove django-guardian (no more object-level or anonymous user permissions)
- * Updated datepicker Javascript library
+ * Updated datepicker Javascript library https://github.com/nyaruka/smartmin/pull/101
+ * Fix bug when form field is bound to empty many-to-many relation https://github.com/nyaruka/smartmin/pull/102
 
 1.10.10 (2017-04-04)
 ====================
