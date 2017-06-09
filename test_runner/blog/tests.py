@@ -22,7 +22,7 @@ from smartmin.templatetags.smartmin import view_as_json, get_value_from_view, ge
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
 from smartmin.views import smart_url
-from smartmin.widgets import ImageThumbnailWidget
+from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
 from test_runner.blog.models import Post, Category
 from .views import PostCRUDL
 
@@ -126,8 +126,16 @@ class PostTest(SmartminTest):
         self.assertHasAccess(self.author, read_url)
         self.assertHasAccess(self.superuser, read_url)
 
-    def test_create(self):
+    def test_create_and_update(self):
         self.client.login(username='author', password='author')
+
+        response = self.client.get(reverse('blog.post_create'))
+        self.assertEqual(response.status_code, 200)
+
+        date_field = response.context['form'].fields['written_on']
+        self.assertIsInstance(date_field.widget, DatePickerWidget)
+        self.assertEqual(date_field.widget.format, "%B %d, %Y")
+        self.assertEqual(date_field.input_formats, ['%B %d, %Y', '%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y'])
 
         post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         self.client.post(reverse('blog.post_create'), post_data, follow=True)

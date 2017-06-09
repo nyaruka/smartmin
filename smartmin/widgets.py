@@ -30,6 +30,7 @@ class DatePickerWidget(widgets.DateInput):
 
     def __init__(self, *args, **kwargs):
         kwargs['attrs'] = {'data-provide': 'datepicker', 'data-date-format': self.input_format[0]}
+        kwargs['format'] = self.input_format[1]
 
         super(DatePickerWidget, self).__init__(*args, **kwargs)
 

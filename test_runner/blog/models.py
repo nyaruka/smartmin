@@ -4,6 +4,7 @@ import six
 import uuid
 
 from django.db import models
+from django.utils.timezone import now
 from smartmin.models import SmartModel, ActiveManager
 
 
@@ -16,7 +17,9 @@ class Post(SmartModel):
     tags = models.CharField(max_length=128,
                             help_text="Any tags for this post")
 
-    uuid = models.CharField(max_length=36, default=uuid.uuid4, editable=False)  # UUID field only added in Django 1.8
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    written_on = models.DateField(default=now, null=True, blank=True)
 
     objects = models.Manager()
     active = ActiveManager()
