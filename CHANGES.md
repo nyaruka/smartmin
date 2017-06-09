@@ -1,3 +1,7 @@
+1.11.1 (2017-06-09)
+====================
+ * Fix date widget so that initial values are correctly formatted
+
 1.11 (2017-06-07)
 ====================
  * Add support for Django 1.11, drop support for Django 1.8
