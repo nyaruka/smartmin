@@ -8,8 +8,14 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from six.moves import StringIO
 
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    class MiddlewareMixin(object):
+        pass
 
-class AjaxRedirect(object):
+
+class AjaxRedirect(MiddlewareMixin):
     def process_response(self, request, response):
         if request.is_ajax():
             if type(response) == HttpResponseRedirect:
@@ -21,7 +27,7 @@ class AjaxRedirect(object):
         return response
 
 
-class ProfileMiddleware(object):
+class ProfileMiddleware(MiddlewareMixin):
     def __init__(self):
         pass
 

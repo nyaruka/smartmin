@@ -7,8 +7,14 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from .models import PasswordHistory
 
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    class MiddlewareMixin(object):
+        pass
 
-class ChangePasswordMiddleware:
+
+class ChangePasswordMiddleware(MiddlewareMixin):
     """
     Redirects all users to the password change form if we find that a user's
     password is expired.
