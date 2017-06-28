@@ -322,7 +322,7 @@ class SmartView(object):
         url_params = "?"
         order_params = ""
         for key in self.request.GET.keys():
-            if key != 'page' and key != 'pjax' and key[0] != '_':
+            if key != 'page' and key != 'pjax' and (len(key) == 0 or key[0] != '_'):
                 for value in self.request.GET.getlist(key):
                     url_params += "%s=%s&" % (key, urlquote(value))
             elif key == '_order':
