@@ -4,7 +4,7 @@ import os
 
 from django.db import models
 from django.utils import timezone
-from smartmin import class_from_string
+from django.utils.module_loading import import_string
 from smartmin.models import SmartModel
 
 
@@ -62,4 +62,4 @@ class ImportTask(SmartModel):
         self.save(update_fields=['import_log', 'modified_on'])
 
     def __unicode__(self):
-        return "%s Import" % class_from_string(self.model_class)._meta.verbose_name.title()
+        return "%s Import" % import_string(self.model_class)._meta.verbose_name.title()

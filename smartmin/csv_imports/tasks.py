@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from celery.task import task
 from django.db import transaction
 from django.utils import timezone
-from smartmin import class_from_string
+from django.utils.module_loading import import_string
 from .models import ImportTask
 
 # python2 and python3 support
@@ -26,7 +26,7 @@ def csv_import(task_id):  # pragma: no cover
 
     try:
         with transaction.atomic():
-            model = class_from_string(task_obj.model_class)
+            model = import_string(task_obj.model_class)
             records = model.import_csv(task_obj, log)
             task_obj.task_status = ImportTask.SUCCESS
             task_obj.save()

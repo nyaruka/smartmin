@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from smartmin import class_from_string
+from django.utils.module_loading import import_string
 from smartmin.csv_imports.models import ImportTask
 from smartmin.views import SmartCRUDL, SmartListView, SmartReadView
 
@@ -21,4 +21,4 @@ class ImportTaskCRUDL(SmartCRUDL):
         link_fields = ('csv_file',)
 
         def get_type(self, obj):
-            return class_from_string(obj.model_class)._meta.verbose_name_plural.title()
+            return import_string(obj.model_class)._meta.verbose_name_plural.title()
