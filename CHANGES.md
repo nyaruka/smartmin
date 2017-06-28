@@ -1,4 +1,9 @@
-1.11.2 (2107-06-15)
+1.11.3 (2017-06-28)
+====================
+ * Paging fix https://github.com/nyaruka/smartmin/pull/105
+ * Replace custom class_from_string with Django's import_string
+ 
+1.11.2 (2017-06-15)
 ====================
  * Support Django 1.10 new middleware style
 
