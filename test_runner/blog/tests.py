@@ -242,6 +242,12 @@ class PostTest(SmartminTest):
                 {'id': self.post.id, 'text': 'Test Post'}
             ], 'err': 'nil', 'more': False})
 
+        # check parsing of query string params used for paging URLs
+        response = self.client.get(reverse('blog.post_list') + "?=x&foo=bar&_order=-title&page=1")
+        self.assertEqual(list(response.context['post_list']), [self.post, post3, post2, post4, post1])
+        self.assertEqual(response.context['url_params'], '?=x&foo=bar&')
+        self.assertEqual(response.context['order_params'], '_order=-title&')
+
     def test_success_url(self):
         self.client.login(username='author', password='author')
 
