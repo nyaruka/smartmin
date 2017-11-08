@@ -435,7 +435,9 @@ def login(request, template_name='smartmin/users/login.html',
 
     if request.method == "POST":
         if 'username' in request.POST and 'password' in request.POST:
-            username = request.POST['username']
+            # we are using AuthenticationForm in which username is CharField with strip=True that automatically strips
+            # whitespace characters, we need to copy that behaviour
+            username = request.POST['username'].strip()
 
             user = get_user_model().objects.filter(username__iexact=username).first()
 
