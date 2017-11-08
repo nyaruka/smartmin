@@ -20,7 +20,7 @@ from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
 from smartmin.templatetags.smartmin import view_as_json, get_value_from_view, get, user_as_string
 from smartmin.tests import SmartminTest
-from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
+from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory, is_password_complex
 from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
 from test_runner.blog.models import Post, Category
@@ -455,6 +455,15 @@ class UserTest(TestCase):
         self.superuser.is_superuser = True
         self.superuser.save()
 
+    def test_login_stripped_spaces(self):
+        login_url = reverse('users.user_login')
+
+        response = self.client.post(login_url, dict(username=' superuser', password='superuser'))
+        self.assertEquals(response.status_code, 302)
+
+        response = self.client.post(login_url, dict(username='    superuser     ', password='superuser'))
+        self.assertEquals(response.status_code, 302)
+
     def test_login_case_not_sensitive(self):
         login_url = reverse('users.user_login')
 
@@ -513,14 +522,20 @@ class UserTest(TestCase):
         self.assertEquals(200, response.status_code)
         self.assertTrue('new_password' in response.context['form'].errors)
 
-        # ok, finally with a zero in there too, this one should pass
-        post_data['new_password'] = 'Passw0rd'
+        # ok, finally with a zero and a whitespace in there too, this one should pass
+        post_data['new_password'] = 'Passw0rd '
         response = self.client.post(reverse('users.user_create'), post_data, follow=True)
         self.assertEquals(200, response.status_code)
         self.assertTrue('form' not in response.context)
 
         # make sure the user was created
         steve = User.objects.get(username='steve')
+
+        # test if we can login with steve
+        self.assertTrue(self.client.login(username='steve', password='Passw0rd '))
+
+        # login superuser again
+        self.client.login(username='superuser', password='superuser')
 
         # create another user manually, make him inactive
         woz = User.objects.create_user('woz', 'woz@apple.com', 'woz')
@@ -542,7 +557,7 @@ class UserTest(TestCase):
 
         # update steve, put him in a different group and change his password
         post_data['groups'] = Group.objects.get(name='Editors').id
-        post_data['new_password'] = 'googleIsNumber1'
+        post_data['new_password'] = ' googleIsNumber1'
 
         # need is active here or steve will be marked inactive
         post_data['is_active'] = '1'
@@ -559,7 +574,7 @@ class UserTest(TestCase):
         self.assertEquals(Group.objects.get(name='Editors'), groups[0])
 
         # assert steve can login with 'google' now
-        self.assertTrue(self.client.login(username='steve', password='googleIsNumber1'))
+        self.assertTrue(self.client.login(username='steve', password=' googleIsNumber1'))
 
         # test user profile action
         # logout first
@@ -598,7 +613,7 @@ class UserTest(TestCase):
         self.assertEquals(302, response.status_code)
 
         # log in as an editor instead
-        self.assertTrue(self.client.login(username='steve', password='googleIsNumber1'))
+        self.assertTrue(self.client.login(username='steve', password=' googleIsNumber1'))
         response = self.client.get(reverse('users.user_profile', args=[steve.id]))
         self.assertEquals(reverse('users.user_profile', args=[steve.id]), response.request['PATH_INFO'])
 
@@ -620,20 +635,21 @@ class UserTest(TestCase):
 
         # check if he can mismatch new password and its confirmation
         post_data = dict(old_password="plain", new_password="NewPassword1", confirm_new_password="confirmnewpassword")
-        self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
+        self.assertTrue('confirm_new_password' in response.context['form'].errors)
 
         # check if he can fill old and new password only without the confirm new password
         post_data = dict(old_password="plain", new_password="NewPassword1")
         response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertIn("Confirm the new password by filling the this field", response.content.decode("utf-8"))
 
-        # actually change the password
-        post_data = dict(old_password="googleIsNumber1", new_password="NewPassword1",
-                         confirm_new_password="NewPassword1")
-        self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
+        # actually change the password, with spaces
+        post_data = dict(old_password=" googleIsNumber1", new_password="NewPassword1 ",
+                         confirm_new_password="NewPassword1 ")
+        response = self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
 
         # assert new password works
-        self.assertTrue(self.client.login(username='steve', password='NewPassword1'))
+        self.assertTrue(self.client.login(username='steve', password='NewPassword1 '))
 
         # see whether we can change our email without a password
         post_data = dict(email="new@foo.com")
@@ -641,7 +657,7 @@ class UserTest(TestCase):
         self.assertTrue('old_password' in response.context['form'].errors)
 
         # but with the new password we can
-        post_data = dict(email="new@foo.com", old_password='NewPassword1')
+        post_data = dict(email="new@foo.com", old_password='NewPassword1 ')
         self.client.post(reverse('users.user_profile', args=[steve.id]), post_data)
         self.assertTrue(User.objects.get(email='new@foo.com'))
 
@@ -1111,7 +1127,7 @@ class UserLockoutTestCase(TestCase):
 class PasswordExpirationTestCase(TestCase):
 
     def setUp(self):
-        self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'Password1')
+        self.plain = User.objects.create_user('plain', 'plain@nogroups.com', 'Password1 ')
         self.plain.groups.add(Group.objects.get(name="Editors"))
 
     def testNoExpiration(self):
@@ -1125,7 +1141,7 @@ class PasswordExpirationTestCase(TestCase):
 
         # log in
         self.client.logout()
-        post_data = dict(username='plain', password='Password1')
+        post_data = dict(username='plain', password='Password1 ')
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
         self.assertTrue(response.context['user'].is_authenticated())
 
@@ -1137,7 +1153,7 @@ class PasswordExpirationTestCase(TestCase):
                                                  password=self.plain.password)
 
         with self.settings(USER_PASSWORD_REPEAT_WINDOW=365):
-            self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+            self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1 "))
             self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "anotherpassword"))
 
             # move our history into the past
@@ -1145,19 +1161,19 @@ class PasswordExpirationTestCase(TestCase):
             history.save()
 
             # still a repeat because it is our current password
-            self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+            self.assertTrue(PasswordHistory.is_password_repeat(self.plain, "Password1 "))
 
             # change our password under the covers
             self.plain.set_password("my new password")
 
             # now this one is fine
-            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1 "))
 
         with self.settings(USER_PASSWORD_REPEAT_WINDOW=-1):
             history.set_on = timezone.now()
             history.save()
 
-            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1"))
+            self.assertFalse(PasswordHistory.is_password_repeat(self.plain, "Password1 "))
 
     @override_settings(USER_PASSWORD_EXPIRATION=60, USER_PASSWORD_REPEAT_WINDOW=365)
     def test_expiration(self):
@@ -1171,7 +1187,7 @@ class PasswordExpirationTestCase(TestCase):
 
         # log in
         self.client.logout()
-        post_data = dict(username='plain', password='Password1')
+        post_data = dict(username='plain', password='Password1 ')
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
 
         # assert we are being taken to our new password page
@@ -1184,16 +1200,17 @@ class PasswordExpirationTestCase(TestCase):
         # redirected again
         self.assertTrue('form' in response.context)
         self.assertTrue('new_password' in response.context['form'].fields)
+        self.assertTrue('old_password' in response.context['form'].fields)
 
         # ok, set our new password
-        post_data = dict(old_password='Password1', new_password='Password1', confirm_new_password='Password1')
+        post_data = dict(old_password='Password1 ', new_password='Password1 ', confirm_new_password='Password1 ')
         response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
 
         # we should get a failure that our new password is a repeat
         self.assertTrue('confirm_new_password' in response.context['form'].errors)
 
         # use a different password
-        post_data = dict(old_password='Password1', new_password='Password2', confirm_new_password='Password2')
+        post_data = dict(old_password='Password1 ', new_password=' Password2', confirm_new_password=' Password2')
         response = self.client.post(reverse('users.user_newpassword', args=[0]), post_data)
 
         # should be redirected to the normal redirect page
@@ -1206,7 +1223,7 @@ class PasswordExpirationTestCase(TestCase):
         # should be able to log in normally
         self.client.logout()
 
-        post_data = dict(username='plain', password='Password2')
+        post_data = dict(username='plain', password=' Password2')
         response = self.client.post(reverse('users.user_login'), post_data)
 
         self.assertEquals(302, response.status_code)
@@ -1226,3 +1243,26 @@ class WidgetsTest(SmartminTest):
         html = widget.render('logo', img)
 
         self.assertIn('<img src="/media/2423.jpg" width="320" width="240" />', html)
+
+
+class IsPasswordComplexTest(TestCase):
+    def test_password_is_complex(self):
+        # one lower one upper one digit 8 chars
+        self.assertTrue(is_password_complex('Ab1.....'))
+        self.assertTrue(is_password_complex('   Ab1   '))
+        # password is longer than 12 chars
+        self.assertTrue(is_password_complex('longer than twelve characters'))
+
+    def test_password_is_not_complex(self):
+        # length < 8
+        self.assertFalse(is_password_complex('only5'))
+        # length < 12
+        self.assertFalse(is_password_complex('only11chars'))
+        # 8 < length < 12, no dig, no cap
+        self.assertFalse(is_password_complex('nodignocap'))
+        # 8 < length < 12, no cap
+        self.assertFalse(is_password_complex('okd1gnocap'))
+        # 8 < length < 12, no dig
+        self.assertFalse(is_password_complex('nodigokCap'))
+        # 8 < length < 12, no low
+        self.assertFalse(is_password_complex('OKD1GOKCAP'))

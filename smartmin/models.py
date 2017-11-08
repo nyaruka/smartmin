@@ -301,7 +301,7 @@ class SmartModel(models.Model):
                 for cell in row:
                     try:
                         cell = six.text_type(cell)
-                    except:
+                    except Exception:
                         cell = six.text_type(cell.decode(ascii_codec))
 
                     encoded.append(cell)
