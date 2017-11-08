@@ -24,7 +24,7 @@ from .models import RecoveryToken, PasswordHistory, FailedLogin, is_password_com
 
 
 class UserForm(forms.ModelForm):
-    new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput)
+    new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, strip=False)
     groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                             queryset=Group.objects.all(), required=False)
 
@@ -65,7 +65,7 @@ class UserForm(forms.ModelForm):
 
 
 class UserUpdateForm(UserForm):
-    new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, required=False)
+    new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, required=False, strip=False)
 
     def clean_new_password(self):
         password = self.cleaned_data['new_password']
@@ -82,9 +82,11 @@ class UserUpdateForm(UserForm):
 
 
 class UserProfileForm(UserForm):
-    old_password = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False)
-    new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, required=False)
-    confirm_new_password = forms.CharField(label=_("Confirm Password"), widget=forms.PasswordInput, required=False)
+    old_password = forms.CharField(label=_("Password"), widget=forms.PasswordInput, required=False, strip=False)
+    new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, required=False, strip=False)
+    confirm_new_password = forms.CharField(
+        label=_("Confirm Password"), widget=forms.PasswordInput, required=False, strip=False
+    )
 
     def clean_old_password(self):
         user = self.instance
@@ -131,12 +133,12 @@ class UserForgetForm(forms.Form):
 
 
 class SetPasswordForm(UserForm):
-    old_password = forms.CharField(label=_("Current Password"), widget=forms.PasswordInput, required=True,
+    old_password = forms.CharField(label=_("Current Password"), widget=forms.PasswordInput, required=True, strip=False,
                                    help_text=_("Your current password"))
     new_password = forms.CharField(label=_("New Password"), widget=forms.PasswordInput, required=True,
-                                   help_text=_("Your new password."))
+                                   help_text=_("Your new password."), strip=False)
     confirm_new_password = forms.CharField(label=_("Confirm new Password"), widget=forms.PasswordInput, required=True,
-                                           help_text=_("Confirm your new password."))
+                                           help_text=_("Confirm your new password."), strip=False)
 
     def clean_old_password(self):
         user = self.instance
