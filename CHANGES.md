@@ -1,3 +1,8 @@
+1.11.4 (2017-11-08)
+====================
+ * Strip whitespace from usernames on the login form https://github.com/nyaruka/smartmin/pull/106
+ * Make sure that we don't strip whitespaces on password fields (default Django behaviour)
+
 1.11.3 (2017-06-28)
 ====================
  * Paging fix https://github.com/nyaruka/smartmin/pull/105
