@@ -20,7 +20,7 @@ from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
 from smartmin.templatetags.smartmin import view_as_json, get_value_from_view, get, user_as_string
 from smartmin.tests import SmartminTest
-from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory
+from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory, is_password_complex
 from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
 from test_runner.blog.models import Post, Category
@@ -1226,3 +1226,26 @@ class WidgetsTest(SmartminTest):
         html = widget.render('logo', img)
 
         self.assertIn('<img src="/media/2423.jpg" width="320" width="240" />', html)
+
+
+class IsPasswordComplexTest(TestCase):
+    def test_password_is_complex(self):
+        # one lower one upper one digit 8 chars
+        self.assertTrue(is_password_complex('Ab1.....'))
+        self.assertTrue(is_password_complex('   Ab1   '))
+        # password is longer than 12 chars
+        self.assertTrue(is_password_complex('longer than twelve characters'))
+
+    def test_password_is_not_complex(self):
+        # length < 8
+        self.assertFalse(is_password_complex('only5'))
+        # length < 12
+        self.assertFalse(is_password_complex('only11chars'))
+        # 8 < length < 12, no dig, no cap
+        self.assertFalse(is_password_complex('nodignocap'))
+        # 8 < length < 12, no cap
+        self.assertFalse(is_password_complex('okd1gnocap'))
+        # 8 < length < 12, no dig
+        self.assertFalse(is_password_complex('nodigokCap'))
+        # 8 < length < 12, no low
+        self.assertFalse(is_password_complex('OKD1GOKCAP'))
