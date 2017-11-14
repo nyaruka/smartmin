@@ -570,7 +570,7 @@ class SmartListView(SmartView, ListView):
         try:
             self.model._meta.get_field_by_name(field)
             return True
-        except:
+        except Exception:
             # that field doesn't exist, so not sortable
             return False
 
