@@ -12,7 +12,6 @@ from enum import Enum
 from six.moves import filter
 from sqlparse import sql
 from sqlparse import tokens as sql_tokens
-from temba.utils.text import truncate
 from textwrap import dedent
 
 
@@ -77,7 +76,7 @@ class SqlObjectOperation(object):
         return cls(raw.value.strip(), sql_type, name, is_create)
 
     def __str__(self):
-        return truncate(self.statement, 79).replace('\n', ' ')
+        return self.statement[:79].replace('\n', ' ')
 
 
 class Command(BaseCommand):  # pragma: no cover
