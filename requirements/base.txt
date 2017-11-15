@@ -4,5 +4,6 @@ django_compressor
 pytz
 redis
 six
+sqlparse
 xlrd
 xlwt
