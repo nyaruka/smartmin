@@ -1,4 +1,8 @@
-1.11.4 (2017-11-08)
+1.11.5 (2017-11-15)
+====================
+ * Add collect_sql and migrate_manual management commands https://github.com/nyaruka/smartmin/pull/108
+ 
+ 1.11.4 (2017-11-08)
 ====================
  * Strip whitespace from usernames on the login form https://github.com/nyaruka/smartmin/pull/106
  * Make sure that we don't strip whitespaces on password fields (default Django behaviour)
