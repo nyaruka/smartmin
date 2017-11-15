@@ -25,13 +25,6 @@ The official source code repository is:
 Built in Rwanda by Nyaruka Ltd:
   http://www.nyaruka.com
 
-
-Dependencies
-===========================================
-
-Smartmin depends on features in Django 1.7, so you'll need to be running at least that version.  It also depends on the
-most excellent django-guardian package to deal with object level permissions, so you'll need to install that as well.
-
 Installation
 ===========================================
 
@@ -61,18 +54,14 @@ To get started with smartmin, the following changes to your ``settings.py`` are 
       "Administrator": ('auth.user.*',)
   }
 
-  # this is required by guardian
-  ANONYMOUS_USER_ID = -1
-
   # set this if you want to use smartmin's user login
   LOGIN_URL = '/users/login'
 
-You'll also need to add smartmin and guardian to your installed apps::
+You'll also need to add smartmin to your installed apps::
 
   INSTALLED_APPS = (
     # .. other apps ..
 
-    'guardian',
     'smartmin',
   )
 
