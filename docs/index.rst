@@ -6,12 +6,14 @@
 Introduction
 ===========================================
 
-Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients.  Smartmin aims to allow you to quickly build scaffolding which you can customize by using Django class based views.
+Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients.
+Smartmin aims to allow you to quickly build scaffolding which you can customize by using Django class based views.
 
 It is very opininated in how it works, if you don't agree, Smartmin may not be for you:
 
 - Permissions are used to gate access to each page, embrace permissions throughout and you'll love this
-- CRUDL operations at the object level, that is, Create, Read, Update, Delete and List, permissions and views are based around this
+- CRUDL operations at the object level, that is, Create, Read, Update, Delete and List, permissions and views are based
+  around this
 - URL automapping via the the CRUDL objects, this should keep things very very DRY
 
 The full documentation can be found at:
@@ -27,7 +29,8 @@ Built in Rwanda by Nyaruka Ltd:
 Dependencies
 ===========================================
 
-Smartmin depends on features in Django 1.7, so you'll need to be running at least that version.  It also depends on the most excellent django-guardian package to deal with object level permissions, so you'll need to install that as well.
+Smartmin depends on features in Django 1.7, so you'll need to be running at least that version.  It also depends on the
+most excellent django-guardian package to deal with object level permissions, so you'll need to install that as well.
 
 Installation
 ===========================================
@@ -73,30 +76,39 @@ You'll also need to add smartmin and guardian to your installed apps::
     'smartmin',
   )
 
-Finally, if you want to use the default smartmin views for managing users and logging in, you'll want to add the smartmin.users app to your ``urls.py``::
+Finally, if you want to use the default smartmin views for managing users and logging in, you'll want to add the
+smartmin.users app to your ``urls.py``::
 
-  urlpatterns = patterns('',
+  urlpatterns = [
     # .. other patterns ..
     url(r'^users/', include('smartmin.users.urls')),
-  )
+  ]
 
 You can now sync your database and start the server::
 
-   % python manage.py syncdb
+   % python manage.py migrate
    % python manage.py runserver
 
-And if you want to see a Smartmin view in action, check out smartmin's user management pages for a demo that functionality by pointing your browser to::
+And if you want to see a Smartmin view in action, check out smartmin's user management pages for a demo that
+functionality by pointing your browser to::
 
     http://localhost:8000/users/user
 
-From here you can create, update and list users on the system, all using standard smartmin views.  The total code to create all this functionality is less than 30 lines of Python.
+From here you can create, update and list users on the system, all using standard smartmin views.  The total code to
+create all this functionality is less than 30 lines of Python.
 
 Versioning:
 ===========================================
 
-Smartmin will release major versions in step (or rather a bit behind) Django's major releases.  Version 1.8 actually works against both Version 1.7 and Version 1.8 and we hope to support the past two versions in each release.  Smartmin is used in quite a few of our projects, so we don't rock the boat too much, even in major releases. That said, we don't guarantee that major releases always be backwards compatible.
+Smartmin will release major versions in step (or rather a bit behind) Django's major releases.  Version 1.11 actually
+works against Django 1.11, 1.10 and 1.9 - we hope to support the 3 most recent versions in each release.  Smartmin
+is used in quite a few of our projects, so we don't rock the boat too much, even in major releases. That said, we don't
+guarantee that major releases always be backwards compatible.
 
-At the onset of each new Django version we will upgrade Twitter Bootstrap to the current version.  Currently for 1.8, which targets Django 1.8, that means Twitter Bootstrap 2. Note that some of our screenshots are a bit outdated, our standard views now use Bootstrap styling, not the more Django admin looking pages shown in our docs. (PRs accepted to fix this!)
+At the onset of each new Django version we will upgrade Twitter Bootstrap to the current version.  Currently for 1.11,
+which targets Django 1.11, that means Twitter Bootstrap 3. Note that some of our screenshots are a bit outdated, our
+standard views now use Bootstrap styling, not the more Django admin looking pages shown in our docs. (PRs accepted to
+fix this!)
 
 Contents:
 ===========================================
@@ -111,7 +123,6 @@ Contents:
    updateview
    deleteview
    listview
-   crudl
    templates
    perms
    users
