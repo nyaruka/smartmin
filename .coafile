@@ -1,0 +1,4 @@
+[python]
+files = **.py
+bears = PycodestyleBear,PEP8Bear,PyLintBear
+use_spaces = True
