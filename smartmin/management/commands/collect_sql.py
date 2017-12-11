@@ -75,11 +75,14 @@ class SqlObjectOperation(object):
 
         return cls(raw.value.strip(), sql_type, name, is_create)
 
+    def __eq__(self, other):
+        return self.statement == other.statement and self.sql_type == other.sql_type and self.obj_name == other.obj_name and self.is_create == other.is_create
+
     def __str__(self):
         return self.statement[:100].replace('\n', ' ')
 
 
-class Command(BaseCommand):  # pragma: no cover
+class Command(BaseCommand):
     help = """Collects SQL statements from migrations to compile lists of indexes, functions and triggers"""
 
     def add_arguments(self, parser):
@@ -116,7 +119,7 @@ class Command(BaseCommand):  # pragma: no cover
 
         self.write_type_dumps(normalized, preserve_order, output_dir)
 
-    def load_migrations(self):
+    def load_migrations(self):  # pragma: no cover
         """
         Loads all migrations in the order they would be applied to a clean database
         """
@@ -158,20 +161,19 @@ class Command(BaseCommand):  # pragma: no cover
         """
         normalized = OrderedDict()
 
-        def op_key(op):
-            return op.sql_type, op.obj_name
-
         for operation in operations:
-            # do we already have an operation for this object?
-            if operation.obj_name in normalized:
-                if self.verbosity >= 2:
-                    self.stdout.write(" < %s" % normalized[op_key(operation)])
+            op_key = (operation.sql_type, operation.obj_name)
 
-                del normalized[op_key(operation)]
+            # do we already have an operation for this object?
+            if op_key in normalized:
+                if self.verbosity >= 2:
+                    self.stdout.write(" < %s" % normalized[op_key])
+
+                del normalized[op_key]
 
             # don't add DROP operations for objects not previously created
             if operation.is_create:
-                normalized[op_key(operation)] = operation
+                normalized[op_key] = operation
             elif self.verbosity >= 2:
                 self.stdout.write(" < %s" % operation)
 
@@ -197,7 +199,7 @@ class Command(BaseCommand):  # pragma: no cover
         if by_type[SqlType.TRIGGER]:
             self.write_dump('triggers', by_type[SqlType.TRIGGER], output_dir)
 
-    def write_dump(self, type_label, operations, output_dir):
+    def write_dump(self, type_label, operations, output_dir):  # pragma: no cover
         filename = '%s/current_%s.sql' % (output_dir, type_label)
 
         with open(filename, 'w') as f:
