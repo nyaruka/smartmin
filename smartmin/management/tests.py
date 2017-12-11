@@ -48,4 +48,3 @@ class CollectSqlTest(TestCase):
                                    SqlType.TRIGGER, "test_1", True)
             ], 'sql')
         ])
-

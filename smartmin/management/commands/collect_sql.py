@@ -76,7 +76,8 @@ class SqlObjectOperation(object):
         return cls(raw.value.strip(), sql_type, name, is_create)
 
     def __eq__(self, other):
-        return self.statement == other.statement and self.sql_type == other.sql_type and self.obj_name == other.obj_name and self.is_create == other.is_create
+        return self.statement == other.statement and self.sql_type == other.sql_type \
+               and self.obj_name == other.obj_name and self.is_create == other.is_create
 
     def __str__(self):
         return self.statement[:100].replace('\n', ' ')
