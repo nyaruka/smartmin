@@ -76,7 +76,7 @@ class SqlObjectOperation(object):
         return cls(raw.value.strip(), sql_type, name, is_create)
 
     def __str__(self):
-        return self.statement[:79].replace('\n', ' ')
+        return self.statement[:100].replace('\n', ' ')
 
 
 class Command(BaseCommand):  # pragma: no cover
@@ -148,7 +148,7 @@ class Command(BaseCommand):  # pragma: no cover
                             operations.append(operation)
 
                             if self.verbosity >= 2:
-                                self.stdout.write(" > %s (%s)" % (operation, migration))
+                                self.stdout.write(" > % -100s (%s)" % (operation, migration))
 
         return operations
 
@@ -158,17 +158,20 @@ class Command(BaseCommand):  # pragma: no cover
         """
         normalized = OrderedDict()
 
+        def op_key(op):
+            return op.sql_type, op.obj_name
+
         for operation in operations:
             # do we already have an operation for this object?
             if operation.obj_name in normalized:
                 if self.verbosity >= 2:
-                    self.stdout.write(" < %s" % normalized[operation.obj_name])
+                    self.stdout.write(" < %s" % normalized[op_key(operation)])
 
-                del normalized[operation.obj_name]
+                del normalized[op_key(operation)]
 
             # don't add DROP operations for objects not previously created
             if operation.is_create:
-                normalized[operation.obj_name] = operation
+                normalized[op_key(operation)] = operation
             elif self.verbosity >= 2:
                 self.stdout.write(" < %s" % operation)
 
