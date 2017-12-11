@@ -1,3 +1,7 @@
+1.11.6 (2017-12-11)
+===================
+ * Fix collect_sql when objects of different types have same name https://github.com/nyaruka/smartmin/pull/111
+
 1.11.5 (2017-11-15)
 ====================
  * Add collect_sql and migrate_manual management commands https://github.com/nyaruka/smartmin/pull/108
