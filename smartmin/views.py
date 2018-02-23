@@ -477,7 +477,7 @@ class SmartDeleteView(SmartSingleObjectView, DetailView, ProcessFormView):
 
     def pre_delete(self, obj):
         # auto populate modified_by if it is present
-        if hasattr(obj, 'modified_by_id') and self.request.user.id >= 0:
+        if self.request.user.id and self.request.user.id > 0 and hasattr(obj, 'modified_by_id'):
             obj.modified_by = self.request.user
 
     def post(self, request, *args, **kwargs):
@@ -1146,7 +1146,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
     def pre_save(self, obj):
         # auto populate modified_by if it is present
-        if hasattr(obj, 'modified_by_id') and self.request.user.id >= 0:
+        if self.request.user.id and self.request.user.id > 0 and hasattr(obj, 'modified_by_id'):
             obj.modified_by = self.request.user
 
         return obj
@@ -1254,13 +1254,14 @@ class SmartCreateView(SmartModelFormView, CreateView):
         return False
 
     def pre_save(self, obj):
-        # auto populate created_by if it is present
-        if hasattr(obj, 'created_by_id') and self.request.user.id >= 0:
-            obj.created_by = self.request.user
+        if self.request.user.id and self.request.user.id > 0:
+            # auto populate created_by if it is present
+            if hasattr(obj, 'created_by_id'):
+                obj.created_by = self.request.user
 
-        # auto populate modified_by if it is present
-        if hasattr(obj, 'modified_by_id') and self.request.user.id >= 0:
-            obj.modified_by = self.request.user
+            # auto populate modified_by if it is present
+            if hasattr(obj, 'modified_by_id'):
+                obj.modified_by = self.request.user
 
         return obj
 
