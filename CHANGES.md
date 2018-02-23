@@ -1,3 +1,7 @@
+1.11.7 (2018-02-23)
+===================
+ * Fix Python 3 issue with comparing ints and None https://github.com/nyaruka/smartmin/pull/113
+
 1.11.6 (2017-12-11)
 ===================
  * Fix collect_sql when objects of different types have same name https://github.com/nyaruka/smartmin/pull/111
