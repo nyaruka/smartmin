@@ -1,3 +1,7 @@
+1.11.8 (2018-03-15)
+===================
+ * Fix Python 3 exception usage https://github.com/nyaruka/smartmin/pull/114
+
 1.11.7 (2018-02-23)
 ===================
  * Fix Python 3 issue with comparing ints and None https://github.com/nyaruka/smartmin/pull/113
