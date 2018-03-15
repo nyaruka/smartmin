@@ -355,12 +355,12 @@ class SmartModel(models.Model):
                     num_errors += 1
 
             except SmartImportRowError as e:
-                error_messages.append(dict(line=line_number, error=str(e)))
+                error_messages.append(dict(line=line_number, error=six.text_type(e)))
 
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
-                raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
+                raise Exception("Line %d: %s\n\n%s" % (line_number, six.text_type(e), field_values))
 
         if import_results is not None:
             import_results['records'] = len(records)

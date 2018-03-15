@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import six
 from celery.task import task
 from django.db import transaction
 from django.utils import timezone
@@ -37,11 +38,11 @@ def csv_import(task_id):  # pragma: no cover
 
     except Exception as e:
         import traceback
-        traceback.print_exc(e)
+        traceback.print_exc()
 
         task_obj.task_status = ImportTask.FAILURE
 
-        task_obj.log("\nError: %s\n" % e)
+        task_obj.log("\nError: %s\n" % six.text_type(e))
         task_obj.log(log.getvalue())
         task_obj.save()
 
