@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+
 try:
     from pypandoc import convert
     read_md = lambda f: convert(f, 'rst')  # noqa

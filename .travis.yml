@@ -14,10 +14,12 @@ install:
  - pip install -q -rrequirements/tests.txt
  - pip install -q django==$DJANGO_VERSION
  - pip install coveralls
+ - pip install coala-bears
 before_script:
  - createdb -E UTF-8 dash -U postgres -O $USER
 script:
  - coverage run manage.py test --settings=test_runner.settings_travis --verbosity=2 --noinput
  - flake8
+ - coala --ci
 after_success:
  - coveralls
