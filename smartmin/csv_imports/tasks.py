@@ -48,4 +48,7 @@ def csv_import(task_id):  # pragma: no cover
 
         raise e
 
+    # give our model the opportunity to do any last finalization outside our transaction
+    model.finalize_import(task_obj, records)
+
     return task_obj
