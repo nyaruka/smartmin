@@ -404,6 +404,9 @@ class PostTest(SmartminTest):
             task = ImportTask.objects.get()
             self.assertEqual(json.loads(task.import_results), dict(records=4, errors=0, error_messages=[]))
 
+            # new posts should all have a new tag
+            self.assertEqual(Post.objects.filter(tags="new").count(), 4)
+
             ImportTask.objects.all().delete()
 
             csv_file = open('test_runner/blog/test_files/posts.xls', 'rb')

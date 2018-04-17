@@ -141,6 +141,14 @@ class SmartModel(models.Model):
         return headers
 
     @classmethod
+    def finalize_import(cls, task, records):
+        """
+        Provides SmartModels a hook to perform any last updates on imported records outside the import
+        database transaction.
+        """
+        return
+
+    @classmethod
     def import_csv(cls, task, log=None):
         csv_file = task.csv_file
         csv_file.open()

@@ -39,6 +39,10 @@ class Post(SmartModel):
         if 'title' not in header:
             raise Exception('missing "title" header')
 
+    @classmethod
+    def finalize_import(cls, task, records):
+        Post.objects.filter(id__in=[p.id for p in records]).update(tags="new")
+
     def __str__(self):
         return self.title
 
