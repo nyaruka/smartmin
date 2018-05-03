@@ -1,3 +1,8 @@
+1.11.9 (2018-05-3)
+===================
+ * Create SmartminTestMixin https://github.com/nyaruka/smartmin/pull/116
+ * add 'create_anonymous_user' method that will ensure that anonymous user exists
+
 1.11.8 (2018-03-15)
 ===================
  * Fix Python 3 exception usage https://github.com/nyaruka/smartmin/pull/114
