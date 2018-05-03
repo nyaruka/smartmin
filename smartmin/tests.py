@@ -11,7 +11,7 @@ from django.utils.encoding import force_str
 from six.moves.urllib.parse import urlparse
 
 
-class SmartminTest(TestCase):
+class SmartminTestMixin(object):
 
     def fetch_protected(self, url, user, post_data=None, failOnFormValidation=True):
         """
@@ -75,6 +75,10 @@ class SmartminTest(TestCase):
                 for k, v in six.iteritems(form.errors):
                     errors.append("%s=%s" % (k, force_str(v)))
                 self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
+
+
+class SmartminTest(SmartminTestMixin, TestCase):
+    pass
 
 
 class _CRUDLTest(SmartminTest):
