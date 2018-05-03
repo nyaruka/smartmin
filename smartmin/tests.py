@@ -76,6 +76,14 @@ class SmartminTestMixin(object):
                     errors.append("%s=%s" % (k, force_str(v)))
                 self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
 
+    def create_anonymous_user(self):
+        User = get_user_model()
+        _anon_exists = User.objects.filter(username=settings.ANONYMOUS_USER_NAME).exists()
+        if not _anon_exists:
+            user = User(username=settings.ANONYMOUS_USER_NAME)
+            user.set_unusable_password()
+            user.save()
+
 
 class SmartminTest(SmartminTestMixin, TestCase):
     pass
