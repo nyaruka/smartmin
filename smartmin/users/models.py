@@ -21,18 +21,19 @@ def is_password_complex(password):
 
 
 class RecoveryToken(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     token = models.CharField(max_length=32, unique=True, default=None, help_text="token to reset password")
     created_on = models.DateTimeField(auto_now_add=True)
 
 
 class FailedLogin(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     failed_on = models.DateTimeField(auto_now_add=True)
 
 
 class PasswordHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.PROTECT,
                              help_text="The user that set a password")
     password = models.CharField(max_length=255,
                                 help_text="The hash of the password that was set")
