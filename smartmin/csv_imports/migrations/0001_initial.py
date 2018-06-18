@@ -25,8 +25,8 @@ class Migration(migrations.Migration):
                 ('import_log', models.TextField()),
                 ('import_results', models.TextField(help_text='JSON blob of result values on task completion', null=True, blank=True)),
                 ('task_id', models.CharField(max_length=64, null=True)),
-                ('created_by', models.ForeignKey(related_name='csv_imports_importtask_creations', to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item')),
-                ('modified_by', models.ForeignKey(related_name='csv_imports_importtask_modifications', to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item')),
+                ('created_by', models.ForeignKey(related_name='csv_imports_importtask_creations', on_delete=models.PROTECT, to=settings.AUTH_USER_MODEL, help_text='The user which originally created this item')),
+                ('modified_by', models.ForeignKey(related_name='csv_imports_importtask_modifications', on_delete=models.PROTECT, to=settings.AUTH_USER_MODEL, help_text='The user which last modified this item')),
             ],
             options={
                 'abstract': False,
