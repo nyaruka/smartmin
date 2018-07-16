@@ -1,3 +1,8 @@
+2.0.0 (2018-07-16)
+==================
+
+* Add support for Django 2.0, drop support for Django 1.9 and Django 1.10
+
 1.11.9 (2018-05-3)
 ===================
  * Create SmartminTestMixin https://github.com/nyaruka/smartmin/pull/116
