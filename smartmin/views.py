@@ -11,7 +11,7 @@ from django.conf.urls import url
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse

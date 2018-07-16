@@ -7,14 +7,14 @@ import re
 from datetime import datetime, timedelta
 from django import template
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import TemplateSyntaxError
 from django.utils import timezone
 
 register = template.Library()
 
 
-@register.assignment_tag
+@register.simple_tag
 def get_hostname():
     if settings.HOSTNAME:
         return settings.HOSTNAME

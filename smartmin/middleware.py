@@ -28,7 +28,7 @@ class AjaxRedirect(MiddlewareMixin):
 
 
 class ProfileMiddleware(MiddlewareMixin):
-    def __init__(self):
+    def __init__(self, get_response=None):
         pass
 
     def process_view(self, request, view, *args, **kwargs):
@@ -69,7 +69,7 @@ class ProfileMiddleware(MiddlewareMixin):
         return None
 
 
-class TimezoneMiddleware(object):
+class TimezoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
         user_tz = getattr(settings, 'USER_TIME_ZONE', None)
 

@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
 from django.test.utils import override_settings
@@ -904,7 +904,7 @@ class UserTest(TestCase):
         # try to log in four times
         for i in range(4):
             response = self.client.post(login_url, post_data)
-            self.assertFalse(response.context['user'].is_authenticated())
+            self.assertFalse(response.context['user'].is_authenticated)
 
         # on the fifth failed login we get redirected
         response = self.client.post(login_url, post_data)
@@ -1050,14 +1050,14 @@ class UserLockoutTestCase(TestCase):
 
         # on the fifth time it should fail
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
-        self.assertFalse(response.context['user'].is_authenticated())
+        self.assertFalse(response.context['user'].is_authenticated)
         content = response.content.decode("utf-8")
         self.assertEqual(content.find(reverse('users.user_forget')), -1)
 
         # even with right password, no dice
         post_data = dict(username='plain', password='plain')
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
-        self.assertFalse(response.context['user'].is_authenticated())
+        self.assertFalse(response.context['user'].is_authenticated)
         content = response.content.decode("utf-8")
         self.assertEqual(content.find(reverse('users.user_forget')), -1)
 
@@ -1079,7 +1079,7 @@ class UserLockoutTestCase(TestCase):
 
             # should now be able to log in
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
-            self.assertTrue(response.context['user'].is_authenticated())
+            self.assertTrue(response.context['user'].is_authenticated)
 
     def testNoRecoveryNoTimeout(self):
         with self.settings(USER_ALLOW_EMAIL_RECOVERY=False, USER_LOCKOUT_TIMEOUT=-1):
@@ -1124,7 +1124,7 @@ class UserLockoutTestCase(TestCase):
 
             post_data = dict(username='plain', password='Password1')
             response = self.client.post(reverse('users.user_login'), post_data, follow=True)
-            self.assertTrue(response.context['user'].is_authenticated())
+            self.assertTrue(response.context['user'].is_authenticated)
 
 
 class PasswordExpirationTestCase(TestCase):
@@ -1146,7 +1146,7 @@ class PasswordExpirationTestCase(TestCase):
         self.client.logout()
         post_data = dict(username='plain', password='Password1 ')
         response = self.client.post(reverse('users.user_login'), post_data, follow=True)
-        self.assertTrue(response.context['user'].is_authenticated())
+        self.assertTrue(response.context['user'].is_authenticated)
 
         # we shouldn't be on a page asking us for a new password
         self.assertFalse('form' in response.context)
