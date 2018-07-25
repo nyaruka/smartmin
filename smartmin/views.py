@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
 
-import django.forms.models as model_forms
+
 import json
 import operator
-import six
+from functools import reduce
 
+import django.forms.models as model_forms
 from django import forms
 from django.conf import settings
 from django.conf.urls import url
@@ -21,9 +21,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView
 from django.views.generic import DetailView, ListView
-from functools import reduce
+
 from smartmin.csv_imports.models import ImportTask
 from smartmin.mixins import NonAtomicMixin
+
 from . import widgets
 
 
@@ -670,7 +671,7 @@ class SmartListView(SmartView, ListView):
 
         if order:
             # if our order is a single string, convert to a simple list
-            if isinstance(order, six.string_types):
+            if isinstance(order, str):
                 order = (order,)
 
             queryset = queryset.order_by(*order)
@@ -750,14 +751,14 @@ class SmartCsvView(SmartListView):
         # build up our header row
         header = []
         for field in fields:
-            header.append(six.text_type(self.lookup_field_label(dict(), field)))
+            header.append(str(self.lookup_field_label(dict(), field)))
         writer.writerow([s.encode("utf-8") for s in header])
 
         # then our actual values
         for obj in self.object_list:
             row = []
             for field in fields:
-                row.append(six.text_type(self.lookup_field_value(dict(), obj, field)))
+                row.append(str(self.lookup_field_value(dict(), obj, field)))
             writer.writerow([s.encode("utf-8") for s in row])
 
         return response
@@ -781,14 +782,14 @@ class SmartXlsView(SmartListView):
         # build up our header row
         for col in range(len(fields)):
             field = fields[col]
-            sheet1.write(0, col, six.text_type(self.lookup_field_label(dict(), field)))
+            sheet1.write(0, col, str(self.lookup_field_label(dict(), field)))
 
         # then our actual values
         for row in range(len(self.object_list)):
             obj = self.object_list[row]
             for col in range(len(fields)):
                 field = fields[col]
-                value = six.text_type(self.lookup_field_value(dict(), obj, field))
+                value = str(self.lookup_field_value(dict(), obj, field))
                 # skip the header
                 sheet1.write(row + 1, col, value)
 
@@ -1095,7 +1096,7 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
                 return response
 
         except IntegrityError as e:
-            message = six.text_type(e).capitalize()
+            message = str(e).capitalize()
             errors = self.form._errors.setdefault(forms.forms.NON_FIELD_ERRORS, forms.utils.ErrorList())
             errors.append(message)
             return self.render_to_response(self.get_context_data(form=form))

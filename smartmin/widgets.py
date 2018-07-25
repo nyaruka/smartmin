@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-import six
 
 from django.forms import widgets
 from django.utils.html import escape
@@ -55,4 +52,4 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         thumb_html += '<input type="file" name="%s" /></td>' % name
         thumb_html += '</tr></table>'
 
-        return mark_safe(six.text_type('<div class="image-picker">%s</div>' % thumb_html))
+        return mark_safe(str('<div class="image-picker">%s</div>' % thumb_html))

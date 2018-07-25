@@ -1,8 +1,7 @@
-from __future__ import unicode_literals
+import os
+from io import StringIO
 
 import ho.pisa as pisa
-import os
-import StringIO
 
 from django.conf import settings
 from django.http import HttpResponse

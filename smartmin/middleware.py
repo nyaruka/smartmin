@@ -1,22 +1,20 @@
-from __future__ import unicode_literals
-
 import os
 import sys
+from io import StringIO
 
 from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
-from six.moves import StringIO
-
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:
-    class MiddlewareMixin(object):
-        pass
 
 
-class AjaxRedirect(MiddlewareMixin):
-    def process_response(self, request, response):
+class AjaxRedirect:
+
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
         if request.is_ajax():
             if type(response) == HttpResponseRedirect:
                 # This is our own AJAX friend redirect to allow
@@ -27,9 +25,13 @@ class AjaxRedirect(MiddlewareMixin):
         return response
 
 
-class ProfileMiddleware(MiddlewareMixin):
+class ProfileMiddleware:
     def __init__(self, get_response=None):
-        pass
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        return response
 
     def process_view(self, request, view, *args, **kwargs):
         import hotshot, hotshot.stats  # noqa
@@ -69,9 +71,17 @@ class ProfileMiddleware(MiddlewareMixin):
         return None
 
 
-class TimezoneMiddleware(MiddlewareMixin):
-    def process_request(self, request):
+class TimezoneMiddleware:
+
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
         user_tz = getattr(settings, 'USER_TIME_ZONE', None)
 
         if user_tz:
             timezone.activate(user_tz)
+
+        return response

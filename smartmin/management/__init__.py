@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-import six
 import sys
 
 from django.apps import apps
@@ -9,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_migrate
+
 from smartmin.perms import assign_perm, remove_perm
 
 permissions_app_name = None
@@ -88,7 +86,7 @@ def check_role_permissions(role, permissions, current_permissions):
 
     # remove any that are extra
     for permission in current_permissions:
-        if isinstance(permission, six.text_type):
+        if isinstance(permission, str):
             key = permission
         else:
             key = "%s.%s" % (permission.content_type.app_label, permission.codename)

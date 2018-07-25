@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from .views import PostCRUDL, CategoryCRUDL, UserCRUDL
 
 urlpatterns = PostCRUDL().as_urlpatterns()

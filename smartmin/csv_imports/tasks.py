@@ -1,17 +1,12 @@
-from __future__ import unicode_literals
+from io import StringIO
 
-import six
 from celery.task import task
+
 from django.db import transaction
 from django.utils import timezone
 from django.utils.module_loading import import_string
-from .models import ImportTask
 
-# python2 and python3 support
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from .models import ImportTask
 
 
 @task(track_started=True)
@@ -42,7 +37,7 @@ def csv_import(task_id):  # pragma: no cover
 
         task_obj.task_status = ImportTask.FAILURE
 
-        task_obj.log("\nError: %s\n" % six.text_type(e))
+        task_obj.log("\nError: %s\n" % str(e))
         task_obj.log(log.getvalue())
         task_obj.save()
 

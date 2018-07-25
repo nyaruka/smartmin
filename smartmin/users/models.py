@@ -1,8 +1,6 @@
-from __future__ import unicode_literals
-
 import re
-
 from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.db import models

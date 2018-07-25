@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
-
 from django.utils.module_loading import import_string
+
 from smartmin.csv_imports.models import ImportTask
 from smartmin.views import SmartCRUDL, SmartListView, SmartReadView
 

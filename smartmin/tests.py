@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
 
-import six
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -8,7 +7,6 @@ from django.contrib.auth.models import Group
 from django.urls import reverse
 from django.test.testcases import TestCase
 from django.utils.encoding import force_str
-from six.moves.urllib.parse import urlparse
 
 
 class SmartminTestMixin(object):
@@ -72,7 +70,7 @@ class SmartminTestMixin(object):
 
             if not form.is_valid():
                 errors = []
-                for k, v in six.iteritems(form.errors):
+                for k, v in form.errors.items():
                     errors.append("%s=%s" % (k, force_str(v)))
                 self.fail("Create failed with form errors: %s, Posted: %s" % (",".join(errors), post_data))
 

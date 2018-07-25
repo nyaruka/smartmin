@@ -3,7 +3,6 @@ django>=1.11,<2.1
 django_compressor
 pytz
 redis
-six
 sqlparse
 xlrd
 xlwt

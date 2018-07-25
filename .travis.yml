@@ -2,7 +2,6 @@ language: python
 sudo: false
 
 python:
- - 2.7
  - 3.4
  - 3.5
  - 3.6
@@ -10,11 +9,6 @@ python:
 env:
  - DJANGO_VERSION=1.11.14
  - DJANGO_VERSION=2.0.7
-
-matrix:
-  exclude:
-    - python: 2.7
-      env: DJANGO_VERSION=2.0.7
 
 install:
  - pip install -q -r requirements/base.txt

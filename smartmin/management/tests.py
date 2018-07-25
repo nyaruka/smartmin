@@ -1,9 +1,9 @@
-from __future__ import unicode_literals
+from unittest.mock import patch, call
 
 from django.core.management import call_command
 from django.db.migrations import RunSQL, RunPython
 from django.test import TestCase
-from mock import patch, call
+
 from .commands.collect_sql import SqlType, SqlObjectOperation
 
 
