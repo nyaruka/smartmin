@@ -1,5 +1,5 @@
 celery
-django>=1.9,<2.0
+django>=1.11,<2.1
 django_compressor
 pytz
 redis

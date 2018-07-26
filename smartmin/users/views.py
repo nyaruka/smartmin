@@ -12,7 +12,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import login as django_login
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.template import loader
 from django.utils import timezone
@@ -338,7 +338,7 @@ class UserCRUDL(SmartCRUDL):
             return context_data
 
         def has_permission(self, request, *args, **kwargs):
-            return request.user.is_authenticated()
+            return request.user.is_authenticated
 
         def get_object(self, queryset=None):
             return self.request.user
@@ -469,4 +469,4 @@ def login(request, template_name='smartmin/users/login.html',
     return django_login(request, template_name='smartmin/users/login.html',
                         redirect_field_name=REDIRECT_FIELD_NAME,
                         authentication_form=AuthenticationForm,
-                        current_app=None, extra_context=dict(allow_email_recovery=allow_email_recovery))
+                        extra_context=dict(allow_email_recovery=allow_email_recovery))
