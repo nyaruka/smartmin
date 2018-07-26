@@ -1,28 +1,24 @@
-from __future__ import unicode_literals
-
 import django.views.static
-
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+
 from .models import PasswordHistory
 
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:
-    class MiddlewareMixin(object):
-        pass
 
-
-class ChangePasswordMiddleware(MiddlewareMixin):
+class ChangePasswordMiddleware:
     """
     Redirects all users to the password change form if we find that a user's
     password is expired.
     """
     def __init__(self, get_response=None):
-        super(ChangePasswordMiddleware, self).__init__(get_response)
+        self.get_response = get_response
 
         self.password_expire = getattr(settings, 'USER_PASSWORD_EXPIRATION', -1)
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        return response
 
     def process_view(self, request, view, *args, **kwargs):
         newpassword_path = reverse('users.user_newpassword', args=[0])

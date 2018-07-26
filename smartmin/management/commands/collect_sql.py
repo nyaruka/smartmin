@@ -1,18 +1,16 @@
-from __future__ import print_function, unicode_literals
-
-import six
-import sqlparse
 
 from collections import OrderedDict
 from datetime import datetime
-from django.core.management.base import BaseCommand
-from django.db.migrations import RunSQL
-from django.db.migrations.executor import MigrationExecutor
 from enum import Enum
-from six.moves import filter
+
+import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as sql_tokens
 from textwrap import dedent
+
+from django.core.management.base import BaseCommand
+from django.db.migrations import RunSQL
+from django.db.migrations.executor import MigrationExecutor
 
 
 class InvalidSQLException(Exception):
@@ -29,7 +27,6 @@ class SqlType(Enum):
     TRIGGER = 3
 
 
-@six.python_2_unicode_compatible
 class SqlObjectOperation(object):
     def __init__(self, statement, sql_type, obj_name, is_create):
         self.statement = statement

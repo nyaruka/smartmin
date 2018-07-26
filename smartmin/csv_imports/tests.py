@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
-
 from django.test import TestCase
+
 from .models import ImportTask, generate_file_path
 
 

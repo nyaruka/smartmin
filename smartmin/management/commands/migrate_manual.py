@@ -1,13 +1,11 @@
-from __future__ import unicode_literals
-
 import time
+from importlib import import_module
 
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management.sql import emit_pre_migrate_signal, emit_post_migrate_signal
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.loader import AmbiguityError
-from importlib import import_module
 
 APPLY_FUNCTION = 'apply_manual'
 

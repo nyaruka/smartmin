@@ -1,14 +1,11 @@
-from __future__ import unicode_literals
-
-import six
 import uuid
 
 from django.db import models
 from django.utils.timezone import now
+
 from smartmin.models import SmartModel, ActiveManager
 
 
-@six.python_2_unicode_compatible
 class Post(SmartModel):
     title = models.CharField(max_length=128,
                              help_text="The title of this blog post, keep it relevant")

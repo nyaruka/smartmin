@@ -1,10 +1,9 @@
-from __future__ import unicode_literals
-
 import os
 
 from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
+
 from smartmin.models import SmartModel
 
 

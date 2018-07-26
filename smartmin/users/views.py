@@ -1,9 +1,7 @@
-from __future__ import unicode_literals
-
 import random
 import string
-
 from datetime import timedelta
+
 from django import forms
 from django.conf import settings
 from django.contrib import messages, auth
@@ -18,6 +16,7 @@ from django.template import loader
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
+
 from smartmin.email import build_email_context
 from smartmin.views import SmartCRUDL, SmartView, SmartFormView, SmartListView, SmartCreateView, SmartUpdateView
 from .models import RecoveryToken, PasswordHistory, FailedLogin, is_password_complex

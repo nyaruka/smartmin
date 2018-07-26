@@ -1,10 +1,9 @@
-from __future__ import unicode_literals
 
 import json
 import pytz
 import re
-
 from datetime import datetime, timedelta
+
 from django import template
 from django.conf import settings
 from django.urls import reverse

@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import csv
 import datetime
 import traceback
@@ -10,6 +8,7 @@ import six
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+
 from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
 
 

@@ -1,8 +1,6 @@
-from __future__ import unicode_literals
-
 import json
 import pytz
-import smartmin
+from unittest.mock import patch
 
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -14,7 +12,8 @@ from django.test import TestCase
 from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils import timezone
-from mock import patch
+
+import smartmin
 from smartmin.csv_imports.models import ImportTask
 from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
@@ -23,6 +22,7 @@ from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory, is_password_complex
 from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
+
 from test_runner.blog.models import Post, Category
 from .views import PostCRUDL
 

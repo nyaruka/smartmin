@@ -1,7 +1,8 @@
-2.0.0 (2018-07-16)
+2.0.0 (2018-07-25)
 ==================
 
 * Add support for Django 2.0, drop support for Django 1.9 and Django 1.10
+* Drop support for Python2
 
 1.11.9 (2018-05-3)
 ===================
