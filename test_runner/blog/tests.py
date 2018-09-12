@@ -126,6 +126,24 @@ class PostTest(SmartminTest):
         self.assertHasAccess(self.author, read_url)
         self.assertHasAccess(self.superuser, read_url)
 
+    def test_refresh_page(self):
+        self.client.login(username='author', password='author')
+
+        refresh_url = reverse('blog.post_refresh', args=[self.post.id])
+
+        response = self.client.get(refresh_url)
+
+        self.assertContains(response, 'function scheduleRefresh')
+
+    def test_norefresh_page(self):
+        self.client.login(username='author', password='author')
+
+        no_refresh_url = reverse('blog.post_no_refresh', args=[self.post.id])
+
+        response = self.client.get(no_refresh_url)
+
+        self.assertNotContains(response, 'function scheduleRefresh')
+
     def test_create_and_update(self):
         self.client.login(username='author', password='author')
 
