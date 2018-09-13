@@ -41,8 +41,10 @@ class CategoryCRUDL(SmartCRUDL):
 
 class PostCRUDL(SmartCRUDL):
     model = Post
-    actions = ('create', 'read', 'update', 'delete', 'list', 'author',
-               'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import', 'by_uuid')
+    actions = (
+        'create', 'read', 'update', 'delete', 'list', 'author', 'exclude', 'exclude2', 'readonly', 'readonly2',
+        'messages', 'csv_import', 'by_uuid', 'refresh', 'no_refresh'
+    )
 
     class Read(SmartReadView):
         permission = None
@@ -95,3 +97,15 @@ class PostCRUDL(SmartCRUDL):
 
     class ByUuid(SmartReadView):
         slug_url_kwarg = 'uuid'
+
+    class Refresh(SmartReadView):
+        permission = None
+
+        def derive_refresh(self):
+            return 123
+
+    class NoRefresh(SmartReadView):
+        permission = None
+
+        def derive_refresh(self):
+            return 0

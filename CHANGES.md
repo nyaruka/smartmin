@@ -1,3 +1,8 @@
+2.0.1 (2018-09-12)
+==================
+
+* stop embedding refresh code on pages that don't have View.refresh set
+
 2.0.0 (2018-07-25)
 ==================
 
