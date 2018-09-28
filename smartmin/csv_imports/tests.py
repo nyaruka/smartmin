@@ -13,8 +13,11 @@ class ImportTest(TestCase):
         self.assertEquals(generate_file_path(ImportTask(), 'allo.foo.bar'), 'csv_imports/allo.foo.bar')
 
         long_name = 'foo' * 100
-        self.assertEquals(generate_file_path(ImportTask(), '%s.xls.csv' % long_name),
-                          'csv_imports/%s.csv' % long_name[:96])
 
-        self.assertEquals(generate_file_path(ImportTask(), '%s.abc.xlsx' % long_name),
-                          'csv_imports/%s.xlsx' % long_name[:95])
+        test_file_name = '%s.xls.csv' % long_name
+        self.assertEquals(len(generate_file_path(ImportTask(), test_file_name)), 100)
+        self.assertEquals(generate_file_path(ImportTask(), test_file_name), 'csv_imports/%s.csv' % long_name[:84])
+
+        test_file_name = '%s.abc.xlsx' % long_name
+        self.assertEquals(len(generate_file_path(ImportTask(), test_file_name)), 100)
+        self.assertEquals(generate_file_path(ImportTask(), test_file_name), 'csv_imports/%s.xlsx' % long_name[:83])
