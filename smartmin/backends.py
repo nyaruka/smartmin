@@ -7,7 +7,7 @@ class CaseInsensitiveBackend(ModelBackend):
     Authenticates against settings.AUTH_USER_MODEL.
     """
 
-    def authenticate(self, username=None, password=None, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         User = get_user_model()
         try:
             user = User.objects.get(username__iexact=username)

@@ -5,10 +5,9 @@ from datetime import timedelta
 from django import forms
 from django.conf import settings
 from django.contrib import messages, auth
-from django.contrib.auth import get_user_model, REDIRECT_FIELD_NAME
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.contrib.auth.views import login as django_login
+from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -358,7 +357,8 @@ class UserCRUDL(SmartCRUDL):
 
         def pre_process(self, request, *args, **kwargs):
             user = self.get_object()
-            login(request)
+
+            Login.as_view()(request)
 
             # After logging in it is important to change the user stored in the session
             # otherwise the user will remain the same
@@ -425,47 +425,52 @@ class UserCRUDL(SmartCRUDL):
             return context
 
 
-def login(request, template_name='smartmin/users/login.html',
-          redirect_field_name=REDIRECT_FIELD_NAME,
-          authentication_form=AuthenticationForm,
-          current_app=None, extra_context=None):
+class Login(LoginView):
+    template_name = 'smartmin/users/login.html'
 
-    lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
-    failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
-    allow_email_recovery = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-    if request.method == "POST":
-        if 'username' in request.POST and 'password' in request.POST:
-            # we are using AuthenticationForm in which username is CharField with strip=True that automatically strips
-            # whitespace characters, we need to copy that behaviour
-            username = request.POST['username'].strip()
+        context['allow_email_recovery'] = getattr(settings, 'USER_ALLOW_EMAIL_RECOVERY', True)
 
-            user = get_user_model().objects.filter(username__iexact=username).first()
+        return context
 
-            # this could be a valid login by a user
-            if user:
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
 
-                # incorrect password?  create a failed login token
-                valid_password = user.check_password(request.POST['password'])
-                if not valid_password:
-                    FailedLogin.objects.create(user=user)
+        # clean form data
+        form_is_valid = form.is_valid()
 
-                bad_interval = timezone.now() - timedelta(minutes=lockout_timeout)
-                failures = FailedLogin.objects.filter(user=user)
+        lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
+        failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
 
-                # if the failures reset after a period of time, then limit our query to that interval
-                if lockout_timeout > 0:
-                    failures = failures.filter(failed_on__gt=bad_interval)
+        user = get_user_model().objects.filter(username__iexact=form.cleaned_data.get('username')).first()
 
-                # if there are too many failed logins, take them to the failed page
-                if len(failures) >= failed_login_limit:
-                    return HttpResponseRedirect(reverse('users.user_failed'))
+        # this could be a valid login by a user
+        if user:
 
-                # delete failed logins if the password is valid
-                elif valid_password:
-                    FailedLogin.objects.filter(user=user).delete()
+            # incorrect password?  create a failed login token
+            valid_password = user.check_password(form.cleaned_data.get('password'))
+            if not valid_password:
+                FailedLogin.objects.create(user=user)
 
-    return django_login(request, template_name='smartmin/users/login.html',
-                        redirect_field_name=REDIRECT_FIELD_NAME,
-                        authentication_form=AuthenticationForm,
-                        extra_context=dict(allow_email_recovery=allow_email_recovery))
+            bad_interval = timezone.now() - timedelta(minutes=lockout_timeout)
+            failures = FailedLogin.objects.filter(user=user)
+
+            # if the failures reset after a period of time, then limit our query to that interval
+            if lockout_timeout > 0:
+                failures = failures.filter(failed_on__gt=bad_interval)
+
+            # if there are too many failed logins, take them to the failed page
+            if len(failures) >= failed_login_limit:
+                return HttpResponseRedirect(reverse('users.user_failed'))
+
+            # delete failed logins if the password is valid
+            elif valid_password:
+                FailedLogin.objects.filter(user=user).delete()
+
+        # pass through the normal login process
+        if form_is_valid:
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
