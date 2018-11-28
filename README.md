@@ -22,7 +22,7 @@ Smartmin tries to stay in lock step with the latest Django versions. With each n
 will be released and we will save the major changes (possibly breaking backwards compatibility) on these versions.  This 
 includes updating to the latest version of Twitter Bootstrap.
 
-The latest version is the 2.0.* series which works against Django 1.11 and 2.0.
+The latest version is the 2.1.* series which works against Django 1.11, 2.0 and 2.1.
 
 About
 =====
