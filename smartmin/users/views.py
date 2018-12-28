@@ -315,6 +315,7 @@ class UserCRUDL(SmartCRUDL):
                 FailedLogin.objects.filter(user=user).delete()
                 context['user'] = user
                 context['path'] = "%s" % reverse('users.user_recover', args=[token])
+                context['address'] = self.request.META.get('HTTP_HOST')
 
             send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
                       [email], fail_silently=False)
