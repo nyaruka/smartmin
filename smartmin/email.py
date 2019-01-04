@@ -4,7 +4,7 @@ from django.utils.module_loading import import_string
 
 def link_components(request, user=None):
     protocol = 'https' if request.is_secure() else 'http'
-    hostname = getattr(settings, 'HOSTNAME', request.get_host())
+    hostname = request.get_host()
 
     return {"protocol": protocol, "hostname": hostname}
 
