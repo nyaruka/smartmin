@@ -1,3 +1,8 @@
+2.1.1 (2019-01-07)
+==================
+* Fix domain names in forgot password emails
+* Test against PostgreSQL 10
+
 2.1.0 (2018-11-27)
 ==================
 * Add support for Django 2.1
@@ -5,12 +10,12 @@
 2.0.2 (2018-10-01)
 ==================
 
-* fix csv import file_path truncation
+* Fix CSV import file_path truncation
 
 2.0.1 (2018-09-12)
 ==================
 
-* stop embedding refresh code on pages that don't have View.refresh set
+* Stop embedding refresh code on pages that don't have View.refresh set
 
 2.0.0 (2018-07-25)
 ==================
