@@ -18,6 +18,8 @@ class Post(SmartModel):
 
     written_on = models.DateField(default=now, null=True, blank=True)
 
+    image = models.ImageField(upload_to="images", null=True, blank=True, help_text="The logo that should be used for this post")
+
     objects = models.Manager()
     active = ActiveManager()
 

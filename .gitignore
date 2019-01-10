@@ -17,3 +17,5 @@ celerybeat-schedule
 .tox/
 csv_imports/
 !smartmin/csv_imports/
+
+.vscode/
