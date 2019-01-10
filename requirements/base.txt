@@ -7,4 +7,3 @@ redis
 sqlparse
 xlrd
 xlwt
-six
