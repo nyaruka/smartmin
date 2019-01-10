@@ -1,7 +1,6 @@
 celery
 django>=1.11,<2.2
 django_compressor
-pillow
 pytz
 redis
 sqlparse
