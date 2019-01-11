@@ -3,7 +3,6 @@ import datetime
 import traceback
 import json
 import pytz
-import six
 
 from django.conf import settings
 from django.db import models
@@ -81,7 +80,7 @@ class SmartModel(models.Model):
                 # read our header
                 header = []
                 for col in range(sheet.ncols):
-                    header.append(six.text_type(sheet.cell(0, col).value))
+                    header.append(str(sheet.cell(0, col).value))
                 headers = [cls.normalize_value(_).lower() for _ in header]
 
                 # only care for the first sheet
@@ -113,9 +112,9 @@ class SmartModel(models.Model):
                     encoded = []
                     for cell in row:
                         try:
-                            cell = six.text_type(cell)
+                            cell = str(cell)
                         except Exception:
-                            cell = six.text_type(cell.decode(ascii_codec))
+                            cell = str(cell.decode(ascii_codec))
 
                         encoded.append(cell)
 
@@ -126,10 +125,10 @@ class SmartModel(models.Model):
             # read in our header
             line_number = 0
 
-            header = six.next(reader)
+            header = next(reader)
             line_number += 1
             while header is not None and len(header[0]) > 1 and header[0][0] == "#":
-                header = six.next(reader)
+                header = next(reader)
                 line_number += 1
 
             # do some sanity checking to make sure they uploaded the right kind of file
@@ -229,7 +228,7 @@ class SmartModel(models.Model):
             # read our header
             header = []
             for col in range(sheet.ncols):
-                header.append(six.text_type(sheet.cell(0, col).value))
+                header.append(str(sheet.cell(0, col).value))
             header = [cls.normalize_value(_).lower() for _ in header]
 
             cls.validate_import_header(header)
@@ -256,12 +255,12 @@ class SmartModel(models.Model):
                         num_errors += 1
 
                 except SmartImportRowError as e:
-                    error_messages.append(dict(line=line_number+1, error=six.text_type(e)))
+                    error_messages.append(dict(line=line_number+1, error=str(e)))
 
                 except Exception as e:
                     if log:
                         traceback.print_exc(100, log)
-                    raise Exception("Line %d: %s\n\n%s" % (line_number, six.text_type(e), field_values))
+                    raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
                 line_number += 1
             # only care about the first sheet
             break
@@ -279,7 +278,7 @@ class SmartModel(models.Model):
             date = xldate_as_tuple(cell.value, workbook.datemode)
             return datetime.datetime(*date, tzinfo=tz)
         else:
-            return cls.normalize_value(six.text_type(cell.value))
+            return cls.normalize_value(str(cell.value))
 
     @classmethod
     def import_raw_csv(cls, filename, user, import_params, log=None, import_results=None):
@@ -309,9 +308,9 @@ class SmartModel(models.Model):
                 encoded = []
                 for cell in row:
                     try:
-                        cell = six.text_type(cell)
+                        cell = str(cell)
                     except Exception:
-                        cell = six.text_type(cell.decode(ascii_codec))
+                        cell = str(cell.decode(ascii_codec))
 
                     encoded.append(cell)
 
@@ -322,10 +321,10 @@ class SmartModel(models.Model):
         # read in our header
         line_number = 0
 
-        header = six.next(reader)
+        header = next(reader)
         line_number += 1
         while header is not None and len(header[0]) > 1 and header[0][0] == "#":
-            header = six.next(reader)
+            header = next(reader)
             line_number += 1
 
         # do some sanity checking to make sure they uploaded the right kind of file
@@ -364,12 +363,12 @@ class SmartModel(models.Model):
                     num_errors += 1
 
             except SmartImportRowError as e:
-                error_messages.append(dict(line=line_number, error=six.text_type(e)))
+                error_messages.append(dict(line=line_number, error=str(e)))
 
             except Exception as e:
                 if log:
                     traceback.print_exc(100, log)
-                raise Exception("Line %d: %s\n\n%s" % (line_number, six.text_type(e), field_values))
+                raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
 
         if import_results is not None:
             import_results['records'] = len(records)

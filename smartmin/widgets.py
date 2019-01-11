@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 
 class VisibleHiddenWidget(widgets.Widget):
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         """
         Returns this Widget rendered as HTML, as a Unicode string.
 
@@ -43,7 +43,7 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         self.height = thumb_height
         super(ImageThumbnailWidget, self).__init__({})
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         thumb_html = '<table><tr>'
         if value and hasattr(value, "url"):
             thumb_html += '<td><img src="%s" width="%s" width="%s" /></td>' % (value.url, self.width, self.height)
