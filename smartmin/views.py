@@ -722,7 +722,9 @@ class SmartListView(SmartView, ListView):
 
                 results.append(result)
 
-            json_data = dict(results=results, err='nil', more=context['page_obj'].has_next())
+            has_more = context['page_obj'].has_next() if context['page_obj'] else False
+
+            json_data = dict(results=results, err='nil', more=has_more)
             return JsonResponse(json_data)
         # otherwise, return normally
         else:

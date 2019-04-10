@@ -182,7 +182,9 @@ PERMISSIONS = {
           'update',  # can update an object
           'delete',  # can delete an object,
           'list'),   # can view a list of the objects
-    'blog.post': ('author', 'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import'),
+    'blog.post': (
+        'author', 'exclude', 'exclude2', 'readonly', 'readonly2', 'messages', 'csv_import', 'list_no_pagination'
+    ),
     'auth.user': ('profile',),
 
     # invalid content type for test
