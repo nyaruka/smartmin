@@ -266,6 +266,69 @@ class PostTest(SmartminTest):
         self.assertEqual(response.context['url_params'], '?=x&foo=bar&')
         self.assertEqual(response.context['order_params'], '_order=-title&')
 
+    def test_list_no_pagination(self):
+        post1 = Post.objects.create(title="A First Post", body="Apples", order=3, tags="post",
+                                    created_by=self.author, modified_by=self.author)
+        post2 = Post.objects.create(title="A Second Post", body="Oranges", order=5, tags="post",
+                                    created_by=self.superuser, modified_by=self.superuser)
+        post3 = Post.objects.create(title="A Third Post", body="Apples", order=1, tags="post",
+                                    created_by=self.author, modified_by=self.author)
+        post4 = Post.objects.create(title="A Fourth Post", body="Oranges", order=3, tags="post",
+                                    created_by=self.superuser, modified_by=self.superuser)
+
+        self.client.login(username='author', password='author')
+
+        # default ordering is by title
+        response = self.client.get(reverse('blog.post_list_no_pagination'))
+        self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
+
+        # try ordering by title reversed
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?_order=-title")
+        self.assertEqual(list(response.context['post_list']), [self.post, post3, post2, post4, post1])
+
+        # try searching (which is case-insensitive)
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?search=apples")
+        self.assertEqual(list(response.context['post_list']), [post1, post3])
+
+        # multiple terms are AND'ed
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?search=apples+first")
+        self.assertEqual(list(response.context['post_list']), [post1])
+
+        # matches on different fields are OR'd
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?search=post")
+        self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
+
+        # empty search string should be ignored
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?search=")
+        self.assertEqual(list(response.context['post_list']), [post1, post4, post2, post3, self.post])
+
+        # change the format to json
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?_format=json")
+        self.assertEqual(json.loads(response.content.decode("utf-8")), [
+            {'tags': 'post', 'title': 'A First Post', 'body': 'Apples'},
+            {'tags': 'post', 'title': 'A Fourth Post', 'body': 'Oranges'},
+            {'tags': 'post', 'title': 'A Second Post', 'body': 'Oranges'},
+            {'tags': 'post', 'title': 'A Third Post', 'body': 'Apples'},
+            {'tags': 'testing_tag', 'title': 'Test Post', 'body': 'This is the body of my first test post'}
+         ])
+
+        # change the format to select2
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?_format=select2")
+        self.assertEqual(json.loads(response.content.decode("utf-8")), {
+            'results': [
+                {'id': post1.id, 'text': 'A First Post'},
+                {'id': post4.id, 'text': 'A Fourth Post'},
+                {'id': post2.id, 'text': 'A Second Post'},
+                {'id': post3.id, 'text': 'A Third Post'},
+                {'id': self.post.id, 'text': 'Test Post'}
+            ], 'err': 'nil', 'more': False})
+
+        # check parsing of query string params used for paging URLs
+        response = self.client.get(reverse('blog.post_list_no_pagination') + "?=x&foo=bar&_order=-title&page=1")
+        self.assertEqual(list(response.context['post_list']), [self.post, post3, post2, post4, post1])
+        self.assertEqual(response.context['url_params'], '?=x&foo=bar&')
+        self.assertEqual(response.context['order_params'], '_order=-title&')
+
     def test_success_url(self):
         self.client.login(username='author', password='author')
 
@@ -334,13 +397,13 @@ class PostTest(SmartminTest):
         permissions = ('blog.post.*', 'blog.post.too.many.dots', 'blog.category.not_valid_either', 'blog.',
                        'blog.foo.*')
 
-        self.assertEquals(17, authors.permissions.all().count())
+        self.assertEquals(18, authors.permissions.all().count())
 
         # check that they are reassigned
         check_role_permissions(authors, permissions, authors.permissions.all())
 
         # removing all category actions should bring us to 10
-        self.assertEquals(12, authors.permissions.all().count())
+        self.assertEquals(13, authors.permissions.all().count())
 
     def test_smart_model(self):
         d1 = datetime(2016, 12, 31, 9, 20, 30, 123456, tzinfo=pytz.timezone("Africa/Kigali"))
