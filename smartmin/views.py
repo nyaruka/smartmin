@@ -325,7 +325,7 @@ class SmartView(object):
         for key in self.request.GET.keys():
             if key != 'page' and key != 'pjax' and (len(key) == 0 or key[0] != '_'):
                 for value in self.request.GET.getlist(key):
-                    url_params += "%s=%s&" % (key, urlquote(value))
+                    url_params += "%s=%s&" % (urlquote(key), urlquote(value))
             elif key == '_order':
                 order_params = "&".join(["%s=%s" % (key, _) for _ in self.request.GET.getlist(key)])
 
