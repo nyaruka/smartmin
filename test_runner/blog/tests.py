@@ -266,6 +266,10 @@ class PostTest(SmartminTest):
         self.assertEqual(response.context['url_params'], '?=x&foo=bar&')
         self.assertEqual(response.context['order_params'], '_order=-title&')
 
+        # check escaping of keys and values in params
+        response = self.client.get(reverse('blog.post_list') + "?\"<alert>=<alert>")
+        self.assertEqual(response.context['url_params'], '?%22%3Calert%3E=%3Calert%3E&')
+
     def test_list_no_pagination(self):
         post1 = Post.objects.create(title="A First Post", body="Apples", order=3, tags="post",
                                     created_by=self.author, modified_by=self.author)
