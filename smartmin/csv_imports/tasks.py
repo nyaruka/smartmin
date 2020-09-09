@@ -2,7 +2,6 @@ from io import StringIO
 
 from celery.task import task
 
-from django.db import transaction
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
