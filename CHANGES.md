@@ -1,3 +1,11 @@
+2.2.4 (2020-09-10)
+==================
+* Fix collect_sql not catching indexes using UNIQUE
+
+2.2.3 (2020-09-09)
+==================
+* Don't use a transaction for CSV import tasks
+
 2.1.1 (2019-01-07)
 ==================
 * Fix domain names in forgot password emails
