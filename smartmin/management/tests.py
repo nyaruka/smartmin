@@ -24,7 +24,7 @@ class CollectSqlTest(TestCase):
         mock_load_migrations.return_value = [
             MockMigration(operations=[
                 RunSQL("""
-CREATE INDEX test_1 ON foo(bar); 
+CREATE INDEX test_1 ON foo(bar);
 CREATE INDEX test_2 ON foo(bar); create unique index test_3 on foo(bar);
 """),
                 RunPython(mock_run_python)
