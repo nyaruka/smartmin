@@ -23,7 +23,10 @@ class CollectSqlTest(TestCase):
     def test_command(self, mock_write_dump, mock_load_migrations):
         mock_load_migrations.return_value = [
             MockMigration(operations=[
-                RunSQL("CREATE INDEX test_1 ON foo(bar); CREATE INDEX test_2 ON foo(bar);"),
+                RunSQL("""
+CREATE INDEX test_1 ON foo(bar);
+CREATE INDEX test_2 ON foo(bar); create unique index test_3 on foo(bar);
+"""),
                 RunPython(mock_run_python)
             ]),
             MockMigration(operations=[
@@ -42,6 +45,7 @@ class CollectSqlTest(TestCase):
             call('indexes', [
                 SqlObjectOperation("CREATE INDEX a_test ON foo(bar);", SqlType.INDEX, "a_test", True),
                 SqlObjectOperation("CREATE INDEX test_1 ON foo(bar);", SqlType.INDEX, "test_1", True),
+                SqlObjectOperation("create unique index test_3 on foo(bar);", SqlType.INDEX, "test_3", True),
             ], 'sql'),
             call('triggers', [
                 SqlObjectOperation("CREATE TRIGGER test_1 AFTER TRUNCATE ON flows_flowstep EXECUTE PROCEDURE foo();",

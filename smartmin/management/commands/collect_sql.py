@@ -53,7 +53,11 @@ class SqlObjectOperation(object):
             return None
 
         try:
-            sql_type = SqlType[tokens[1].value.upper()]
+            type_token = tokens[1].value.upper()
+            if type_token == "UNIQUE":
+                type_token = tokens[2].value.upper()
+
+            sql_type = SqlType[type_token]
         except KeyError:
             return None
 
@@ -76,8 +80,8 @@ class SqlObjectOperation(object):
         return self.statement == other.statement and self.sql_type == other.sql_type \
                and self.obj_name == other.obj_name and self.is_create == other.is_create
 
-    def __str__(self):
-        return self.statement[:100].replace('\n', ' ')
+    def __repr__(self):
+        return "SqlObjectOperation[statement=%s obj=%s]" % (repr(self.statement), self.obj_name)
 
 
 class Command(BaseCommand):
