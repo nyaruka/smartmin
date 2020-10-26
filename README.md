@@ -1,8 +1,8 @@
 Django Smartmin
 ===============
 
-[![Build Status](https://travis-ci.org/nyaruka/smartmin.svg?branch=master)](https://travis-ci.org/nyaruka/smartmin)
-[![Coverage Status](https://coveralls.io/repos/github/nyaruka/smartmin/badge.svg?branch=master)](https://coveralls.io/github/nyaruka/smartmin?branch=master)
+[![Build Status](https://github.com/nyaruka/smartmin/workflows/CI/badge.svg)](https://github.com/nyaruka/smartmin/actions?query=workflow%3ACI) 
+[![codecov](https://codecov.io/gh/nyaruka/smartmin/branch/master/graph/badge.svg)](https://codecov.io/gh/nyaruka/smartmin)
 [![PyPI Release](https://img.shields.io/pypi/v/smartmin.svg)](https://pypi.python.org/pypi/smartmin/)
 
 Smartmin was born out of the frustration of the Django admin site not being well suited to being exposed to clients. 
