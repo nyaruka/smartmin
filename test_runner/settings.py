@@ -10,12 +10,15 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'smartmin.db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'smartmin',
+        'USER': 'smartmin',
+        'PASSWORD': 'nyaruka',
+        "HOST": "localhost",
+        "PORT": "5432",
+        "ATOMIC_REQUESTS": True,
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {},
     }
 }
 
