@@ -15,7 +15,7 @@ from django.db.migrations.executor import MigrationExecutor
 
 class InvalidSQLException(Exception):
     def __init__(self, s):
-        super(InvalidSQLException, self).__init__("Invalid SQL: %s" % s)
+        super(InvalidSQLException, self).__init__(f"Invalid SQL: {s}")
 
 
 class SqlType(Enum):
@@ -27,7 +27,7 @@ class SqlType(Enum):
     TRIGGER = 3
 
 
-class SqlObjectOperation(object):
+class SqlObjectOperation:
     def __init__(self, statement, sql_type, obj_name, is_create):
         self.statement = statement
         self.sql_type = sql_type
@@ -77,19 +77,19 @@ class SqlObjectOperation(object):
         return cls(raw.value.strip(), sql_type, name, is_create)
 
     @staticmethod
-    def _function_name(func: sql.Function):
+    def _function_name(func: sql.Function) -> str:
         # possible bug in sqlparse library but Function.get_parameters only returns first identifier
         parenthesis = func.tokens[-1]
         types = [str(t) for t in parenthesis.tokens if t.ttype == tokens.Name.Builtin]
 
-        return "%s(%s)" % (func.get_name(), ",".join(types))
+        return f"{func.get_name()}({','.join(types)})"
 
     def __eq__(self, other):
         return self.statement == other.statement and self.sql_type == other.sql_type \
                and self.obj_name == other.obj_name and self.is_create == other.is_create
 
     def __repr__(self):
-        return "SqlObjectOperation[statement=%s name='%s']" % (repr(self.statement), self.obj_name)
+        return f"SqlObjectOperation[statement={repr(self.statement)} name='{self.obj_name}']"
 
 
 class Command(BaseCommand):
