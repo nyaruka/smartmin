@@ -89,7 +89,7 @@ class SqlObjectOperation:
                and self.obj_name == other.obj_name and self.is_create == other.is_create
 
     def __repr__(self):
-        return f"SqlObjectOperation[statement={repr(self.statement)} name='{self.obj_name}']"
+        return f"SqlObjectOperation[type={self.sql_type} name='{self.obj_name}' is_create={self.is_create}]"
 
 
 class Command(BaseCommand):

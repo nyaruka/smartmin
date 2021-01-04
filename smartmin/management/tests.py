@@ -45,6 +45,9 @@ CREATE INDEX test_2 ON foo(bar); create unique index test_3 on foo(bar);
 
                 # same function because it has same name and parameters
                 RunSQL("CREATE OR REPLACE FUNCTION A_FUNC(N integer, V text) RETURNS text AS $$ BEGIN RETURN UPPER(V); END; $$ LANGUAGE plpgsql;"),
+
+                RunSQL("CREATE OR REPLACE FUNCTION func2(i INTEGER) RETURNS integer AS $$ BEGIN RETURN i + 1; END; $$ LANGUAGE plpgsql;"),
+                RunSQL("DROP FUNCTION func2(i INTEGER);"),
             ])
         ]
 
