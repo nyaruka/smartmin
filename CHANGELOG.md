@@ -1,3 +1,8 @@
+v2.3.1
+----------
+ * Convert to poetry
+ * Tweak collec_sql verbose logging and add test for dropping functions
+
 2.3 (2020-10-27)
 ================
 * Fix collect_sql not tracking overloaded functions
