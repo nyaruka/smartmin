@@ -1,8 +1,0 @@
-celery<5.0
-django<3.0
-django_compressor
-pytz
-redis
-sqlparse
-xlrd
-xlwt

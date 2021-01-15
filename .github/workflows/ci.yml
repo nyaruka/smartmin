@@ -5,9 +5,9 @@ jobs:
     name: Test
     strategy:
       matrix:
-        python_version: ['3.6.x', '3.7.x']
-        pg_version: ['10', '11']
-        django_version: ['2.1.15', '2.2.16']
+        python-version: ['3.6.x', '3.7.x', '3.8.x']
+        pg-version: ['10', '11']
+        django-version: ['2.1.15', '2.2.16']
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -16,7 +16,7 @@ jobs:
     - name: Install PostgreSQL
       uses: harmon758/postgresql-action@v1
       with:
-        postgresql version: ${{ matrix.pg_version }}
+        postgresql version: ${{ matrix.pg-version }}
         postgresql db: smartmin
         postgresql user: smartmin
         postgresql password: nyaruka
@@ -24,22 +24,43 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python_version }}
+        python-version: ${{ matrix.python-version }}
 
     - name: Initialize environment
       run: |
-        pip install -q -r requirements/base.txt
-        pip install -q -r requirements/tests.txt
-        pip install -q django==${{ matrix.django_version }}
-        pip install codecov
+        python -m pip install -U pip poetry
+        poetry install
+        poetry run pip install -q django==${{ matrix.django-version }}
 
     - name: Run tests
       run: |
-        coverage run manage.py test --keepdb --noinput --verbosity=2
-        coverage report -i
+        poetry run coverage run manage.py test --verbosity=2
+        poetry run coverage report -i
+        poetry run coverage xml
 
     - name: Upload coverage
       if: success()
       uses: codecov/codecov-action@v1
       with:
         fail_ci_if_error: true
+
+  release:
+    name: Release
+    needs: [test]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+
+    - name: Install Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.8.x'
+
+    - name: Publish release
+      run: |
+        python -m pip install -U pip poetry
+        poetry build
+        poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+        poetry publish
