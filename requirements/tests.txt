@@ -1,4 +1,0 @@
-psycopg2
-funcsigs
-flake8
-pillow

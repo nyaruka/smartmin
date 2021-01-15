@@ -19,3 +19,5 @@ csv_imports/
 !smartmin/csv_imports/
 
 .vscode/
+fabric
+fabfile.*
