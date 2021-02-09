@@ -300,10 +300,7 @@ class UserCRUDL(SmartCRUDL):
 
             from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'website@%s' % domain)
             user_email_template = getattr(settings, "USER_FORGET_EMAIL_TEMPLATE", "smartmin/users/user_email.txt")
-            no_user_email_template = getattr(settings, "NO_USER_FORGET_EMAIL_TEMPLATE",
-                                             "smartmin/users/no_user_email.txt")
 
-            email_template = loader.get_template(no_user_email_template)
             user = get_user_model().objects.filter(email__iexact=email).first()
 
             context = build_email_context(self.request, user)
@@ -316,8 +313,8 @@ class UserCRUDL(SmartCRUDL):
                 context['user'] = user
                 context['path'] = "%s" % reverse('users.user_recover', args=[token])
 
-            send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
-                      [email], fail_silently=False)
+                send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
+                            [email], fail_silently=False)
 
             response = super(UserCRUDL.Forget, self).form_valid(form)
             return response
