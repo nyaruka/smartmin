@@ -1,3 +1,12 @@
+v2.3.2
+----------
+ * Merge pull request #143 from nyaruka/forget-password-email-no-user-settings
+ * Merge pull request #142 from nyaruka/update-jquery
+ * Disable sending emails to address without user in the system
+ * Add settings to configure whether we send email when no user is found, default to False
+ * Update jquery
+ * Bump CI testing to PG 11 and 12
+
 v2.3.1
 ----------
  * Convert to poetry
