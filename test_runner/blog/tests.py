@@ -8,7 +8,7 @@ from django.contrib.auth.models import User, Group
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils import timezone
@@ -777,15 +777,22 @@ class UserTest(TestCase):
         post_data['email'] = 'nouser@nouser.com'
 
         response = self.client.post(forget_url, post_data, follow=True)
-        self.assertEquals(1, len(mail.outbox))
-        sent_email = mail.outbox[0]
-        self.assertEqual(len(sent_email.to), 1)
-        self.assertEqual(sent_email.to[0], 'nouser@nouser.com')
-        self.assertTrue("we don't have an account associated with it" in sent_email.body)
-        self.assertNotIn("Clicking on the following link will allow you to reset the password", sent_email.body)
-
+        # no email sent
+        self.assertEquals(0, len(mail.outbox))
         # email form submitted successfully
         self.assertEquals(200, response.status_code)
+
+        with override_settings(NO_USER_FOUND_SEND_EMAIL=True):
+            response = self.client.post(forget_url, post_data, follow=True)
+            self.assertEquals(1, len(mail.outbox))
+            sent_email = mail.outbox[0]
+            self.assertEqual(len(sent_email.to), 1)
+            self.assertEqual(sent_email.to[0], 'nouser@nouser.com')
+            self.assertTrue("we don't have an account associated with it" in sent_email.body)
+            self.assertNotIn("Clicking on the following link will allow you to reset the password", sent_email.body)
+
+            # email form submitted successfully
+            self.assertEquals(200, response.status_code)
 
         # email with valid user
         forget_url = reverse('users.user_forget')
