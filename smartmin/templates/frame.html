@@ -125,9 +125,9 @@
   {%  block js-jquery %}
   <script>
     if (window.location.hostname == "localhost"){
-    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery.1.11.1.min.js"%3E%3C/script%3E'));
+    document.write(unescape('%3Cscript src="{{ STATIC_URL }}js/libs/jquery-1.12.4.min.js"%3E%3C/script%3E'));
     } else {
-    document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"%3E%3C/script%3E'));
+    document.write(unescape('%3Cscript src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"%3E%3C/script%3E'));
     }
   </script>
   {% endblock %}
