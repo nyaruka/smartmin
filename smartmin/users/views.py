@@ -443,6 +443,9 @@ class Login(LoginView):
 
         username = form.cleaned_data.get('username')
 
+        if not username:
+            return self.form_invalid(form)
+
         user = get_user_model().objects.filter(username__iexact=username).first()
         valid_password = False
         

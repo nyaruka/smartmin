@@ -25,7 +25,7 @@ class RecoveryToken(models.Model):
 
 
 class FailedLogin(models.Model):
-    username = models.CharField(max_length=256, null=True)
+    username = models.CharField(max_length=256)
     failed_on = models.DateTimeField(auto_now_add=True)
 
 
