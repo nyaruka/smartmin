@@ -441,8 +441,7 @@ class Login(LoginView):
         lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
         failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
 
-        username = form.cleaned_data.get('username')
-
+        username = self.get_username(form)
         if not username:
             return self.form_invalid(form)
 
@@ -468,12 +467,17 @@ class Login(LoginView):
         if len(failures) >= failed_login_limit:
             return HttpResponseRedirect(reverse('users.user_failed'))
 
-        # delete failed logins if the password is valid
-        elif valid_password:
-            FailedLogin.objects.filter(username__iexact=username).delete()
-
         # pass through the normal login process
         if form_is_valid:
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+    def form_valid(self, form):
+        # clean up any failed logins for this user
+        FailedLogin.objects.filter(username__iexact=self.get_username(form)).delete()
+
+        return super().form_valid(form)
+
+    def get_username(self, form):
+        return form.cleaned_data.get('username')
