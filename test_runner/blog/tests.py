@@ -1155,9 +1155,9 @@ class UserLockoutTestCase(TestCase):
             self.assertContains(response, "10 minutes")
 
             # move all our lockout events to 11 minutes in the past
-            ten_minutes = timedelta(minutes=10)
-            for failed in FailedLogin.objects.filter(user=self.plain):
-                failed.failed_on = failed.failed_on - ten_minutes
+            eleven_minutes = timedelta(minutes=11)
+            for failed in FailedLogin.objects.filter(username__iexact="plain"):
+                failed.failed_on = failed.failed_on - eleven_minutes
                 failed.save()
 
             # should now be able to log in
@@ -1177,9 +1177,9 @@ class UserLockoutTestCase(TestCase):
             self.assertTrue(content.find("10 minutes") == -1)
 
             # move all our lockout events to 11 minutes in the past
-            ten_minutes = timedelta(minutes=10)
-            for failed in FailedLogin.objects.filter(user=self.plain):
-                failed.failed_on = failed.failed_on - ten_minutes
+            eleven_minutes = timedelta(minutes=11)
+            for failed in FailedLogin.objects.filter(username__iexact="plain"):
+                failed.failed_on = failed.failed_on - eleven_minutes
                 failed.save()
 
             # should still have no dice on trying to log in
@@ -1200,7 +1200,7 @@ class UserLockoutTestCase(TestCase):
             self.client.post(reverse('users.user_update', args=[self.plain.id]), post_data)
 
             # assert our lockouts got cleared
-            self.assertFalse(FailedLogin.objects.filter(user=self.plain))
+            self.assertFalse(FailedLogin.objects.filter(username="plain"))
 
             # the user should be able to log in now
             self.client.logout()

@@ -25,7 +25,7 @@ class RecoveryToken(models.Model):
 
 
 class FailedLogin(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    username = models.CharField(max_length=256)
     failed_on = models.DateTimeField(auto_now_add=True)
 
 

@@ -251,7 +251,7 @@ class UserCRUDL(SmartCRUDL):
 
             # if a new password was set, reset our failed logins
             if 'new_password' in self.form.cleaned_data and self.form.cleaned_data['new_password']:
-                FailedLogin.objects.filter(user=self.object).delete()
+                FailedLogin.objects.filter(username__iexact=self.object.username).delete()
                 PasswordHistory.objects.create(user=obj, password=obj.password)
 
             return obj
@@ -271,7 +271,7 @@ class UserCRUDL(SmartCRUDL):
         def post_save(self, obj):
             obj = super(UserCRUDL.Profile, self).post_save(obj)
             if 'new_password' in self.form.cleaned_data and self.form.cleaned_data['new_password']:
-                FailedLogin.objects.filter(user=self.object).delete()
+                FailedLogin.objects.filter(username__iexact=self.object.username).delete()
                 PasswordHistory.objects.create(user=obj, password=obj.password)
 
             return obj
@@ -309,7 +309,7 @@ class UserCRUDL(SmartCRUDL):
                 token = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token, user=user)
                 email_template = loader.get_template(user_email_template)
-                FailedLogin.objects.filter(user=user).delete()
+                FailedLogin.objects.filter(username__iexact=user.username).delete()
                 context['user'] = user
                 context['path'] = "%s" % reverse('users.user_recover', args=[token])
 
@@ -441,30 +441,36 @@ class Login(LoginView):
         lockout_timeout = getattr(settings, 'USER_LOCKOUT_TIMEOUT', 10)
         failed_login_limit = getattr(settings, 'USER_FAILED_LOGIN_LIMIT', 5)
 
-        user = get_user_model().objects.filter(username__iexact=form.cleaned_data.get('username')).first()
+        username = form.cleaned_data.get('username')
 
+        if not username:
+            return self.form_invalid(form)
+
+        user = get_user_model().objects.filter(username__iexact=username).first()
+        valid_password = False
+        
         # this could be a valid login by a user
         if user:
-
             # incorrect password?  create a failed login token
             valid_password = user.check_password(form.cleaned_data.get('password'))
-            if not valid_password:
-                FailedLogin.objects.create(user=user)
+            
+        if not user or not valid_password:
+            FailedLogin.objects.create(username=username)
 
-            bad_interval = timezone.now() - timedelta(minutes=lockout_timeout)
-            failures = FailedLogin.objects.filter(user=user)
+        bad_interval = timezone.now() - timedelta(minutes=lockout_timeout)
+        failures = FailedLogin.objects.filter(username__iexact=username)
 
-            # if the failures reset after a period of time, then limit our query to that interval
-            if lockout_timeout > 0:
-                failures = failures.filter(failed_on__gt=bad_interval)
+        # if the failures reset after a period of time, then limit our query to that interval
+        if lockout_timeout > 0:
+            failures = failures.filter(failed_on__gt=bad_interval)
 
-            # if there are too many failed logins, take them to the failed page
-            if len(failures) >= failed_login_limit:
-                return HttpResponseRedirect(reverse('users.user_failed'))
+        # if there are too many failed logins, take them to the failed page
+        if len(failures) >= failed_login_limit:
+            return HttpResponseRedirect(reverse('users.user_failed'))
 
-            # delete failed logins if the password is valid
-            elif valid_password:
-                FailedLogin.objects.filter(user=user).delete()
+        # delete failed logins if the password is valid
+        elif valid_password:
+            FailedLogin.objects.filter(username__iexact=username).delete()
 
         # pass through the normal login process
         if form_is_valid:
