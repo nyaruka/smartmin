@@ -1,3 +1,7 @@
+v2.3.5
+----------
+ * Downgrade xlrd dep to 1.2.0
+
 v2.3.4
 ----------
  * Update deps, downgrading redis requirement
