@@ -1,3 +1,7 @@
+v2.3.4
+----------
+ * Update deps, downgrading redis requirement
+
 v2.3.3
 ----------
  * Rework login view so we can reuse it more easily when user isn't determined by form
