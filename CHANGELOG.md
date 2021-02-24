@@ -1,3 +1,9 @@
+v2.3.3
+----------
+ * Rework login view so we can reuse it more easily when user isn't determined by form
+ * Add data migrations to remove all failed logins
+ * Replace FailedLogin user field by username
+
 v2.3.2
 ----------
  * Merge pull request #143 from nyaruka/forget-password-email-no-user-settings
