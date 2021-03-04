@@ -44,6 +44,12 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
         super(ImageThumbnailWidget, self).__init__({})
 
     def render(self, name, value, attrs=None, renderer=None):
+        try:
+            from sorl.thumbnail import get_thumbnail
+            value = get_thumbnail(value, f"{self.width}x{self.height}", crop='center', quality=99)
+        except ImportError:
+            pass
+
         thumb_html = '<table><tr>'
         if value and hasattr(value, "url"):
             thumb_html += '<td><img src="%s" width="%s" width="%s" /></td>' % (value.url, self.width, self.height)
