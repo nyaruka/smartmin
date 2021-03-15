@@ -1,3 +1,7 @@
+v2.3.7
+----------
+ * Fix thumbnail widget to only use sorl function if we have an image value
+
 v2.3.6
 ----------
  * Revert redis downgrade
