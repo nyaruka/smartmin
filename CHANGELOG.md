@@ -1,3 +1,7 @@
+v2.3.8
+----------
+ * Fix pagination index
+
 v2.3.7
 ----------
  * Fix thumbnail widget to only use sorl function if we have an image value
