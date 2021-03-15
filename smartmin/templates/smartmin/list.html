@@ -82,7 +82,7 @@
          {{ counter }} results
         {% endblocktrans %}
       {% else %}
-	{% blocktrans with start=page_obj.start_index end=start_obj.end_index count=paginator.count %}
+	{% blocktrans with start=page_obj.start_index end=page_obj.end_index count=paginator.count %}
 	Results {{ start }}-{{ end }} of {{ count }}
 	{% endblocktrans %}
       {% endif %}
