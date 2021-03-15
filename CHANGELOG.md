@@ -1,3 +1,8 @@
+v2.3.6
+----------
+ * Revert redis downgrade
+ * Use thumnail image in the image widget when we have the sorl thumbnail installed
+
 v2.3.5
 ----------
  * Downgrade xlrd dep to 1.2.0
