@@ -316,6 +316,11 @@ class UserCRUDL(SmartCRUDL):
                 send_mail(_('Password Recovery Request'), email_template.render(context), from_email,
                             [email], fail_silently=False)
 
+            # Run the hook function taking parameters user, email
+            user_forget_hook_function = getattr(settings, "USER_FORGET_HOOK_FUNCTION", None)
+            if user_forget_hook_function:
+                eval(user_forget_hook_function, {}, {"user": user, "email": email})
+
             response = super(UserCRUDL.Forget, self).form_valid(form)
             return response
 
