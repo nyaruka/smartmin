@@ -890,10 +890,16 @@ class SmartFormMixin(object):
         """
         default = None
 
-        for form_field in self.form:
-            if form_field.name == field:
-                default = form_field.label
-                break
+        # model forms will have meta inherited from their model that includes labels
+        meta_labels = self.form._meta.labels if hasattr(self.form, "_meta") else {}
+
+        if meta_labels and field in meta_labels:
+            default = meta_labels[field]
+        else:
+            for form_field in self.form:
+                if form_field.name == field:
+                    default = form_field.label
+                    break
 
         return super(SmartFormMixin, self).lookup_field_label(context, field, default=default)
 
@@ -902,14 +908,20 @@ class SmartFormMixin(object):
         Looks up the help text for the passed in field.
 
         This is overloaded so that we can check whether our form has help text set
-        explicitely.  If so, we will pass this as the default to our parent function.
+        explicitly.  If so, we will pass this as the default to our parent function.
         """
         default = None
 
-        for form_field in self.form:
-            if form_field.name == field:
-                default = form_field.help_text
-                break
+        # model forms will have meta inherited from their model that includes help texts
+        meta_help_texts = self.form._meta.help_texts if hasattr(self.form, "_meta") else {}
+
+        if meta_help_texts and field in meta_help_texts:
+            default = meta_help_texts[field]
+        else:
+            for form_field in self.form:
+                if form_field.name == field:
+                    default = form_field.help_text
+                    break
 
         return super(SmartFormMixin, self).lookup_field_help(field, default=default)
 
