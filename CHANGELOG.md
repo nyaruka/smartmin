@@ -1,3 +1,7 @@
+v2.3.9
+----------
+ * Add support for Form.Meta.labels and Form.Meta.help_texts
+
 v2.3.8
 ----------
  * Fix pagination index

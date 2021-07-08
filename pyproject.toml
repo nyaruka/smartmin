@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "smartmin"
-version = "2.3.8"
+version = "2.3.9"
 description = "Scaffolding system for Django object management."
 authors = ["Nyaruka Ltd <code@nyaruka.com>"]
 readme = "README.md"
