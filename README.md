@@ -18,11 +18,11 @@ It is very opinionated in how it works, if you don't agree, Smartmin may not be 
 About Versions
 ==============
 
-Smartmin tries to stay in lock step with the latest Django versions. With each new Django version a new Smartmin version 
-will be released and we will save the major changes (possibly breaking backwards compatibility) on these versions.  This 
-includes updating to the latest version of Twitter Bootstrap.
+Smartmin tries to stay in lock step with the latest Django versions. With each new Django LTS release we will release
+a new Smartmin major version and we will reserve major changes (possibly breaking backwards compatibility) for such 
+releases. This includes updating to the latest version of Twitter Bootstrap.
 
-The latest version is the 2.2.* series which supports the Django 2.1.* and 2.2.* releases series.
+The latest version is the 3.* series which supports the Django 3.2 LTS and 2.2 LTS.
 
 About
 =====
