@@ -1,3 +1,7 @@
+v3.0.1
+----------
+ * Replace the default SmartView.as_json implementation with a NotImplementedError as it can never work
+
 v3.0.0
 ----------
  * Ad support for Django 3.2 LTS
