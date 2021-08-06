@@ -49,7 +49,7 @@ def smart_url(url, obj=None):
             return url % obj.id
 
 
-class SmartView(object):
+class SmartView:
     fields = None
     exclude = None
     field_config = {}
@@ -368,19 +368,21 @@ class SmartView(object):
         Responsible for turning our context into an dict that can then be serialized into an
         JSON response.
         """
-        return context
+        raise NotImplementedError("this view can't be rendered as JSON")
 
     def render_to_response(self, context, **response_kwargs):
         """
         Overloaded to deal with _format arguments.
         """
-        # should we actually render in json?
+        # should we try rendering as JSON?
         if '_format' in self.request.GET and self.request.GET['_format'] == 'json':
-            return JsonResponse(self.as_json(context), safe=False)
+            try:
+                return JsonResponse(self.as_json(context), safe=False)
+            except NotImplementedError:
+                pass
 
         # otherwise, return normally
-        else:
-            return super(SmartView, self).render_to_response(context)
+        return super(SmartView, self).render_to_response(context)
 
 
 class SmartTemplateView(SmartView, TemplateView):

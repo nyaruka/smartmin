@@ -55,13 +55,7 @@ class PostCRUDL(SmartCRUDL):
         default_order = 'title'
 
         def as_json(self, context):
-            items = []
-            for obj in self.object_list:
-                items.append(dict(title=obj.title,
-                                  body=obj.body,
-                                  tags=obj.tags))
-
-            return items
+            return [{"title": obj.title, "body": obj.body, "tags": obj.tags} for obj in self.object_list]
 
     class ListNoPagination(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')
@@ -71,13 +65,7 @@ class PostCRUDL(SmartCRUDL):
         paginate_by = None
 
         def as_json(self, context):
-            items = []
-            for obj in self.object_list:
-                items.append(dict(title=obj.title,
-                                  body=obj.body,
-                                  tags=obj.tags))
-
-            return items
+            return [{"title": obj.title, "body": obj.body, "tags": obj.tags} for obj in self.object_list]
 
     class Author(SmartListView):
         fields = ('title', 'tags', 'created_on', 'created_by')
