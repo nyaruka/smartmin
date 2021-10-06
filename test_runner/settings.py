@@ -210,10 +210,5 @@ LOGIN_REDIRECT_URL = "/blog/post/"
 # -----------------------------------------------------------------------------------
 # Async tasks with celery
 # -----------------------------------------------------------------------------------
-
-CELERY_RESULT_BACKEND = 'database'
-
-BROKER_BACKEND = 'redis'
-BROKER_HOST = 'localhost'
-BROKER_PORT = 6379
-BROKER_VHOST = '4'
+CELERY_RESULT_BACKED = 'database'
+CELERY_BROKER_URL = 'redis://localhost:6379/4'

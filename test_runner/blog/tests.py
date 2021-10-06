@@ -486,7 +486,7 @@ class PostTest(SmartminTest):
             self.assertEqual(Post.get_import_file_headers(open_file), ['urn:tel', 'name', 'field:email-address'])
 
     def test_csv_import(self):
-        with self.settings(CELERY_ALWAYS_EAGER=True, CELERY_RESULT_BACKEND='cache', CELERY_CACHE_BACKEND='memory'):
+        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_RESULT_BACKED='cache'):
             import_url = reverse('blog.post_csv_import')
 
             response = self.client.get(import_url)
