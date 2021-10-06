@@ -1,3 +1,7 @@
+v3.1.0
+----------
+ * Update to celery 5.1
+
 v3.0.1
 ----------
  * Replace the default SmartView.as_json implementation with a NotImplementedError as it can never work
