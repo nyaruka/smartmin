@@ -153,7 +153,10 @@ class PostTest(SmartminTest):
         date_field = response.context['form'].fields['written_on']
         self.assertIsInstance(date_field.widget, DatePickerWidget)
         self.assertEqual(date_field.widget.format, "%B %d, %Y")
-        self.assertEqual(date_field.input_formats, ['%B %d, %Y', '%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y'])
+        self.assertIn('%B %d, %Y', date_field.input_formats)
+        self.assertIn('%Y-%m-%d', date_field.input_formats)
+        self.assertIn('%m/%d/%Y', date_field.input_formats)
+        self.assertIn('%m/%d/%y', date_field.input_formats)
 
         post_data = dict(title="New Post", body="This is a new post", order=1, tags="post")
         self.client.post(reverse('blog.post_create'), post_data, follow=True)
