@@ -1,8 +1,8 @@
 import csv
-import datetime
 import traceback
 import json
-import pytz
+import zoneinfo
+from datetime import datetime
 
 from django.conf import settings
 from django.db import models
@@ -15,11 +15,8 @@ class SmartImportRowError(Exception):
     def __init__(self, message):
         self.message = message
 
-    def __unicode__(self):  # pragma: no cover
-        return self.message
-
     def __str__(self):
-        return str(self.__unicode__())
+        return self.message
 
 
 class SmartModel(models.Model):
@@ -216,8 +213,8 @@ class SmartModel(models.Model):
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         # use now to determine a relevant timezone
-        naive_timezone = pytz.timezone(import_params['timezone']) \
-            if import_params and 'timezone' in import_params else pytz.UTC
+        naive_timezone = zoneinfo.ZoneInfo(import_params['timezone']) \
+            if import_params and 'timezone' in import_params else timezone.utc
         tz = timezone.now().astimezone(naive_timezone).tzinfo
 
         records = []
@@ -276,7 +273,7 @@ class SmartModel(models.Model):
     def get_cell_value(cls, workbook, tz, cell):
         if cell.ctype == XL_CELL_DATE:
             date = xldate_as_tuple(cell.value, workbook.datemode)
-            return datetime.datetime(*date, tzinfo=tz)
+            return datetime(*date, tzinfo=tz)
         else:
             return cls.normalize_value(str(cell.value))
 
