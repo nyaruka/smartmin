@@ -3,21 +3,20 @@
 import json
 import operator
 from functools import reduce
+from urllib.parse import quote as urlquote
 
 import django.forms.models as model_forms
 from django import forms
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse
+from django.urls import reverse, re_path
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
-from django.utils.encoding import force_text
-from django.utils.http import urlquote
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
 from django.views.generic.base import TemplateView
 from django.views.generic import DetailView, ListView
@@ -537,7 +536,7 @@ class SmartListView(SmartView, ListView):
         title = super(SmartListView, self).derive_title()
 
         if not title:
-            return force_text(self.model._meta.verbose_name_plural).title()
+            return force_str(self.model._meta.verbose_name_plural).title()
         else:
             return title
 
@@ -1078,7 +1077,7 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
         Derives our title from our object
         """
         if not self.title:
-            return _("Edit %s") % force_text(self.model._meta.verbose_name).title()
+            return _("Edit %s") % force_str(self.model._meta.verbose_name).title()
         else:
             return self.title
 
@@ -1294,7 +1293,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
         Derives our title from our object
         """
         if not self.title:
-            return _("Create %s") % force_text(self.model._meta.verbose_name).title()
+            return _("Create %s") % force_str(self.model._meta.verbose_name).title()
         else:
             return self.title
 
@@ -1516,6 +1515,6 @@ class SmartCRUDL(object):
             view_class = self.view_for_action(action)
             view_pattern = self.pattern_for_view(view_class, action)
             name = self.url_name_for_action(action)
-            urls.append(url(view_pattern, view_class.as_view(), name=name))
+            urls.append(re_path(view_pattern, view_class.as_view(), name=name))
 
         return urls

@@ -22,8 +22,8 @@ packages = [
 repository = "http://github.com/nyaruka/smartmin"
 
 [tool.poetry.dependencies]
-python = "^3.6"
-Django = ">= 2.2, < 4.0"
+python = "^3.9"
+Django = ">= 3.2, < 4.1"
 celery = ">= 4.4.6"
 pytz = "*"
 redis = "^3.5.3"

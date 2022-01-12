@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.template import loader
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from smartmin.email import build_email_context
