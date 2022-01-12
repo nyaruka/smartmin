@@ -1,3 +1,8 @@
+v4.0.0
+----------
+ * Use timezone.utc instead of pytz.UTC
+ * Update allowed Django versions to < 4.1 and replace removed functions
+
 v3.1.0
 ----------
  * Update to celery 5.1
