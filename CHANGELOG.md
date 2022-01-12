@@ -1,3 +1,7 @@
+v4.0.1
+----------
+ * Add NOOP migrations created by change in Django 4.0
+
 v4.0.0
 ----------
  * Use timezone.utc instead of pytz.UTC
