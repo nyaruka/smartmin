@@ -1,3 +1,8 @@
+v4.1.0
+----------
+ * Remove broken and unused middleware classes
+ * Bump pillow from 8.4.0 to 9.0.0
+
 v4.0.1
 ----------
  * Add NOOP migrations created by change in Django 4.0
