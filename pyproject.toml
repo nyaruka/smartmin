@@ -35,7 +35,7 @@ xlwt = "^1.3.0"
 psycopg2 = "< 2.9"  # https://github.com/psycopg/psycopg2/issues/1293
 funcsigs = "^1.0.2"
 flake8 = "^3.8.4"
-Pillow = "^9.0.0"
+Pillow = "^9.0.1"
 codecov = "^2.1.11"
 
 [build-system]
