@@ -9,7 +9,7 @@ from .models import Post, Category
 class ExcludeForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ('title', 'body', 'order', 'tags')
+        fields = ("title", "body", "order", "tags")
 
 
 # We overload a normal CategoryForm to not call the super's clean method. By default
@@ -21,7 +21,7 @@ class CategoryForm(forms.ModelForm):
 
     class Meta:
         model = Category
-        fields = ('name',)
+        fields = ("name",)
 
 
 # just tests that our reverse and permissions are based on the view.py app, not
@@ -29,7 +29,7 @@ class CategoryForm(forms.ModelForm):
 class UserCRUDL(SmartCRUDL):
     model = User
     permissions = False
-    actions = ('list',)
+    actions = ("list",)
 
 
 class CategoryCRUDL(SmartCRUDL):
@@ -42,25 +42,39 @@ class CategoryCRUDL(SmartCRUDL):
 class PostCRUDL(SmartCRUDL):
     model = Post
     actions = (
-        'create', 'read', 'update', 'delete', 'list', 'author', 'exclude', 'exclude2', 'readonly', 'readonly2',
-        'messages', 'csv_import', 'by_uuid', 'refresh', 'no_refresh', 'list_no_pagination'
+        "create",
+        "read",
+        "update",
+        "delete",
+        "list",
+        "author",
+        "exclude",
+        "exclude2",
+        "readonly",
+        "readonly2",
+        "messages",
+        "csv_import",
+        "by_uuid",
+        "refresh",
+        "no_refresh",
+        "list_no_pagination",
     )
 
     class Read(SmartReadView):
         permission = None
 
     class List(SmartListView):
-        fields = ('title', 'tags', 'created_on', 'created_by')
-        search_fields = ('title__icontains', 'body__icontains')
-        default_order = 'title'
+        fields = ("title", "tags", "created_on", "created_by")
+        search_fields = ("title__icontains", "body__icontains")
+        default_order = "title"
 
         def as_json(self, context):
             return [{"title": obj.title, "body": obj.body, "tags": obj.tags} for obj in self.object_list]
 
     class ListNoPagination(SmartListView):
-        fields = ('title', 'tags', 'created_on', 'created_by')
-        search_fields = ('title__icontains', 'body__icontains')
-        default_order = 'title'
+        fields = ("title", "tags", "created_on", "created_by")
+        search_fields = ("title__icontains", "body__icontains")
+        default_order = "title"
 
         paginate_by = None
 
@@ -68,8 +82,8 @@ class PostCRUDL(SmartCRUDL):
             return [{"title": obj.title, "body": obj.body, "tags": obj.tags} for obj in self.object_list]
 
     class Author(SmartListView):
-        fields = ('title', 'tags', 'created_on', 'created_by')
-        default_order = ('created_by__username', 'order')
+        fields = ("title", "tags", "created_on", "created_by")
+        default_order = ("created_by__username", "order")
 
     class Update(SmartUpdateView):
         success_message = "Your blog post has been updated."
@@ -78,18 +92,18 @@ class PostCRUDL(SmartCRUDL):
         submit_button_name = "Create New Post"
 
     class Exclude(SmartUpdateView):
-        exclude = ('tags',)
+        exclude = ("tags",)
 
     class Exclude2(SmartUpdateView):
         form_class = ExcludeForm
-        exclude = ('tags',)
+        exclude = ("tags",)
 
     class Readonly(SmartUpdateView):
-        readonly = ('tags',)
+        readonly = ("tags",)
 
     class Readonly2(SmartUpdateView):
         form_class = ExcludeForm
-        readonly = ('tags',)
+        readonly = ("tags",)
 
     class Messages(SmartListView):
         def pre_process(self, request, *args, **kwargs):
@@ -100,7 +114,7 @@ class PostCRUDL(SmartCRUDL):
             messages.debug(request, "Debug Messages")
 
     class ByUuid(SmartReadView):
-        slug_url_kwarg = 'uuid'
+        slug_url_kwarg = "uuid"
 
     class Refresh(SmartReadView):
         permission = None

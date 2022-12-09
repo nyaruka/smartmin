@@ -2,29 +2,28 @@ import time
 from importlib import import_module
 
 from django.core.management.base import BaseCommand, CommandError
-from django.core.management.sql import emit_pre_migrate_signal, emit_post_migrate_signal
+from django.core.management.sql import emit_post_migrate_signal, emit_pre_migrate_signal
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.loader import AmbiguityError
 
-APPLY_FUNCTION = 'apply_manual'
+APPLY_FUNCTION = "apply_manual"
 
 
 class Command(BaseCommand):  # pragma: no cover
     help = "Applies a migration manually which may have been previously applied or faked"
 
     def add_arguments(self, parser):
-        parser.add_argument('app_label',
-                            help='App label of an application to synchronize the state.')
-        parser.add_argument('migration_name',
-                            help='Database state will be brought to the state after that migration.')
-        parser.add_argument('--record', action='store_true', dest='record', default=False,
-                            help='Record migration as applied.')
+        parser.add_argument("app_label", help="App label of an application to synchronize the state.")
+        parser.add_argument("migration_name", help="Database state will be brought to the state after that migration.")
+        parser.add_argument(
+            "--record", action="store_true", dest="record", default=False, help="Record migration as applied."
+        )
 
     def handle(self, app_label, migration_name, *args, **options):
-        self.verbosity = options.get('verbosity')
-        interactive = options.get('interactive')
-        record = options.get('record')
+        self.verbosity = options.get("verbosity")
+        interactive = options.get("interactive")
+        record = options.get("record")
 
         connection = connections[DEFAULT_DB_ALIAS]
         connection.prepare_database()
@@ -47,8 +46,8 @@ class Command(BaseCommand):  # pragma: no cover
             migration = executor.loader.get_migration_by_prefix(app_label, migration_name)
         except AmbiguityError:
             raise CommandError(
-                "More than one migration matches '%s' in app '%s'. Please be more specific." %
-                (migration_name, app_label)
+                "More than one migration matches '%s' in app '%s'. Please be more specific."
+                % (migration_name, app_label)
             )
         except KeyError:
             raise CommandError("Cannot find a migration matching '%s' from app '%s'." % (migration_name, app_label))

@@ -17,6 +17,7 @@ class PDFMixin(object):
      - html5lib
      - pisa
     """
+
     def render_to_response(self, context, **response_kwargs):
 
         response = super(PDFMixin, self).render_to_response(context, **response_kwargs)
@@ -28,11 +29,12 @@ class PDFMixin(object):
         result = StringIO.StringIO()
 
         # now render with pisa as PDF
-        pdf = pisa.pisaDocument(StringIO.StringIO(response.rendered_content.encode("ISO-8859-1")), result,
-                                link_callback=fetch_resource)
+        pdf = pisa.pisaDocument(
+            StringIO.StringIO(response.rendered_content.encode("ISO-8859-1")), result, link_callback=fetch_resource
+        )
         if not pdf.err:
-            return HttpResponse(result.getvalue(), mimetype='application/pdf')
-        return HttpResponse('We had some errors<pre>%s</pre>' % escape(response.content))
+            return HttpResponse(result.getvalue(), mimetype="application/pdf")
+        return HttpResponse("We had some errors<pre>%s</pre>" % escape(response.content))
 
 
 def fetch_resource(uri, rel):

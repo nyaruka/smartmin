@@ -1,4 +1,3 @@
-
 import json
 import re
 import zoneinfo
@@ -6,8 +5,8 @@ from datetime import datetime, timedelta
 
 from django import template
 from django.conf import settings
-from django.urls import reverse
 from django.template import TemplateSyntaxError
+from django.urls import reverse
 from django.utils import timezone
 
 register = template.Library()
@@ -36,7 +35,7 @@ def format_datetime(time):
     user_time_zone = timezone.get_current_timezone()
     if time.tzinfo is None:
         time = time.replace(tzinfo=timezone.utc)
-        user_time_zone = zoneinfo.ZoneInfo(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
+        user_time_zone = zoneinfo.ZoneInfo(getattr(settings, "USER_TIME_ZONE", "GMT"))
 
     time = time.astimezone(user_time_zone)
     return time.strftime("%b %d, %Y %H:%M")
@@ -50,10 +49,10 @@ def get_value_from_view(context, field):
     This first checks for a particular method on the ListView, then looks for a method
     on the object, then finally treats it as an attribute.
     """
-    view = context['view']
+    view = context["view"]
     obj = None
-    if 'object' in context:
-        obj = context['object']
+    if "object" in context:
+        obj = context["object"]
 
     value = view.lookup_field_value(context, obj, field)
 
@@ -72,7 +71,7 @@ def get_value(context, obj, field):
     This first checks for a particular method on the ListView, then looks for a method
     on the object, then finally treats it as an attribute.
     """
-    view = context['view']
+    view = context["view"]
     value = view.lookup_field_value(context, obj, field)
     if type(value) == datetime:
         return format_datetime(value)
@@ -85,7 +84,7 @@ def get_class(context, field, obj=None):
     """
     Looks up the class for this field
     """
-    view = context['view']
+    view = context["view"]
     return view.lookup_field_class(field, obj, "field_" + field)
 
 
@@ -98,7 +97,7 @@ def get_label(context, field, obj=None):
        1) if the view has a field_config and a label specified there, use that label
        2) check for a form in the view, if it contains that field, use it's value
     """
-    view = context['view']
+    view = context["view"]
     return view.lookup_field_label(context, field, obj)
 
 
@@ -107,7 +106,7 @@ def get_field_link(context, field, obj=None):
     """
     Determine what the field link should be for the given field, object pair
     """
-    view = context['view']
+    view = context["view"]
     return view.lookup_field_link(context, field, obj)
 
 
@@ -116,14 +115,14 @@ def view_as_json(context):
     """
     Returns our view serialized as json
     """
-    view = context['view']
+    view = context["view"]
     return json.dumps(view.as_json(context))
 
 
 @register.simple_tag(takes_context=True)
 def ssl_url(context, url_name, args=None):
     path = reverse(url_name, args)
-    if getattr(settings, 'SESSION_COOKIE_SECURE', False):
+    if getattr(settings, "SESSION_COOKIE_SECURE", False):
         return "https://%s%s" % (settings.HOSTNAME, path)
     else:
         return path
@@ -145,14 +144,14 @@ def field(form, field):
         return None
 
 
-@register.filter(name='add_css')
+@register.filter(name="add_css")
 def add_css(field, css):
     custom_attrs = field.field.widget.attrs
 
-    if not custom_attrs.get('class', None):
-        custom_attrs['class'] = css
+    if not custom_attrs.get("class", None):
+        custom_attrs["class"] = css
     else:
-        custom_attrs['class'] += " " + css
+        custom_attrs["class"] += " " + css
 
     return field.as_widget(attrs=custom_attrs)
 
@@ -166,7 +165,7 @@ def map(string, args):
 def gmail_time(dtime, now=None):
     if dtime.tzinfo is None:
         dtime = dtime.replace(tzinfo=timezone.utc)
-        user_time_zone = zoneinfo.ZoneInfo(getattr(settings, 'USER_TIME_ZONE', 'GMT'))
+        user_time_zone = zoneinfo.ZoneInfo(getattr(settings, "USER_TIME_ZONE", "GMT"))
         dtime = dtime.astimezone(user_time_zone)
     else:
         dtime = dtime.astimezone(timezone.get_current_timezone())
@@ -212,7 +211,7 @@ def get(dictionary, key):
     if key in dictionary:
         return dictionary[key]
     else:
-        return ''
+        return ""
 
 
 @register.filter
@@ -220,7 +219,7 @@ def is_smartobject(obj):
     """
     Returns whether the passed in object is a smart object
     """
-    return hasattr(obj, 'is_active')
+    return hasattr(obj, "is_active")
 
 
 @register.filter
@@ -235,8 +234,11 @@ class PDBNode(template.Node):
     """
     Woot woot, simple pdb debugging. {% pdb %}
     """
+
     def render(self, context):
-        import pdb; pdb.set_trace()  # noqa
+        import pdb
+
+        pdb.set_trace()  # noqa
 
 
 @register.tag
@@ -250,11 +252,11 @@ def getblock(context, prefix, suffix=None):
     if suffix:
         key += str(suffix)
 
-    if 'blocks' not in context:
+    if "blocks" not in context:
         raise TemplateSyntaxError("setblock/endblock can only be used with SmartView or it's subclasses")
 
-    if key in context['blocks']:
-        return context['blocks'][key]
+    if key in context["blocks"]:
+        return context["blocks"][key]
     else:
         return ""
 
@@ -266,7 +268,7 @@ def setblock(parser, token):
 
     key = "".join(args[1:])
 
-    nodelist = parser.parse(('endsetblock',))
+    nodelist = parser.parse(("endsetblock",))
     parser.delete_first_token()
     return SetBlockNode(key, nodelist)
 
@@ -277,11 +279,11 @@ class SetBlockNode(template.Node):
         self.nodelist = nodelist
 
     def render(self, context):
-        if 'blocks' not in context:
+        if "blocks" not in context:
             raise TemplateSyntaxError("setblock/endblock can only be used with SmartView or it's subclasses")
 
         output = self.nodelist.render(context)
-        context['blocks'][self.key] = output
+        context["blocks"][self.key] = output
         return ""
 
 
@@ -289,10 +291,10 @@ class SetBlockNode(template.Node):
 setblock = register.tag(setblock)
 
 
-@register.inclusion_tag('smartmin/field.html', takes_context=True)
+@register.inclusion_tag("smartmin/field.html", takes_context=True)
 def render_field(context, field):
-    form = context['form']
-    view = context['view']
+    form = context["form"]
+    view = context["view"]
 
     readonly_fields = view.derive_readonly()
 
@@ -300,12 +302,9 @@ def render_field(context, field):
     if field not in form.fields and field not in readonly_fields:
         raise TemplateSyntaxError("Error: No field '%s' found in form to render" % field)
 
-    inclusion_context = dict(field=field,
-                             form=context['form'],
-                             view=context['view'],
-                             blocks=context['blocks'])
-    if 'object' in context:
-        inclusion_context['object'] = context['object']
+    inclusion_context = dict(field=field, form=context["form"], view=context["view"], blocks=context["blocks"])
+    if "object" in context:
+        inclusion_context["object"] = context["object"]
 
     return inclusion_context
 
@@ -316,5 +315,5 @@ def active(request, pattern):
     Simple tag let us define a regex for the active navigation tab
     """
     if re.search(pattern, request.path):
-        return 'active'
-    return ''
+        return "active"
+    return ""

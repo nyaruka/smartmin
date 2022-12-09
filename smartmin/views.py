@@ -1,5 +1,3 @@
-
-
 import json
 import operator
 from functools import reduce
@@ -11,15 +9,15 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse, re_path
 from django.db import IntegrityError
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.urls import re_path, reverse
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
-from django.views.generic.edit import ModelFormMixin, UpdateView, CreateView, ProcessFormView, FormView
-from django.views.generic.base import TemplateView
 from django.views.generic import DetailView, ListView
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import CreateView, FormView, ModelFormMixin, ProcessFormView, UpdateView
 
 from smartmin.csv_imports.models import ImportTask
 from smartmin.mixins import NonAtomicMixin
@@ -34,7 +32,7 @@ def smart_url(url, obj=None):
     Otherwise a straight % substitution is applied.
     """
     if url.find("@") >= 0:
-        (args, value) = url.split('@')
+        (args, value) = url.split("@")
 
         if args:
             val = getattr(obj, args, None)
@@ -82,7 +80,7 @@ class SmartView:
         """
         Returns the URL pattern for this view.
         """
-        return r'^%s/%s/$' % (path, action)
+        return r"^%s/%s/$" % (path, action)
 
     def has_permission(self, request, *args, **kwargs):
         """
@@ -92,7 +90,7 @@ class SmartView:
         self.args = args
         self.request = request
 
-        if not getattr(self, 'permission', None):
+        if not getattr(self, "permission", None):
             return True
         else:
             return request.user.has_perm(self.permission)
@@ -101,11 +99,12 @@ class SmartView:
         """
         Overloaded to check permissions if appropriate
         """
+
         def wrapper(request, *args, **kwargs):
             if not self.has_permission(request, *args, **kwargs):
                 path = urlquote(request.get_full_path())
-                login_url = kwargs.pop('login_url', settings.LOGIN_URL)
-                redirect_field_name = kwargs.pop('redirect_field_name', REDIRECT_FIELD_NAME)
+                login_url = kwargs.pop("login_url", settings.LOGIN_URL)
+                redirect_field_name = kwargs.pop("redirect_field_name", REDIRECT_FIELD_NAME)
                 return HttpResponseRedirect("%s?%s=%s" % (login_url, redirect_field_name, path))
             else:
                 response = self.pre_process(request, *args, **kwargs)
@@ -131,18 +130,18 @@ class SmartView:
         Looks for a field's value from the passed in obj.  Note that this will strip
         leading attributes to deal with subelements if possible
         """
-        curr_field = field.encode('ascii', 'ignore').decode("utf-8")
+        curr_field = field.encode("ascii", "ignore").decode("utf-8")
         rest = None
 
-        if field.find('.') >= 0:
-            curr_field = field.split('.')[0]
-            rest = '.'.join(field.split('.')[1:])
+        if field.find(".") >= 0:
+            curr_field = field.split(".")[0]
+            rest = ".".join(field.split(".")[1:])
 
         # next up is the object itself
         obj_field = getattr(obj, curr_field, None)
 
         # if it is callable, do so
-        if obj_field and getattr(obj_field, '__call__', None):
+        if obj_field and getattr(obj_field, "__call__", None):
             obj_field = obj_field()
 
         if obj_field and rest:
@@ -160,12 +159,12 @@ class SmartView:
         This may be used for example to change the display value of a variable depending on
         other variables within our context.
         """
-        curr_field = field.encode('ascii', 'ignore').decode("utf-8")
+        curr_field = field.encode("ascii", "ignore").decode("utf-8")
 
         # if this isn't a subfield, check the view to see if it has a get_ method
-        if field.find('.') == -1:
+        if field.find(".") == -1:
             # view supercedes all, does it have a 'get_' method for this obj
-            view_method = getattr(self, 'get_%s' % curr_field, None)
+            view_method = getattr(self, "get_%s" % curr_field, None)
             if view_method:
                 return view_method(obj)
 
@@ -180,14 +179,14 @@ class SmartView:
             2) if not, then we derive a field value from the field name
         """
         # if this is a subfield, strip off everything but the last field name
-        if field.find('.') >= 0:
-            return self.lookup_field_label(context, field.split('.')[-1], default)
+        if field.find(".") >= 0:
+            return self.lookup_field_label(context, field.split(".")[-1], default)
 
         label = None
 
         # is there a label specified for this field
-        if field in self.field_config and 'label' in self.field_config[field]:
-            label = self.field_config[field]['label']
+        if field in self.field_config and "label" in self.field_config[field]:
+            label = self.field_config[field]["label"]
 
         # if we were given a default, use that
         elif default:
@@ -212,15 +211,15 @@ class SmartView:
         help = None
 
         # is there a label specified for this field
-        if field in self.field_config and 'help' in self.field_config[field]:
-            help = self.field_config[field]['help']
+        if field in self.field_config and "help" in self.field_config[field]:
+            help = self.field_config[field]["help"]
 
         # if we were given a default, use that
         elif default:
             help = default
 
         # try to see if there is a description on our model
-        elif hasattr(self, 'model'):
+        elif hasattr(self, "model"):
             for model_field in self.model._meta.fields:
                 if model_field.name == field:
                     help = model_field.help_text
@@ -235,8 +234,8 @@ class SmartView:
         css = ""
 
         # is there a class specified for this field
-        if field in self.field_config and 'class' in self.field_config[field]:
-            css = self.field_config[field]['class']
+        if field in self.field_config and "class" in self.field_config[field]:
+            css = self.field_config[field]["class"]
 
         # if we were given a default, use that
         elif default:
@@ -249,7 +248,7 @@ class SmartView:
         Derives a field label for the passed in field name.
         """
         # replace _'s with ' '
-        label = field.replace('_', ' ').title()
+        label = field.replace("_", " ").title()
         return label
 
     def derive_field_config(self):
@@ -269,10 +268,10 @@ class SmartView:
         Subclasses can override this by setting a 'template_name' variable on the class.
         """
         templates = []
-        if getattr(self, 'template_name', None):
+        if getattr(self, "template_name", None):
             templates.append(self.template_name)
 
-        if getattr(self, 'default_template', None):
+        if getattr(self, "default_template", None):
             templates.append(self.default_template)
         else:
             templates = super(SmartView, self).get_template_names()
@@ -322,43 +321,43 @@ class SmartView:
         url_params = "?"
         order_params = ""
         for key in self.request.GET.keys():
-            if key != 'page' and key != 'pjax' and (len(key) == 0 or key[0] != '_'):
+            if key != "page" and key != "pjax" and (len(key) == 0 or key[0] != "_"):
                 for value in self.request.GET.getlist(key):
                     url_params += "%s=%s&" % (urlquote(key), urlquote(value))
-            elif key == '_order':
+            elif key == "_order":
                 order_params = "&".join(["%s=%s" % (key, _) for _ in self.request.GET.getlist(key)])
 
-        context['url_params'] = url_params
-        context['order_params'] = order_params + "&"
-        context['pjax'] = self.pjax
+        context["url_params"] = url_params
+        context["order_params"] = order_params + "&"
+        context["pjax"] = self.pjax
 
         # set our blocks
-        context['blocks'] = dict()
+        context["blocks"] = dict()
 
         # stuff it all in our context
-        context['fields'] = self.fields
-        context['view'] = self
-        context['field_config'] = self.field_config
+        context["fields"] = self.fields
+        context["view"] = self
+        context["field_config"] = self.field_config
 
-        context['title'] = self.derive_title()
+        context["title"] = self.derive_title()
 
         # and any extra context the user specified
         context.update(self.extra_context)
 
         # by default, our base is 'base.html', but we might be pjax
         base_template = "base.html"
-        if 'pjax' in self.request.GET or 'pjax' in self.request.POST:
+        if "pjax" in self.request.GET or "pjax" in self.request.POST:
             base_template = "smartmin/pjax.html"
 
-        if 'HTTP_X_PJAX' in self.request.META:
+        if "HTTP_X_PJAX" in self.request.META:
             base_template = "smartmin/pjax.html"
 
-        context['base_template'] = base_template
+        context["base_template"] = base_template
 
         # set our refresh if we have one
         refresh = self.derive_refresh()
         if refresh:
-            context['refresh'] = refresh
+            context["refresh"] = refresh
 
         return context
 
@@ -374,7 +373,7 @@ class SmartView:
         Overloaded to deal with _format arguments.
         """
         # should we try rendering as JSON?
-        if '_format' in self.request.GET and self.request.GET['_format'] == 'json':
+        if "_format" in self.request.GET and self.request.GET["_format"] == "json":
             try:
                 return JsonResponse(self.as_json(context), safe=False)
             except NotImplementedError:
@@ -393,9 +392,9 @@ def derive_single_object_url_pattern(slug_url_kwarg, path, action):
     Utility function called by class methods for single object views
     """
     if slug_url_kwarg:
-        return r'^%s/%s/(?P<%s>[^/]+)/$' % (path, action, slug_url_kwarg)
+        return r"^%s/%s/(?P<%s>[^/]+)/$" % (path, action, slug_url_kwarg)
     else:
-        return r'^%s/%s/(?P<pk>\d+)/$' % (path, action)
+        return r"^%s/%s/(?P<pk>\d+)/$" % (path, action)
 
 
 class SmartSingleObjectView(SmartView):
@@ -410,11 +409,10 @@ class SmartSingleObjectView(SmartView):
 
 
 class SmartReadView(SmartSingleObjectView, DetailView):
-    default_template = 'smartmin/read.html'
+    default_template = "smartmin/read.html"
     edit_button = None
 
-    field_config = {'modified_blurb': dict(label="Modified"),
-                    'created_blurb': dict(label="Created")}
+    field_config = {"modified_blurb": dict(label="Modified"), "created_blurb": dict(label="Created")}
 
     @classmethod
     def derive_url_pattern(cls, path, action):
@@ -462,8 +460,8 @@ class SmartReadView(SmartSingleObjectView, DetailView):
 
 
 class SmartDeleteView(SmartSingleObjectView, DetailView, ProcessFormView):
-    default_template = 'smartmin/delete_confirm.html'
-    name_field = 'name'
+    default_template = "smartmin/delete_confirm.html"
+    name_field = "name"
     cancel_url = None
     redirect_url = None
 
@@ -479,7 +477,7 @@ class SmartDeleteView(SmartSingleObjectView, DetailView, ProcessFormView):
 
     def pre_delete(self, obj):
         # auto populate modified_by if it is present
-        if self.request.user.id and self.request.user.id > 0 and hasattr(obj, 'modified_by_id'):
+        if self.request.user.id and self.request.user.id > 0 and hasattr(obj, "modified_by_id"):
             obj.modified_by = self.request.user
 
     def post(self, request, *args, **kwargs):
@@ -497,31 +495,31 @@ class SmartDeleteView(SmartSingleObjectView, DetailView, ProcessFormView):
         return smart_url(self.redirect_url)
 
     def get_context_data(self, **kwargs):
-        """ Add in the field to use for the name field """
+        """Add in the field to use for the name field"""
         context = super(SmartDeleteView, self).get_context_data(**kwargs)
-        context['name_field'] = self.name_field
-        context['cancel_url'] = self.get_cancel_url()
+        context["name_field"] = self.name_field
+        context["cancel_url"] = self.get_cancel_url()
         return context
 
 
 class SmartListView(SmartView, ListView):
-    default_template = 'smartmin/list.html'
+    default_template = "smartmin/list.html"
 
     link_url = None
     link_fields = None
     add_button = None
     search_fields = None
     paginate_by = 25
-    field_config = {'is_active': dict(label='')}
+    field_config = {"is_active": dict(label="")}
     default_order = None
     select_related = None
 
     @classmethod
     def derive_url_pattern(cls, path, action):
-        if action == 'list':
-            return r'^%s/$' % (path)
+        if action == "list":
+            return r"^%s/$" % (path)
         else:
-            return r'^%s/%s/$' % (path, action)
+            return r"^%s/%s/$" % (path, action)
 
     def derive_search_fields(self):
         """
@@ -552,7 +550,7 @@ class SmartListView(SmartView, ListView):
             link_fields = set()
             if self.fields:
                 for field in self.fields:
-                    if field != 'is_active':
+                    if field != "is_active":
                         link_fields.add(field)
                         break
 
@@ -586,21 +584,21 @@ class SmartListView(SmartView, ListView):
         self.link_fields = self.derive_link_fields(context)
 
         # stuff it all in our context
-        context['link_fields'] = self.link_fields
+        context["link_fields"] = self.link_fields
 
         # our search term if any
-        if 'search' in self.request.GET:
-            context['search'] = self.request.GET['search']
+        if "search" in self.request.GET:
+            context["search"] = self.request.GET["search"]
 
         # our ordering field if any
         order = self.derive_ordering()
         if order:
-            if order[0] == '-':
-                context['order'] = order[1:]
-                context['order_asc'] = False
+            if order[0] == "-":
+                context["order"] = order[1:]
+                context["order_asc"] = False
             else:
-                context['order'] = order
-                context['order_asc'] = True
+                context["order"] = order
+                context["order_asc"] = True
 
         return context
 
@@ -616,10 +614,10 @@ class SmartListView(SmartView, ListView):
 
         # apply any filtering
         search_fields = self.derive_search_fields()
-        search_query = self.request.GET.get('search')
+        search_query = self.request.GET.get("search")
         if search_fields and search_query:
             term_queries = []
-            for term in search_query.split(' '):
+            for term in search_query.split(" "):
                 field_queries = []
                 for field in search_fields:
                     field_queries.append(Q(**{field: term}))
@@ -650,8 +648,8 @@ class SmartListView(SmartView, ListView):
 
         If the default order of the queryset should be used, returns None
         """
-        if '_order' in self.request.GET:
-            return self.request.GET['_order']
+        if "_order" in self.request.GET:
+            return self.request.GET["_order"]
         elif self.default_order:
             return self.default_order
         else:
@@ -666,8 +664,8 @@ class SmartListView(SmartView, ListView):
 
         # if we get our order from the request
         # make sure it is a valid field in the list
-        if '_order' in self.request.GET:
-            if order.lstrip('-') not in self.derive_fields():
+        if "_order" in self.request.GET:
+            if order.lstrip("-") not in self.derive_fields():
                 order = None
 
         if order:
@@ -689,7 +687,7 @@ class SmartListView(SmartView, ListView):
         else:
             fields = []
             for field in self.object_list.model._meta.fields:
-                if field.name != 'id':
+                if field.name != "id":
                     fields.append(field.name)
             return fields
 
@@ -703,19 +701,19 @@ class SmartListView(SmartView, ListView):
         if obj.is_active:
             return '<div class="active_icon"></div>'
         else:
-            return ''
+            return ""
 
     def render_to_response(self, context, **response_kwargs):
         """
         Overloaded to deal with _format arguments.
         """
         # is this a select2 format response?
-        if self.request.GET.get('_format', 'html') == 'select2':
+        if self.request.GET.get("_format", "html") == "select2":
 
             results = []
-            for obj in context['object_list']:
+            for obj in context["object_list"]:
                 result = None
-                if hasattr(obj, 'as_select2'):
+                if hasattr(obj, "as_select2"):
                     result = obj.as_select2()
 
                 if not result:
@@ -723,9 +721,9 @@ class SmartListView(SmartView, ListView):
 
                 results.append(result)
 
-            has_more = context['page_obj'].has_next() if context['page_obj'] else False
+            has_more = context["page_obj"].has_next() if context["page_obj"] else False
 
-            json_data = dict(results=results, err='nil', more=has_more)
+            json_data = dict(results=results, err="nil", more=has_more)
             return JsonResponse(json_data)
         # otherwise, return normally
         else:
@@ -733,9 +731,8 @@ class SmartListView(SmartView, ListView):
 
 
 class SmartCsvView(SmartListView):
-
     def derive_filename(self):
-        filename = getattr(self, 'filename', None)
+        filename = getattr(self, "filename", None)
         if not filename:
             filename = "%s.csv" % self.model._meta.verbose_name.lower()
         return filename
@@ -744,8 +741,8 @@ class SmartCsvView(SmartListView):
         import csv
 
         # Create the HttpResponse object with the appropriate CSV header.
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = "attachment; filename=%s" % self.derive_filename()
 
         writer = csv.writer(response, quoting=csv.QUOTE_ALL)
 
@@ -768,9 +765,8 @@ class SmartCsvView(SmartListView):
 
 
 class SmartXlsView(SmartListView):
-
     def derive_filename(self):
-        filename = getattr(self, 'filename', None)
+        filename = getattr(self, "filename", None)
         if not filename:
             filename = "%s.xls" % self.model._meta.verbose_name.lower()
         return filename
@@ -778,6 +774,7 @@ class SmartXlsView(SmartListView):
     def render_to_response(self, context, **response_kwargs):
 
         from xlwt import Workbook
+
         book = Workbook()
         sheet1 = book.add_sheet(self.derive_title())
         fields = self.derive_fields()
@@ -797,16 +794,15 @@ class SmartXlsView(SmartListView):
                 sheet1.write(row + 1, col, value)
 
         # Create the HttpResponse object with the appropriate header.
-        response = HttpResponse(content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename=%s' % self.derive_filename()
+        response = HttpResponse(content_type="application/vnd.ms-excel")
+        response["Content-Disposition"] = "attachment; filename=%s" % self.derive_filename()
         book.save(response)
         return response
 
 
 class SmartFormMixin(object):
     readonly = ()
-    field_config = {'modified_blurb': dict(label="Modified"),
-                    'created_blurb': dict(label="Created")}
+    field_config = {"modified_blurb": dict(label="Modified"), "created_blurb": dict(label="Created")}
     success_message = None
     submit_button_name = _("Submit")
 
@@ -851,14 +847,14 @@ class SmartFormMixin(object):
         # stuff in our referer as the default location for where to return
         location = forms.CharField(widget=forms.widgets.HiddenInput(), required=False)
 
-        if ('HTTP_REFERER' in self.request.META):
-            location.initial = self.request.META['HTTP_REFERER']
+        if "HTTP_REFERER" in self.request.META:
+            location.initial = self.request.META["HTTP_REFERER"]
 
         # add the location to our form fields
-        self.form.fields['loc'] = location
+        self.form.fields["loc"] = location
 
         if fields:
-            fields.append('loc')
+            fields.append("loc")
 
         # provides a hook to programmatically customize fields before rendering
         for (name, field) in self.form.fields.items():
@@ -933,7 +929,7 @@ class SmartFormMixin(object):
         """
         readonly = list(self.readonly)
         for key, value in self.field_config.items():
-            if 'readonly' in value and value['readonly']:
+            if "readonly" in value and value["readonly"]:
                 readonly.append(key)
 
         return readonly
@@ -974,7 +970,7 @@ class SmartFormMixin(object):
             if self.model is not None:
                 # If a model has been explicitly provided, use it
                 model = self.model
-            elif hasattr(self, 'object') and self.object is not None:
+            elif hasattr(self, "object") and self.object is not None:
                 # If this view is operating on a single object, use
                 # the class of that object
                 model = self.object.__class__
@@ -1006,10 +1002,10 @@ class SmartFormMixin(object):
                 if ex in fields:
                     fields.remove(ex)
 
-            params['fields'] = fields
+            params["fields"] = fields
 
         if exclude:
-            params['exclude'] = exclude
+            params["exclude"] = exclude
 
         return params
 
@@ -1020,13 +1016,13 @@ class SmartFormMixin(object):
         """
         if self.success_url:
             # if our smart url references an object, pass that in
-            if self.success_url.find('@') > 0:
+            if self.success_url.find("@") > 0:
                 return smart_url(self.success_url, self.object)
             else:
                 return smart_url(self.success_url, None)
 
-        elif 'loc' in self.form.cleaned_data:
-            return self.form.cleaned_data['loc']
+        elif "loc" in self.form.cleaned_data:
+            return self.form.cleaned_data["loc"]
 
         raise ImproperlyConfigured("No redirect location found, override get_success_url to not use redirect urls")
 
@@ -1043,7 +1039,7 @@ class SmartFormMixin(object):
         Otherwise we include all fields in a standard ModelForm.
         """
         kwargs = super(SmartFormMixin, self).get_form_kwargs()
-        kwargs['initial'] = self.derive_initial()
+        kwargs["initial"] = self.derive_initial()
         return kwargs
 
     def derive_submit_button_name(self):
@@ -1054,12 +1050,12 @@ class SmartFormMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(SmartFormMixin, self).get_context_data(**kwargs)
-        context['submit_button_name'] = self.derive_submit_button_name()
+        context["submit_button_name"] = self.derive_submit_button_name()
         return context
 
 
 class SmartFormView(SmartFormMixin, SmartView, FormView):
-    default_template = 'smartmin/form.html'
+    default_template = "smartmin/form.html"
 
     def form_valid(self, form):
         # plug in our success message
@@ -1070,7 +1066,7 @@ class SmartFormView(SmartFormMixin, SmartView, FormView):
 class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
     javascript_submit = None
 
-    field_config = {'modified_blurb': dict(label="Modified"), 'created_blurb': dict(label="Created")}
+    field_config = {"modified_blurb": dict(label="Modified"), "created_blurb": dict(label="Created")}
 
     def derive_title(self):
         """
@@ -1103,11 +1099,11 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
             self.object = self.post_save(self.object)
 
             messages.success(self.request, self.derive_success_message())
-            if 'HTTP_X_FORMAX' not in self.request.META:
+            if "HTTP_X_FORMAX" not in self.request.META:
                 return HttpResponseRedirect(self.get_success_url())
             else:
                 response = self.render_to_response(self.get_context_data(form=form))
-                response['REDIRECT'] = self.get_success_url()
+                response["REDIRECT"] = self.get_success_url()
                 return response
 
         except IntegrityError as e:
@@ -1130,13 +1126,13 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
 
     def get_context_data(self, **kwargs):
         context = super(SmartModelFormView, self).get_context_data(**kwargs)
-        context['javascript_submit'] = self.javascript_submit
+        context["javascript_submit"] = self.javascript_submit
         return context
 
 
 class SmartUpdateView(SmartModelFormView, UpdateView):
-    default_template = 'smartmin/update.html'
-    exclude = ('created_by', 'modified_by')
+    default_template = "smartmin/update.html"
+    exclude = ("created_by", "modified_by")
     submit_button_name = _("Save Changes")
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
@@ -1162,7 +1158,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
     def pre_save(self, obj):
         # auto populate modified_by if it is present
-        if self.request.user.id and self.request.user.id > 0 and hasattr(obj, 'modified_by_id'):
+        if self.request.user.id and self.request.user.id > 0 and hasattr(obj, "modified_by_id"):
             obj.modified_by = self.request.user
 
         return obj
@@ -1171,7 +1167,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
         context = super(SmartUpdateView, self).get_context_data(**kwargs)
 
         if self.delete_url:
-            context['delete_url'] = smart_url(self.delete_url, self.object)
+            context["delete_url"] = smart_url(self.delete_url, self.object)
 
         return context
 
@@ -1183,7 +1179,6 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
 
 class SmartModelActionView(SmartFormMixin, SmartSingleObjectView, DetailView, ProcessFormView):
-
     @classmethod
     def derive_url_pattern(cls, path, action):
         return derive_single_object_url_pattern(cls.slug_url_kwarg, path, action)
@@ -1215,7 +1210,7 @@ class SmartModelActionView(SmartFormMixin, SmartSingleObjectView, DetailView, Pr
 
 
 class SmartMultiFormView(SmartView, TemplateView):
-    default_template = 'smartmin/multi_form.html'
+    default_template = "smartmin/multi_form.html"
     forms = {}
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
@@ -1229,7 +1224,7 @@ class SmartMultiFormView(SmartView, TemplateView):
             f = form(prefix=prefix)
             page_forms.append(f)
 
-        context['forms'] = page_forms
+        context["forms"] = page_forms
 
         return self.render_to_response(context)
 
@@ -1245,7 +1240,7 @@ class SmartMultiFormView(SmartView, TemplateView):
             page_forms.append(f)
 
         if not valid:
-            context['forms'] = page_forms
+            context["forms"] = page_forms
             return self.render_to_response(context)
         else:
             # redirect to success page
@@ -1255,14 +1250,14 @@ class SmartMultiFormView(SmartView, TemplateView):
         context = super(SmartMultiFormView, self).get_context_data(**kwargs)
 
         if self.delete_url:
-            context['delete_url'] = smart_url(self.delete_url, self.object)
+            context["delete_url"] = smart_url(self.delete_url, self.object)
 
         return context
 
 
 class SmartCreateView(SmartModelFormView, CreateView):
-    default_template = 'smartmin/create.html'
-    exclude = ('created_by', 'modified_by', 'is_active')
+    default_template = "smartmin/create.html"
+    exclude = ("created_by", "modified_by", "is_active")
     submit_button_name = _("Create")
 
     def has_object_permission(self, getter_name):
@@ -1272,11 +1267,11 @@ class SmartCreateView(SmartModelFormView, CreateView):
     def pre_save(self, obj):
         if self.request.user.id and self.request.user.id > 0:
             # auto populate created_by if it is present
-            if hasattr(obj, 'created_by_id'):
+            if hasattr(obj, "created_by_id"):
                 obj.created_by = self.request.user
 
             # auto populate modified_by if it is present
-            if hasattr(obj, 'modified_by_id'):
+            if hasattr(obj, "modified_by_id"):
                 obj.modified_by = self.request.user
 
         return obj
@@ -1299,9 +1294,9 @@ class SmartCreateView(SmartModelFormView, CreateView):
 
 
 class SmartCSVImportView(NonAtomicMixin, SmartCreateView):
-    success_url = 'id@csv_imports.importtask_read'
+    success_url = "id@csv_imports.importtask_read"
 
-    fields = ('csv_file',)
+    fields = ("csv_file",)
 
     def derive_title(self):
         return _("Import %s") % self.crudl.model._meta.verbose_name_plural.title()
@@ -1323,7 +1318,7 @@ class SmartCSVImportView(NonAtomicMixin, SmartCreateView):
 
 
 class SmartCRUDL(object):
-    actions = ('create', 'read', 'update', 'delete', 'list')
+    actions = ("create", "read", "update", "delete", "list")
     model_name = None
     app_name = None
     module_name = None
@@ -1354,7 +1349,7 @@ class SmartCRUDL(object):
             self.module_name = parts[-2]
 
             # deal with special case of views subdirectories, we need to go up one more to find the real module
-            if self.module_name == 'views' and len(parts) >= 3:
+            if self.module_name == "views" and len(parts) >= 3:
                 self.module_name = parts[-3]
 
         # set our actions if set
@@ -1393,88 +1388,88 @@ class SmartCRUDL(object):
             view = getattr(self, class_name)
 
             # no model set?  set it ourselves
-            if not getattr(view, 'model', None):
+            if not getattr(view, "model", None):
                 view.model = self.model
 
             # no permission and we are supposed to set them, do so
-            if not hasattr(view, 'permission') and self.permissions:
+            if not hasattr(view, "permission") and self.permissions:
                 view.permission = self.permission_for_action(action)
 
             # set our link URL based on read and update
-            if not getattr(view, 'link_url', None):
-                if 'read' in self.actions:
-                    view.link_url = 'id@%s' % self.url_name_for_action('read')
-                elif 'update' in self.actions:
-                    view.link_url = 'id@%s' % self.url_name_for_action('update')
+            if not getattr(view, "link_url", None):
+                if "read" in self.actions:
+                    view.link_url = "id@%s" % self.url_name_for_action("read")
+                elif "update" in self.actions:
+                    view.link_url = "id@%s" % self.url_name_for_action("update")
 
             # if we can't infer a link URL then view class must override lookup_field_link
-            if not getattr(view, 'link_url', None) and 'lookup_field_link' not in view.__dict__:
+            if not getattr(view, "link_url", None) and "lookup_field_link" not in view.__dict__:
                 view.link_fields = ()
 
             # set add_button based on existence of Create view if add_button not explicitly set
-            if action == 'list' and getattr(view, 'add_button', None) is None:
-                view.add_button = 'create' in self.actions
+            if action == "list" and getattr(view, "add_button", None) is None:
+                view.add_button = "create" in self.actions
 
             # set edit_button based on existence of Update view if edit_button not explicitly set
-            if action == 'read' and getattr(view, 'edit_button', None) is None:
-                view.edit_button = 'update' in self.actions
+            if action == "read" and getattr(view, "edit_button", None) is None:
+                view.edit_button = "update" in self.actions
 
             # if update or create, set success url if not set
-            if not getattr(view, 'success_url', None) and (action == 'update' or action == 'create'):
-                view.success_url = '@%s' % self.url_name_for_action('list')
+            if not getattr(view, "success_url", None) and (action == "update" or action == "create"):
+                view.success_url = "@%s" % self.url_name_for_action("list")
 
         # otherwise, use our defaults
         else:
             options = dict(model=self.model)
 
             # if this is an update or create, and we have a list view, then set the default to that
-            if action == 'update' or action == 'create' and 'list' in self.actions:
-                options['success_url'] = '@%s' % self.url_name_for_action('list')
+            if action == "update" or action == "create" and "list" in self.actions:
+                options["success_url"] = "@%s" % self.url_name_for_action("list")
 
             # set permissions if appropriate
             if self.permissions:
-                options['permission'] = self.permission_for_action(action)
+                options["permission"] = self.permission_for_action(action)
 
-            if action == 'create':
+            if action == "create":
                 view = type(str("%sCreateView" % self.model_name), (SmartCreateView,), options)
 
-            elif action == 'read':
-                if 'update' in self.actions:
-                    options['edit_button'] = True
+            elif action == "read":
+                if "update" in self.actions:
+                    options["edit_button"] = True
 
                 view = type(str("%sReadView" % self.model_name), (SmartReadView,), options)
 
-            elif action == 'update':
-                if 'delete' in self.actions:
-                    options['delete_url'] = 'id@%s' % self.url_name_for_action('delete')
+            elif action == "update":
+                if "delete" in self.actions:
+                    options["delete_url"] = "id@%s" % self.url_name_for_action("delete")
 
                 view = type(str("%sUpdateView" % self.model_name), (SmartUpdateView,), options)
 
-            elif action == 'delete':
-                if 'list' in self.actions:
-                    options['cancel_url'] = '@%s' % self.url_name_for_action('list')
-                    options['redirect_url'] = '@%s' % self.url_name_for_action('list')
+            elif action == "delete":
+                if "list" in self.actions:
+                    options["cancel_url"] = "@%s" % self.url_name_for_action("list")
+                    options["redirect_url"] = "@%s" % self.url_name_for_action("list")
 
-                elif 'update' in self.actions:
-                    options['cancel_url'] = '@%s' % self.url_name_for_action('update')
+                elif "update" in self.actions:
+                    options["cancel_url"] = "@%s" % self.url_name_for_action("update")
 
                 view = type(str("%sDeleteView" % self.model_name), (SmartDeleteView,), options)
 
-            elif action == 'list':
-                if 'read' in self.actions:
-                    options['link_url'] = 'id@%s' % self.url_name_for_action('read')
-                elif 'update' in self.actions:
-                    options['link_url'] = 'id@%s' % self.url_name_for_action('update')
+            elif action == "list":
+                if "read" in self.actions:
+                    options["link_url"] = "id@%s" % self.url_name_for_action("read")
+                elif "update" in self.actions:
+                    options["link_url"] = "id@%s" % self.url_name_for_action("update")
                 else:
-                    options['link_fields'] = ()
+                    options["link_fields"] = ()
 
-                if 'create' in self.actions:
-                    options['add_button'] = True
+                if "create" in self.actions:
+                    options["add_button"] = True
 
                 view = type(str("%sListView" % self.model_name), (SmartListView,), options)
 
-            elif action == 'csv_import':
-                options['model'] = ImportTask
+            elif action == "csv_import":
+                options["model"] = ImportTask
                 view = type(str("%sCSVImportView" % self.model_name), (SmartCSVImportView,), options)
 
         if not view:
@@ -1485,7 +1480,7 @@ class SmartCRUDL(object):
         view.url_name = self.url_name_for_action(action)
 
         # no template set for it?  set one based on our action and app name
-        if not getattr(view, 'template_name', None):
+        if not getattr(view, "template_name", None):
             view.template_name = self.template_for_action(action)
 
         view.crudl = self
@@ -1497,12 +1492,12 @@ class SmartCRUDL(object):
         Returns the URL pattern for the passed in action.
         """
         # if this view knows how to define a URL pattern, call that
-        if getattr(view, 'derive_url_pattern', None):
+        if getattr(view, "derive_url_pattern", None):
             return view.derive_url_pattern(self.path, action)
 
         # otherwise take our best guess
         else:
-            return r'^%s/%s/$' % (self.path, action)
+            return r"^%s/%s/$" % (self.path, action)
 
     def as_urlpatterns(self):
         """

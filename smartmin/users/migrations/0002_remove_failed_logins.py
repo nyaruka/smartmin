@@ -16,10 +16,7 @@ def noop(apps, schema_editor):  # pragma: no cover
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0001_initial'),
+        ("users", "0001_initial"),
     ]
 
-    operations = [
-        migrations.RunPython(delete_failed_logins, noop)
-
-    ]
+    operations = [migrations.RunPython(delete_failed_logins, noop)]

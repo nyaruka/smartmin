@@ -2,8 +2,8 @@ import sys
 
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_migrate
 
@@ -20,7 +20,7 @@ def get_permissions_app_name():
     global permissions_app_name
 
     if not permissions_app_name:
-        permissions_app_name = getattr(settings, 'PERMISSIONS_APP', None)
+        permissions_app_name = getattr(settings, "PERMISSIONS_APP", None)
 
         if not permissions_app_name:
             app_names_with_models = [a.name for a in apps.get_app_configs() if a.models_module is not None]
@@ -60,8 +60,10 @@ def check_role_permissions(role, permissions, current_permissions):
             (object, action) = splits[1:]
 
             # if this is a wildcard, then query our database for all the permissions that exist on this object
-            if action == '*':
-                for perm in Permission.objects.filter(codename__startswith="%s_" % object, content_type__app_label=app):
+            if action == "*":
+                for perm in Permission.objects.filter(
+                    codename__startswith="%s_" % object, content_type__app_label=app
+                ):
                     codenames.append(perm.codename)
             # otherwise, this is an error, continue
             else:
@@ -102,7 +104,7 @@ def check_all_group_permissions(sender, **kwargs):
     if not is_permissions_app(sender):
         return
 
-    config = getattr(settings, 'GROUP_PERMISSIONS', dict())
+    config = getattr(settings, "GROUP_PERMISSIONS", dict())
 
     # for each of our items
     for name, permissions in config.items():
@@ -126,9 +128,9 @@ def add_permission(content_type, permission):
 
     # does it already exist
     if not Permission.objects.filter(content_type=content_type, codename=codename):
-        Permission.objects.create(content_type=content_type,
-                                  codename=codename,
-                                  name="Can %s %s" % (permission, content_type.name))
+        Permission.objects.create(
+            content_type=content_type, codename=codename, name="Can %s %s" % (permission, content_type.name)
+        )
         # sys.stderr.write("Added %s permission for %s\n" % (permission, content_type.name))
 
 
@@ -140,12 +142,12 @@ def check_all_permissions(sender, **kwargs):
     if not is_permissions_app(sender):
         return
 
-    config = getattr(settings, 'PERMISSIONS', dict())
+    config = getattr(settings, "PERMISSIONS", dict())
 
     # for each of our items
     for natural_key, permissions in config.items():
         # if the natural key '*' then that means add to all objects
-        if natural_key == '*':
+        if natural_key == "*":
             # for each of our content types
             for content_type in ContentType.objects.all():
                 for permission in permissions:
@@ -153,7 +155,7 @@ def check_all_permissions(sender, **kwargs):
 
         # otherwise, this is on a specific content type, add for each of those
         else:
-            app, model = natural_key.split('.')
+            app, model = natural_key.split(".")
             try:
                 content_type = ContentType.objects.get_by_natural_key(app, model)
             except ContentType.DoesNotExist:

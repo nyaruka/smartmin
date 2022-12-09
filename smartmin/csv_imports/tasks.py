@@ -1,9 +1,9 @@
 from io import StringIO
 
-from celery import shared_task
-
 from django.utils import timezone
 from django.utils.module_loading import import_string
+
+from celery import shared_task
 
 from .models import ImportTask
 
@@ -31,6 +31,7 @@ def csv_import(task_id):  # pragma: no cover
 
     except Exception as e:
         import traceback
+
         traceback.print_exc()
 
         task_obj.task_status = ImportTask.FAILURE
