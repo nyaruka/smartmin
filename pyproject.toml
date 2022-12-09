@@ -50,7 +50,6 @@ line-length = 120
 select = ["E", "F", "W"]
 ignore = ["E501", "F405"]
 fix = true
-exclude = ["./.tox/*", "./.venv/*", "./env/*", "*/migrations/*", "./build/*"]
 
 [tool.isort]
 multi_line_output = 3
@@ -58,9 +57,8 @@ force_grid_wrap = 0
 line_length = 119
 include_trailing_comma = true
 combine_as_imports = true
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "DJANGOTHIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
 known_django = ["django"]
-known_djangothirdparty = ["celery"]
 
 [tool.coverage.run]
 source = ["smartmin"]
