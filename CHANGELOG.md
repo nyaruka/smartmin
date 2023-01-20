@@ -1,3 +1,7 @@
+v4.2.0 (2023-01-20)
+-------------------------
+ * Use latest Django 4.0.* and test against Django 4.1.*
+
 v4.1.0
 ----------
  * Remove broken and unused middleware classes
