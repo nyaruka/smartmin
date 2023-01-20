@@ -37,9 +37,7 @@ jobs:
         poetry add django==${{ matrix.django-version }}
 
     - name: Run pre-test checks
-      run: |
-        sudo apt-get install gettext
-        poetry run ./code_check.py --debug
+      run: poetry run ./code_check.py --debug
 
     - name: Run tests
       run: |
