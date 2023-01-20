@@ -7,11 +7,11 @@ jobs:
       matrix:
         python-version: ["3.9.x", "3.10.x"]
         pg-version: ["13", "14"]
-        django-version: ["3.2.11", "4.0.7"]
+        django-version: ["4.0.8", "4.1.5"]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Install PostgreSQL
         uses: harmon758/postgresql-action@v1
@@ -22,7 +22,7 @@ jobs:
           postgresql password: nyaruka
 
       - name: Install Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -47,8 +47,9 @@ jobs:
 
       - name: Upload coverage
         if: success()
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
 
   release:
@@ -58,10 +59,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Install Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: "3.9.x"
 
