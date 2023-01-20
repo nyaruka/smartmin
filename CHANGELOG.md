@@ -1,3 +1,7 @@
+v4.2.1 (2023-01-20)
+-------------------------
+ * Allow Django 4.1 and newer versions of celery and redis
+
 v4.2.0 (2023-01-20)
 -------------------------
  * Use latest Django 4.0.* and test against Django 4.1.*
