@@ -6,7 +6,7 @@ from smartmin.views import SmartCRUDL, SmartListView, SmartReadView
 
 class ImportTaskCRUDL(SmartCRUDL):
     model = ImportTask
-    actions = ('read', 'list')
+    actions = ("read", "list")
 
     class Read(SmartReadView):
         def derive_refresh(self):
@@ -16,8 +16,8 @@ class ImportTaskCRUDL(SmartCRUDL):
                 return 0
 
     class List(SmartListView):
-        fields = ('status', 'type', 'csv_file', 'created_on', 'created_by')
-        link_fields = ('csv_file',)
+        fields = ("status", "type", "csv_file", "created_on", "created_by")
+        link_fields = ("csv_file",)
 
         def get_type(self, obj):
             return import_string(obj.model_class)._meta.verbose_name_plural.title()

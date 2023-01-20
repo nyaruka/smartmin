@@ -9,28 +9,48 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('blog', '0006_post_image'),
+        ("blog", "0006_post_image"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='category',
-            name='created_by',
-            field=models.ForeignKey(help_text='The user which originally created this item', on_delete=django.db.models.deletion.PROTECT, related_name='%(app_label)s_%(class)s_creations', to=settings.AUTH_USER_MODEL),
+            model_name="category",
+            name="created_by",
+            field=models.ForeignKey(
+                help_text="The user which originally created this item",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="%(app_label)s_%(class)s_creations",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='category',
-            name='modified_by',
-            field=models.ForeignKey(help_text='The user which last modified this item', on_delete=django.db.models.deletion.PROTECT, related_name='%(app_label)s_%(class)s_modifications', to=settings.AUTH_USER_MODEL),
+            model_name="category",
+            name="modified_by",
+            field=models.ForeignKey(
+                help_text="The user which last modified this item",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="%(app_label)s_%(class)s_modifications",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='created_by',
-            field=models.ForeignKey(help_text='The user which originally created this item', on_delete=django.db.models.deletion.PROTECT, related_name='%(app_label)s_%(class)s_creations', to=settings.AUTH_USER_MODEL),
+            model_name="post",
+            name="created_by",
+            field=models.ForeignKey(
+                help_text="The user which originally created this item",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="%(app_label)s_%(class)s_creations",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='modified_by',
-            field=models.ForeignKey(help_text='The user which last modified this item', on_delete=django.db.models.deletion.PROTECT, related_name='%(app_label)s_%(class)s_modifications', to=settings.AUTH_USER_MODEL),
+            model_name="post",
+            name="modified_by",
+            field=models.ForeignKey(
+                help_text="The user which last modified this item",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="%(app_label)s_%(class)s_modifications",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

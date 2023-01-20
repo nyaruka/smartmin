@@ -36,6 +36,9 @@ jobs:
         poetry install
         poetry add django==${{ matrix.django-version }}
 
+    - name: Run pre-test checks
+      run: poetry run ./code_check.py --debug
+
     - name: Run tests
       run: |
         poetry run coverage run manage.py test smartmin test_runner --verbosity=2

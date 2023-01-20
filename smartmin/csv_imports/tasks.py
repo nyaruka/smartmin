@@ -31,6 +31,7 @@ def csv_import(task_id):  # pragma: no cover
 
     except Exception as e:
         import traceback
+
         traceback.print_exc()
 
         task_obj.task_status = ImportTask.FAILURE

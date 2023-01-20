@@ -1,14 +1,14 @@
 import csv
-import traceback
 import json
+import traceback
 import zoneinfo
 from datetime import datetime
+
+from xlrd import XL_CELL_DATE, XLRDError, open_workbook, xldate_as_tuple
 
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-
-from xlrd import open_workbook, xldate_as_tuple, XL_CELL_DATE, XLRDError
 
 
 class SmartImportRowError(Exception):
@@ -25,27 +25,35 @@ class SmartModel(models.Model):
     having a user that created or modified the item and creation and modification
     dates.
     """
-    is_active = models.BooleanField(default=True,
-                                    help_text="Whether this item is active, use this instead of deleting")
 
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                   on_delete=models.PROTECT,
-                                   related_name="%(app_label)s_%(class)s_creations",
-                                   help_text="The user which originally created this item")
-    created_on = models.DateTimeField(default=timezone.now, editable=False, blank=True,
-                                      help_text="When this item was originally created")
+    is_active = models.BooleanField(
+        default=True, help_text="Whether this item is active, use this instead of deleting"
+    )
 
-    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                    on_delete=models.PROTECT,
-                                    related_name="%(app_label)s_%(class)s_modifications",
-                                    help_text="The user which last modified this item")
-    modified_on = models.DateTimeField(default=timezone.now, editable=False, blank=True,
-                                       help_text="When this item was last modified")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_creations",
+        help_text="The user which originally created this item",
+    )
+    created_on = models.DateTimeField(
+        default=timezone.now, editable=False, blank=True, help_text="When this item was originally created"
+    )
+
+    modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="%(app_label)s_%(class)s_modifications",
+        help_text="The user which last modified this item",
+    )
+    modified_on = models.DateTimeField(
+        default=timezone.now, editable=False, blank=True, help_text="When this item was last modified"
+    )
 
     def save(self, *args, **kwargs):
-        update_fields = kwargs.get('update_fields', None)
+        update_fields = kwargs.get("update_fields", None)
 
-        if (update_fields is None or 'modified_on' in update_fields) and not kwargs.pop('preserve_modified_on', False):
+        if (update_fields is None or "modified_on" in update_fields) and not kwargs.pop("preserve_modified_on", False):
             self.modified_on = timezone.now()
 
         return super(SmartModel, self).save(*args, **kwargs)
@@ -70,7 +78,7 @@ class SmartModel(models.Model):
         filename = csv_file
         headers = []
         try:
-            workbook = open_workbook(filename.name, 'rb')
+            workbook = open_workbook(filename.name, "rb")
 
             for sheet in workbook.sheets():
 
@@ -84,7 +92,7 @@ class SmartModel(models.Model):
                 break
         except XLRDError:
             # our alternative codec, by default we are the crazy windows encoding
-            ascii_codec = 'cp1252'
+            ascii_codec = "cp1252"
 
             # read the entire file, look for mac_roman characters
             reader = open(filename.name, "rb")
@@ -96,12 +104,12 @@ class SmartModel(models.Model):
                 except TypeError:
                     byte_number = byte
 
-                if byte_number in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
-                    ascii_codec = 'mac_roman'
+                if byte_number in [0x81, 0x8D, 0x8F, 0x90, 0x9D]:
+                    ascii_codec = "mac_roman"
                     break
             reader.close()
 
-            reader = open(filename.name, "rU", encoding='utf-8-sig')
+            reader = open(filename.name, "rU", encoding="utf-8-sig")
 
             def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
                 csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
@@ -151,20 +159,21 @@ class SmartModel(models.Model):
         csv_file.open()
 
         # this file isn't good enough, lets write it to local disk
-        from django.conf import settings
-        from uuid import uuid4
         import os
+        from uuid import uuid4
+
+        from django.conf import settings
 
         # make sure our tmp directory is present (throws if already present)
         try:
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, 'tmp'))
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, "tmp"))
         except Exception:
             pass
 
         # write our file out
-        tmp_file = os.path.join(settings.MEDIA_ROOT, 'tmp/%s' % str(uuid4()))
+        tmp_file = os.path.join(settings.MEDIA_ROOT, "tmp/%s" % str(uuid4()))
 
-        out_file = open(tmp_file, 'wb')
+        out_file = open(tmp_file, "wb")
         out_file.write(csv_file.read())
         out_file.close()
 
@@ -209,12 +218,15 @@ class SmartModel(models.Model):
 
     @classmethod
     def import_xls(cls, filename, user, import_params, log=None, import_results=None):
-        workbook = open_workbook(filename.name, 'rb')
+        workbook = open_workbook(filename.name, "rb")
 
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         # use now to determine a relevant timezone
-        naive_timezone = zoneinfo.ZoneInfo(import_params['timezone']) \
-            if import_params and 'timezone' in import_params else timezone.utc
+        naive_timezone = (
+            zoneinfo.ZoneInfo(import_params["timezone"])
+            if import_params and "timezone" in import_params
+            else timezone.utc
+        )
         tz = timezone.now().astimezone(naive_timezone).tzinfo
 
         records = []
@@ -239,8 +251,8 @@ class SmartModel(models.Model):
                     field_values.append(cls.get_cell_value(workbook, tz, cell))
 
                 field_values = dict(zip(header, field_values))
-                field_values['created_by'] = user
-                field_values['modified_by'] = user
+                field_values["created_by"] = user
+                field_values["modified_by"] = user
 
                 try:
                     field_values = cls.prepare_fields(field_values, import_params, user)
@@ -252,7 +264,7 @@ class SmartModel(models.Model):
                         num_errors += 1
 
                 except SmartImportRowError as e:
-                    error_messages.append(dict(line=line_number+1, error=str(e)))
+                    error_messages.append(dict(line=line_number + 1, error=str(e)))
 
                 except Exception as e:
                     if log:
@@ -263,9 +275,9 @@ class SmartModel(models.Model):
             break
 
         if import_results is not None:
-            import_results['records'] = len(records)
-            import_results['errors'] = num_errors + len(error_messages)
-            import_results['error_messages'] = error_messages
+            import_results["records"] = len(records)
+            import_results["errors"] = num_errors + len(error_messages)
+            import_results["error_messages"] = error_messages
 
         return records
 
@@ -280,7 +292,7 @@ class SmartModel(models.Model):
     @classmethod
     def import_raw_csv(cls, filename, user, import_params, log=None, import_results=None):
         # our alternative codec, by default we are the crazy windows encoding
-        ascii_codec = 'cp1252'
+        ascii_codec = "cp1252"
 
         # read the entire file, look for mac_roman characters
         reader = open(filename.name, "rb")
@@ -292,12 +304,12 @@ class SmartModel(models.Model):
             except TypeError:
                 byte_number = byte
 
-            if byte_number in [0x81, 0x8d, 0x8f, 0x90, 0x9d]:
-                ascii_codec = 'mac_roman'
+            if byte_number in [0x81, 0x8D, 0x8F, 0x90, 0x9D]:
+                ascii_codec = "mac_roman"
                 break
         reader.close()
 
-        reader = open(filename.name, "rU", encoding='utf-8-sig')
+        reader = open(filename.name, "rU", encoding="utf-8-sig")
 
         def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
             csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
@@ -345,12 +357,14 @@ class SmartModel(models.Model):
 
             # make sure there are same number of fields
             if len(row) != len(header):
-                raise Exception("Line %d: The number of fields for this row is incorrect. Expected %d but found %d."
-                                % (line_number, len(header), len(row)))
+                raise Exception(
+                    "Line %d: The number of fields for this row is incorrect. Expected %d but found %d."
+                    % (line_number, len(header), len(row))
+                )
 
             field_values = dict(zip(header, row))
-            field_values['created_by'] = user
-            field_values['modified_by'] = user
+            field_values["created_by"] = user
+            field_values["modified_by"] = user
             try:
                 field_values = cls.prepare_fields(field_values, import_params, user)
                 record = cls.create_instance(field_values)
@@ -368,9 +382,9 @@ class SmartModel(models.Model):
                 raise Exception("Line %d: %s\n\n%s" % (line_number, str(e), field_values))
 
         if import_results is not None:
-            import_results['records'] = len(records)
-            import_results['errors'] = num_errors + len(error_messages)
-            import_results['error_messages'] = error_messages
+            import_results["records"] = len(records)
+            import_results["errors"] = num_errors + len(error_messages)
+            import_results["error_messages"] = error_messages
 
         return records
 
@@ -379,6 +393,7 @@ class ActiveManager(models.Manager):
     """
     A manager that only selects items which are still active.
     """
+
     def get_queryset(self):
         """
         Where the magic happens, we automatically throw on an extra is_active = True to every filter
