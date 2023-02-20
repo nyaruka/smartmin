@@ -1,3 +1,7 @@
+v4.2.2 (2023-02-20)
+-------------------------
+ * Bump django from 4.1.6 to 4.1.7
+
 v4.2.1 (2023-01-20)
 -------------------------
  * Allow Django 4.1 and newer versions of celery and redis
