@@ -8,7 +8,6 @@ from smartmin.models import SmartModel
 
 
 def generate_file_path(instance, filename):
-
     file_path_prefix = "csv_imports/"
 
     name, extension = os.path.splitext(filename)

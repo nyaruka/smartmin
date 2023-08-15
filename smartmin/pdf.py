@@ -19,7 +19,6 @@ class PDFMixin(object):
     """
 
     def render_to_response(self, context, **response_kwargs):
-
         response = super(PDFMixin, self).render_to_response(context, **response_kwargs)
 
         # do the actual rendering

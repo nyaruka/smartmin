@@ -709,7 +709,6 @@ class SmartListView(SmartView, ListView):
         """
         # is this a select2 format response?
         if self.request.GET.get("_format", "html") == "select2":
-
             results = []
             for obj in context["object_list"]:
                 result = None
@@ -772,7 +771,6 @@ class SmartXlsView(SmartListView):
         return filename
 
     def render_to_response(self, context, **response_kwargs):
-
         from xlwt import Workbook
 
         book = Workbook()
@@ -857,7 +855,7 @@ class SmartFormMixin(object):
             fields.append("loc")
 
         # provides a hook to programmatically customize fields before rendering
-        for (name, field) in self.form.fields.items():
+        for name, field in self.form.fields.items():
             field = self.customize_form_field(name, field)
             self.form.fields[name] = field
 

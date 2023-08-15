@@ -1,4 +1,4 @@
-from .views import PostCRUDL, CategoryCRUDL, UserCRUDL
+from .views import CategoryCRUDL, PostCRUDL, UserCRUDL
 
 urlpatterns = PostCRUDL().as_urlpatterns()
 urlpatterns += CategoryCRUDL().as_urlpatterns()
