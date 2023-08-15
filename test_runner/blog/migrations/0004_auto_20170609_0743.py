@@ -1,10 +1,10 @@
-from django.db import migrations, models
-import django.utils.timezone
 import uuid
+
+import django.utils.timezone
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("blog", "0003_auto_20170223_0917"),
     ]

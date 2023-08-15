@@ -10,7 +10,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": "smartmin",
         "USER": "smartmin",
         "PASSWORD": "nyaruka",

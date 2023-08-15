@@ -4,7 +4,6 @@ import smartmin.csv_imports.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("csv_imports", "0001_initial"),
     ]

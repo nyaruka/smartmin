@@ -22,7 +22,7 @@ packages = [
 repository = "http://github.com/nyaruka/smartmin"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 Django = ">= 4.0, < 5.0"
 celery = ">= 5.1"
 pytz = "*"
@@ -42,7 +42,7 @@ Pillow = "^9.3.0"
 colorama = "^0.4.6"
 
 [tool.black]
-line-length = 119
+line-length = 120
 
 [tool.ruff]
 line-length = 120
@@ -53,7 +53,7 @@ fix = true
 [tool.isort]
 multi_line_output = 3
 force_grid_wrap = 0
-line_length = 119
+line_length = 120
 include_trailing_comma = true
 combine_as_imports = true
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]

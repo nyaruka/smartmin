@@ -26,9 +26,7 @@ class SmartModel(models.Model):
     dates.
     """
 
-    is_active = models.BooleanField(
-        default=True, help_text="Whether this item is active, use this instead of deleting"
-    )
+    is_active = models.BooleanField(default=True, help_text="Whether this item is active, use this instead of deleting")
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -81,7 +79,6 @@ class SmartModel(models.Model):
             workbook = open_workbook(filename.name, "rb")
 
             for sheet in workbook.sheets():
-
                 # read our header
                 header = []
                 for col in range(sheet.ncols):
@@ -109,7 +106,7 @@ class SmartModel(models.Model):
                     break
             reader.close()
 
-            reader = open(filename.name, "rU", encoding="utf-8-sig")
+            reader = open(filename.name, "r", encoding="utf-8-sig")
 
             def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
                 csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
@@ -309,7 +306,7 @@ class SmartModel(models.Model):
                 break
         reader.close()
 
-        reader = open(filename.name, "rU", encoding="utf-8-sig")
+        reader = open(filename.name, "r", encoding="utf-8-sig")
 
         def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
             csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)

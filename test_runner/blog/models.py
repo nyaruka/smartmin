@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.utils.timezone import now
 
-from smartmin.models import SmartModel, ActiveManager
+from smartmin.models import ActiveManager, SmartModel
 
 
 class Post(SmartModel):

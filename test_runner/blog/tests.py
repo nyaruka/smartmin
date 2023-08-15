@@ -1,29 +1,30 @@
 import json
-import pytz
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from datetime import datetime, timedelta
+import pytz
+
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import timezone
 
 import smartmin
 from smartmin.csv_imports.models import ImportTask
 from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
-from smartmin.templatetags.smartmin import view_as_json, get_value_from_view, get, user_as_string
+from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_string, view_as_json
 from smartmin.tests import SmartminTest
-from smartmin.users.models import FailedLogin, RecoveryToken, PasswordHistory, is_password_complex
+from smartmin.users.models import FailedLogin, PasswordHistory, RecoveryToken, is_password_complex
 from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
+from test_runner.blog.models import Category, Post
 
-from test_runner.blog.models import Post, Category
 from .views import PostCRUDL
 
 
@@ -64,9 +65,7 @@ class PostTest(SmartminTest):
     def assertHasAccess(self, user, url):
         self.client.login(username=user.username, password=user.username)
         response = self.client.get(url)
-        self.assertEquals(
-            200, response.status_code, "User '%s' does not have access to URL: %s" % (user.username, url)
-        )
+        self.assertEquals(200, response.status_code, "User '%s' does not have access to URL: %s" % (user.username, url))
 
     def assertIsLogin(self, response):
         self.assertRedirect(response, reverse("users.user_login"))
@@ -78,9 +77,7 @@ class PostTest(SmartminTest):
         self.assertEqual(reverse("blog.post_delete", args=[self.post.id]), "/blog/post/delete/%d/" % self.post.id)
         self.assertEqual(reverse("blog.post_list"), "/blog/post/")
         self.assertEqual(reverse("blog.post_author"), "/blog/post/author/")
-        self.assertEqual(
-            reverse("blog.post_by_uuid", args=[self.post.uuid]), "/blog/post/by_uuid/%s/" % self.post.uuid
-        )
+        self.assertEqual(reverse("blog.post_by_uuid", args=[self.post.uuid]), "/blog/post/by_uuid/%s/" % self.post.uuid)
 
     def test_smart_url(self):
         self.assertEqual(smart_url("@blog.post_create"), "/blog/post/create/")
@@ -946,9 +943,7 @@ class UserTest(TestCase):
                 self.assertIsNotNone(recovery_token.token)
 
                 self.assertTrue("https://nyaruka.com/users/user/recover/%s" % recovery_token.token in sent_email.body)
-                self.assertFalse(
-                    "https://nyaruka.com//users/user/recover/%s" % recovery_token.token in sent_email.body
-                )
+                self.assertFalse("https://nyaruka.com//users/user/recover/%s" % recovery_token.token in sent_email.body)
 
                 # delete the recovery tokens we have
                 RecoveryToken.objects.all().delete()
@@ -1172,6 +1167,7 @@ class TagTestCase(TestCase):
 
     def test_gmail_time(self):
         import pytz
+
         from smartmin.templatetags.smartmin import gmail_time
 
         # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
