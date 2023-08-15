@@ -427,9 +427,9 @@ class SmartReadView(SmartSingleObjectView, DetailView):
 
     def derive_title(self):
         """
-        By default we just return the string representation of our object
+        Fallback to the string representation of our object
         """
-        return str(self.object)
+        return self.title if self.title is not None else str(self.object)
 
     def derive_fields(self):
         """
@@ -531,9 +531,9 @@ class SmartListView(SmartView, ListView):
         """
         Derives our title from our list
         """
-        title = super(SmartListView, self).derive_title()
+        title = super().derive_title()
 
-        if not title:
+        if title is None:
             return force_str(self.model._meta.verbose_name_plural).title()
         else:
             return title
@@ -808,10 +808,7 @@ class SmartFormMixin(object):
         """
         Derives our title from our object
         """
-        if not self.title:
-            return _("Form")
-        else:
-            return self.title
+        return self.title if self.title is not None else _("Form")
 
     def derive_success_message(self):
         """
@@ -1070,7 +1067,7 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
         """
         Derives our title from our object
         """
-        if not self.title:
+        if self.title is None:
             return _("Edit %s") % force_str(self.model._meta.verbose_name).title()
         else:
             return self.title
@@ -1285,7 +1282,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
         """
         Derives our title from our object
         """
-        if not self.title:
+        if self.title is None:
             return _("Create %s") % force_str(self.model._meta.verbose_name).title()
         else:
             return self.title
