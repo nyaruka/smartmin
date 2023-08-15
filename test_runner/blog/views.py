@@ -2,8 +2,9 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.models import User
 
-from smartmin.views import SmartCRUDL, SmartCreateView, SmartReadView, SmartListView, SmartUpdateView
-from .models import Post, Category
+from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartReadView, SmartUpdateView
+
+from .models import Category, Post
 
 
 class ExcludeForm(forms.ModelForm):

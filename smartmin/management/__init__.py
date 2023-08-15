@@ -61,9 +61,7 @@ def check_role_permissions(role, permissions, current_permissions):
 
             # if this is a wildcard, then query our database for all the permissions that exist on this object
             if action == "*":
-                for perm in Permission.objects.filter(
-                    codename__startswith="%s_" % object, content_type__app_label=app
-                ):
+                for perm in Permission.objects.filter(codename__startswith="%s_" % object, content_type__app_label=app):
                     codenames.append(perm.codename)
             # otherwise, this is an error, continue
             else:
