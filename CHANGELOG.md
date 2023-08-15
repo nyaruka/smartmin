@@ -1,3 +1,9 @@
+v4.2.3 (2023-08-15)
+-------------------------
+ * Fix for python 3.11
+ * Update CI test versions and dev deps
+ * Allow all views to override title using title field
+
 v4.2.2 (2023-02-20)
 -------------------------
  * Bump django from 4.1.6 to 4.1.7
