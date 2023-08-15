@@ -106,7 +106,7 @@ class SmartModel(models.Model):
                     break
             reader.close()
 
-            reader = open(filename.name, "rU", encoding="utf-8-sig")
+            reader = open(filename.name, "r", encoding="utf-8-sig")
 
             def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
                 csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
@@ -306,7 +306,7 @@ class SmartModel(models.Model):
                 break
         reader.close()
 
-        reader = open(filename.name, "rU", encoding="utf-8-sig")
+        reader = open(filename.name, "r", encoding="utf-8-sig")
 
         def unicode_csv_reader(utf8_data, dialect=csv.excel, **kwargs):
             csv_reader = csv.reader(utf8_data, dialect=dialect, **kwargs)
