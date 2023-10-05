@@ -1,3 +1,8 @@
+v4.2.4 (2023-10-05)
+-------------------------
+ * Merge pull request #176 from nyaruka/dependabot/pip/pillow-10.0.1
+ * Bump pillow from 9.5.0 to 10.0.1
+
 v4.2.3 (2023-08-15)
 -------------------------
  * Fix for python 3.11
