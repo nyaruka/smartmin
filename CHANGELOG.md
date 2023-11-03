@@ -1,3 +1,8 @@
+v4.2.5 (2023-11-03)
+-------------------------
+ * Merge pull request #178 from nyaruka/update-deps
+ * Update deps
+
 v4.2.4 (2023-10-05)
 -------------------------
  * Merge pull request #176 from nyaruka/dependabot/pip/pillow-10.0.1
