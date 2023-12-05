@@ -1140,9 +1140,9 @@ class TagTestCase(TestCase):
 
     def test_value_from_view(self):
         context = dict(view=self.read_view, object=self.post)
-        self.assertEquals(self.post.title, get_value_from_view(context, "title"))
+        self.assertEqual(self.post.title, get_value_from_view(context, "title"))
         local_created = self.post.created_on.replace(tzinfo=tzone.utc).astimezone(ZoneInfo("Africa/Kigali"))
-        self.assertEquals(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
+        self.assertEqual(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
 
     def test_view_as_json(self):
         self.list_view.object_list = Post.objects.all()
@@ -1184,7 +1184,7 @@ class TagTestCase(TestCase):
 
         # but a different year is different
         jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo=tzone.utc)
-        self.assertEquals("2/1/12", gmail_time(jan_2, now))
+        self.assertEqual("2/1/12", gmail_time(jan_2, now))
 
     def test_user_as_string(self):
         # plain user have both first and last names
