@@ -2,7 +2,7 @@ import csv
 import json
 import traceback
 import zoneinfo
-from datetime import datetime
+from datetime import datetime, timezone as tzone
 
 from xlrd import XL_CELL_DATE, XLRDError, open_workbook, xldate_as_tuple
 
@@ -220,9 +220,7 @@ class SmartModel(models.Model):
         # timezone for date cells can be specified as an import parameter or defaults to UTC
         # use now to determine a relevant timezone
         naive_timezone = (
-            zoneinfo.ZoneInfo(import_params["timezone"])
-            if import_params and "timezone" in import_params
-            else timezone.utc
+            zoneinfo.ZoneInfo(import_params["timezone"]) if import_params and "timezone" in import_params else tzone.utc
         )
         tz = timezone.now().astimezone(naive_timezone).tzinfo
 
