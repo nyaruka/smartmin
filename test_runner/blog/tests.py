@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-import pytz
+from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
@@ -485,8 +485,8 @@ class PostTest(SmartminTest):
         self.assertEquals(13, authors.permissions.all().count())
 
     def test_smart_model(self):
-        d1 = datetime(2016, 12, 31, 9, 20, 30, 123456, tzinfo=pytz.timezone("Africa/Kigali"))
-        d2 = datetime(2017, 1, 10, 10, 20, 30, 123456, tzinfo=pytz.timezone("Africa/Kigali"))
+        d1 = datetime(2016, 12, 31, 9, 20, 30, 123456, tzinfo=ZoneInfo("Africa/Kigali"))
+        d2 = datetime(2017, 1, 10, 10, 20, 30, 123456, tzinfo=ZoneInfo("Africa/Kigali"))
         d3 = timezone.now()
 
         p1 = Post.objects.create(
@@ -1141,7 +1141,7 @@ class TagTestCase(TestCase):
     def test_value_from_view(self):
         context = dict(view=self.read_view, object=self.post)
         self.assertEquals(self.post.title, get_value_from_view(context, "title"))
-        local_created = self.post.created_on.replace(tzinfo=pytz.utc).astimezone(pytz.timezone("Africa/Kigali"))
+        local_created = self.post.created_on.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("Africa/Kigali"))
         self.assertEquals(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
 
     def test_view_as_json(self):
@@ -1166,8 +1166,6 @@ class TagTestCase(TestCase):
         self.assertEquals("title: {title} id: {id}".format(**kwargs), map("title: %(title)s id: %(id)d", self.post))
 
     def test_gmail_time(self):
-        import pytz
-
         from smartmin.templatetags.smartmin import gmail_time
 
         # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
@@ -1185,7 +1183,7 @@ class TagTestCase(TestCase):
         self.assertEquals(test_date.strftime("%b") + " 2", gmail_time(test_date, now))
 
         # but a different year is different
-        jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo=pytz.utc)
+        jan_2 = datetime(2012, 1, 2, 17, 5, 0, 0).replace(tzinfo=timezone.utc)
         self.assertEquals("2/1/12", gmail_time(jan_2, now))
 
     def test_user_as_string(self):
