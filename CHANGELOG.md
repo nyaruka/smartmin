@@ -1,3 +1,7 @@
+v5.0.0 (2023-12-06)
+-------------------------
+ * Support django 5.0
+
 v4.2.5 (2023-11-03)
 -------------------------
  * Merge pull request #178 from nyaruka/update-deps
