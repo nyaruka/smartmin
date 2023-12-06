@@ -7,7 +7,7 @@ jobs:
       matrix:
         python-version: ["3.10.x", "3.11.x"]
         pg-version: ["14", "15"]
-        django-version: ["4.1.x", "4.2.x"]
+        django-version: ["4.1.x", "4.2.x", "5.0.x"]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

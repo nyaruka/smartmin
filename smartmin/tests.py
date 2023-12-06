@@ -26,14 +26,14 @@ class SmartminTestMixin(object):
         # but now we can!
         if not post_data:
             response = self.client.get(url)
-            self.assertEquals(200, response.status_code)
+            self.assertEqual(200, response.status_code)
         else:
             response = self.client.post(url, data=post_data)
             self.assertNotRedirect(response, reverse("users.user_login"), msg="Unexpected redirect to login")
 
             if failOnFormValidation:
                 self.assertNoFormErrors(response, post_data)
-                self.assertEquals(302, response.status_code)
+                self.assertEqual(302, response.status_code)
 
         return response
 
@@ -162,7 +162,7 @@ class _CRUDLTest(SmartminTest):
             return
         object = self.getTestObject()
         self._do_test_view("delete", object, post_data=dict())
-        self.assertEquals(0, len(self.getManager().filter(pk=object.pk)))
+        self.assertEqual(0, len(self.getManager().filter(pk=object.pk)))
 
     def testList(self):
         if "list" not in self.getCRUDL().actions:
@@ -222,7 +222,7 @@ class _CRUDLTest(SmartminTest):
     def assertPageGet(self, action, response):
         if response.status_code == 302:
             self.fail("'%s' resulted in an unexpected redirect to: %s" % (action, response.get("Location")))
-        self.assertEquals(
+        self.assertEqual(
             200,
             response.status_code,
         )
