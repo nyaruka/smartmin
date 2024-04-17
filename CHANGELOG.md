@@ -1,3 +1,16 @@
+v5.0.1 (2024-04-17)
+-------------------------
+ * Merge pull request #185 from nyaruka/dependabot/pip/sqlparse-0.5.0
+ * Bump sqlparse from 0.4.4 to 0.5.0
+ * Merge pull request #184 from nyaruka/dependabot/pip/pillow-10.3.0
+ * Bump pillow from 10.2.0 to 10.3.0
+ * Merge pull request #183 from nyaruka/dependabot/pip/black-24.3.0
+ * Merge pull request #182 from nyaruka/dependabot/pip/django-5.0.3
+ * Bump black from 23.11.0 to 24.3.0
+ * Bump django from 5.0 to 5.0.3
+ * Merge pull request #180 from nyaruka/dependabot/pip/pillow-10.2.0
+ * Bump pillow from 10.1.0 to 10.2.0
+
 v5.0.0 (2023-12-06)
 -------------------------
  * Support django 5.0
