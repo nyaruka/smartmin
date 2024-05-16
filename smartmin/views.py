@@ -1146,7 +1146,7 @@ class SmartUpdateView(SmartModelFormView, UpdateView):
 
     def derive_success_message(self):
         # First check whether a default message has been set
-        if self.success_message is None:
+        if self.success_message is None and getattr(settings, "SMARTMIN_DEFAULT_MESSAGES", True):
             return "Your %s has been updated." % self.model._meta.verbose_name
         else:
             return self.success_message
@@ -1273,7 +1273,7 @@ class SmartCreateView(SmartModelFormView, CreateView):
 
     def derive_success_message(self):
         # First check whether a default message has been set
-        if self.success_message is None:
+        if self.success_message is None and getattr(settings, "SMARTMIN_DEFAULT_MESSAGES", True):
             return _("Your new %s has been created.") % self.model._meta.verbose_name
         else:
             return self.success_message
