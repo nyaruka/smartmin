@@ -1,3 +1,7 @@
+v5.0.2 (2024-05-16)
+-------------------------
+ * Add SMARTMIN_DEFAULT_MESSAGES setting to allow disabling of automatic messages for create and update views
+
 v5.0.1 (2024-04-17)
 -------------------------
  * Merge pull request #185 from nyaruka/dependabot/pip/sqlparse-0.5.0
