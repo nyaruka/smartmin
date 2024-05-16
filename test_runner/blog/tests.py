@@ -184,13 +184,27 @@ class PostTest(SmartminTest):
         post = list(Post.objects.all())[-1]
 
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, "Your new post has been created.")
+        self.assertContains(response, "Your new post has been created.")  # created from model name
 
-        post_data = dict(title="New Post", body="Updated post content", order=1, tags="post")
-        response = self.client.post(reverse("blog.post_update", args=[post.id]), post_data, follow=True)
+        response = self.client.post(
+            reverse("blog.post_update", args=[post.id]),
+            {"title": "New Post", "body": "Updated post content", "order": 1, "tags": "post"},
+            follow=True,
+        )
 
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, "Your blog post has been updated.")
+        self.assertContains(response, "Your blog post has been updated.")  # set explicitly on view
+
+        # can disable auto-creating success messages from model names
+        with self.settings(SMARTMIN_DEFAULT_MESSAGES=False):
+            response = self.client.post(
+                reverse("blog.post_create"),
+                {"title": "Post 2", "body": "Hi Again", "order": 1, "tags": "post"},
+                follow=True,
+            )
+
+        self.assertEquals(200, response.status_code)
+        self.assertNotContains(response, "Your new post has been created.")  # disabled
 
     def test_message_tags(self):
         self.client.login(username="author", password="author")
