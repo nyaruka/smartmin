@@ -1,23 +1,23 @@
 import json
 from datetime import datetime, timedelta, timezone as tzone
 from unittest.mock import patch
-
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import F, Value
+from django.db.models.functions import Concat
 from django.test import TestCase, override_settings
 from django.test.client import Client
-from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 import smartmin
 from smartmin.csv_imports.models import ImportTask
-from smartmin.management import check_role_permissions
 from smartmin.models import SmartImportRowError
+from smartmin.perms import update_group_permissions
 from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_string, view_as_json
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, PasswordHistory, RecoveryToken, is_password_complex
@@ -481,22 +481,71 @@ class PostTest(SmartminTest):
     def test_management(self):
         authors = Group.objects.get(name="Authors")
 
+        def perms(g):
+            return set(
+                g.permissions.values_list(Concat(F("content_type__app_label"), Value("."), F("codename")), flat=True)
+            )
+
+        with self.assertRaises(ValueError):
+            update_group_permissions(authors, ("blog.",))
+        with self.assertRaises(ValueError):
+            update_group_permissions(authors, ("blog.post.too.many.dots",))
+        with self.assertRaises(ValueError):
+            update_group_permissions(authors, ("blog.category.not_valid_either",))
+        with self.assertRaises(ValueError):
+            update_group_permissions(authors, ("blog.category_not_valid_either",))
+
+        self.assertEqual(
+            {
+                "blog.category_create",
+                "blog.category_delete",
+                "blog.category_list",
+                "blog.category_read",
+                "blog.category_update",
+                "blog.post_author",
+                "blog.post_create",
+                "blog.post_csv_import",
+                "blog.post_delete",
+                "blog.post_exclude",
+                "blog.post_exclude2",
+                "blog.post_list",
+                "blog.post_list_no_pagination",
+                "blog.post_messages",
+                "blog.post_read",
+                "blog.post_readonly",
+                "blog.post_readonly2",
+                "blog.post_update",
+            },
+            perms(authors),
+        )  # no change
+
         # reduce our permission set to not include categories
-        permissions = (
-            "blog.post.*",
-            "blog.post.too.many.dots",
-            "blog.category.not_valid_either",
-            "blog.",
-            "blog.foo.*",
+        update_group_permissions(authors, permissions=("blog.post.*", "blog.foo.*"))
+
+        # category permissions should have been removed
+        self.assertEqual(
+            {
+                "blog.post_author",
+                "blog.post_create",
+                "blog.post_csv_import",
+                "blog.post_delete",
+                "blog.post_exclude",
+                "blog.post_exclude2",
+                "blog.post_list",
+                "blog.post_list_no_pagination",
+                "blog.post_messages",
+                "blog.post_read",
+                "blog.post_readonly",
+                "blog.post_readonly2",
+                "blog.post_update",
+            },
+            perms(authors),
         )
 
-        self.assertEqual(18, authors.permissions.all().count())
+        # reduce our permission to specific post permissions
+        update_group_permissions(authors, permissions=("blog.post_create", "blog.post_list"))
 
-        # check that they are reassigned
-        check_role_permissions(authors, permissions, authors.permissions.all())
-
-        # removing all category actions should bring us to 10
-        self.assertEqual(13, authors.permissions.all().count())
+        self.assertEqual({"blog.post_create", "blog.post_list"}, perms(authors))
 
     def test_smart_model(self):
         d1 = datetime(2016, 12, 31, 9, 20, 30, 123456, tzinfo=ZoneInfo("Africa/Kigali"))
