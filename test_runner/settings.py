@@ -142,11 +142,9 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "smartmin",
     "smartmin.users",
+    "test_runner.authors",
     "test_runner.blog",
-    # Uncomment the next line to enable the admin:
     "django.contrib.admin",
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
     "smartmin.csv_imports",
 )
 
@@ -177,8 +175,8 @@ PERMISSIONS = {
         "read",  # can read an object, viewing it's details
         "update",  # can update an object
         "delete",  # can delete an object,
-        "list",
-    ),  # can view a list of the objects
+        "list",  # can view a list of the objects
+    ),
     "blog.post": (
         "author",
         "exclude",
@@ -190,16 +188,14 @@ PERMISSIONS = {
         "list_no_pagination",
     ),
     "auth.user": ("profile",),
-    # invalid content type for test
-    "blog.foo": ("nothing",),
 }
 
 # assigns the permissions that each group should have, here creating an Administrator group with
 # authority to create and change users
 GROUP_PERMISSIONS = {
-    "Administrator": ("auth.user.*",),
-    "Editors": ("blog.post_update", "blog.post_list", "auth.user_profile"),
-    "Authors": ("blog.post.*", "blog.category.*"),
+    "Administrator": ("authors.author.*",),
+    "Editors": ("blog.post_update", "blog.post_list"),
+    "Authors": ("blog.post.*", "blog.category.*", "authors.author_read"),
 }
 
 LOGIN_URL = "/users/login/"
