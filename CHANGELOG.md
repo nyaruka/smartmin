@@ -1,3 +1,7 @@
+v5.0.4 (2024-06-11)
+-------------------------
+ * Rework perms again, this time to configure the perms for each app individually
+
 v5.0.3 (2024-06-11)
 -------------------------
  * Refactor permissions code
