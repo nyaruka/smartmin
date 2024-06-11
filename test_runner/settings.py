@@ -142,7 +142,6 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "smartmin",
     "smartmin.users",
-    "test_runner.authors",
     "test_runner.blog",
     "django.contrib.admin",
     "smartmin.csv_imports",
@@ -193,9 +192,9 @@ PERMISSIONS = {
 # assigns the permissions that each group should have, here creating an Administrator group with
 # authority to create and change users
 GROUP_PERMISSIONS = {
-    "Administrator": ("authors.author.*",),
-    "Editors": ("blog.post_update", "blog.post_list"),
-    "Authors": ("blog.post.*", "blog.category.*", "authors.author_read"),
+    "Administrator": ("auth.user.*",),
+    "Editors": ("blog.post_update", "blog.post_list", "auth.user_profile"),
+    "Authors": ("blog.post.*", "blog.category.*", "auth.user_profile"),
 }
 
 LOGIN_URL = "/users/login/"
