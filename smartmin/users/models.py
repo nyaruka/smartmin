@@ -4,7 +4,12 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.db import models
+from django.db.models.signals import post_migrate
 from django.utils import timezone
+
+from .perms import sync_permissions
+
+post_migrate.connect(sync_permissions)
 
 
 def is_password_complex(password):
