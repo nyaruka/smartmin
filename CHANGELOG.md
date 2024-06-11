@@ -1,3 +1,7 @@
+v5.0.3 (2024-06-11)
+-------------------------
+ * Refactor permissions code
+
 v5.0.2 (2024-05-16)
 -------------------------
  * Add SMARTMIN_DEFAULT_MESSAGES setting to allow disabling of automatic messages for create and update views
