@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone as tzone
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.core import mail
@@ -478,25 +479,40 @@ class PostTest(SmartminTest):
     def test_version(self):
         self.assertTrue(smartmin.__version__ is not None)
 
-    def test_management(self):
+    def test_permissions(self):
+        admins = Group.objects.get(name="Administrator")
         authors = Group.objects.get(name="Authors")
+        blog_app = apps.get_app_config("blog")
 
         def perms(g):
             return set(
                 g.permissions.values_list(Concat(F("content_type__app_label"), Value("."), F("codename")), flat=True)
             )
 
-        with self.assertRaises(ValueError):
-            update_group_permissions(authors, ("blog.",))
-        with self.assertRaises(ValueError):
-            update_group_permissions(authors, ("blog.post.too.many.dots",))
-        with self.assertRaises(ValueError):
-            update_group_permissions(authors, ("blog.category.not_valid_either",))
-        with self.assertRaises(ValueError):
-            update_group_permissions(authors, ("blog.category_not_valid_either",))
-
         self.assertEqual(
             {
+                "auth.user_read",
+                "auth.user_update",
+                "auth.user_delete",
+                "auth.user_create",
+                "auth.user_list",
+                "auth.user_profile",
+            },
+            perms(admins),
+        )
+
+        with self.assertRaises(ValueError):
+            update_group_permissions(blog_app, authors, ("blog.",))
+        with self.assertRaises(ValueError):
+            update_group_permissions(blog_app, authors, ("blog.post.too.many.dots",))
+        with self.assertRaises(ValueError):
+            update_group_permissions(blog_app, authors, ("blog.category.not_valid_either",))
+        with self.assertRaises(ValueError):
+            update_group_permissions(blog_app, authors, ("blog.category_not_valid_either",))
+
+        self.assertEqual(  # no change
+            {
+                "auth.user_profile",
                 "blog.category_create",
                 "blog.category_delete",
                 "blog.category_list",
@@ -517,14 +533,27 @@ class PostTest(SmartminTest):
                 "blog.post_update",
             },
             perms(authors),
-        )  # no change
+        )
+
+        self.assertEqual(  # no change
+            {
+                "auth.user_read",
+                "auth.user_update",
+                "auth.user_delete",
+                "auth.user_create",
+                "auth.user_list",
+                "auth.user_profile",
+            },
+            perms(admins),
+        )
 
         # reduce our permission set to not include categories
-        update_group_permissions(authors, permissions=("blog.post.*", "blog.foo.*"))
+        update_group_permissions(blog_app, authors, permissions=("blog.post.*", "blog.foo.*"))
 
         # category permissions should have been removed
         self.assertEqual(
             {
+                "auth.user_profile",
                 "blog.post_author",
                 "blog.post_create",
                 "blog.post_csv_import",
@@ -542,10 +571,22 @@ class PostTest(SmartminTest):
             perms(authors),
         )
 
-        # reduce our permission to specific post permissions
-        update_group_permissions(authors, permissions=("blog.post_create", "blog.post_list"))
+        self.assertEqual(  # no change to other group
+            {
+                "auth.user_read",
+                "auth.user_update",
+                "auth.user_delete",
+                "auth.user_create",
+                "auth.user_list",
+                "auth.user_profile",
+            },
+            perms(admins),
+        )
 
-        self.assertEqual({"blog.post_create", "blog.post_list"}, perms(authors))
+        # reduce our permission to specific post permissions
+        update_group_permissions(blog_app, authors, permissions=("blog.post_create", "blog.post_list"))
+
+        self.assertEqual({"auth.user_profile", "blog.post_create", "blog.post_list"}, perms(authors))
 
     def test_smart_model(self):
         d1 = datetime(2016, 12, 31, 9, 20, 30, 123456, tzinfo=ZoneInfo("Africa/Kigali"))
