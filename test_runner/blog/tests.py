@@ -17,10 +17,10 @@ from django.utils import timezone
 import smartmin
 from smartmin.csv_imports.models import ImportTask
 from smartmin.models import SmartImportRowError
+from smartmin.perms import update_group_permissions
 from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_string, view_as_json
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, PasswordHistory, RecoveryToken, is_password_complex
-from smartmin.users.perms import update_group_permissions
 from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
 from test_runner.blog.models import Category, Post
