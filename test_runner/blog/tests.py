@@ -204,7 +204,7 @@ class PostTest(SmartminTest):
                 follow=True,
             )
 
-        self.assertEquals(200, response.status_code)
+        self.assertEqual(200, response.status_code)
         self.assertNotContains(response, "Your new post has been created.")  # disabled
 
     def test_message_tags(self):
