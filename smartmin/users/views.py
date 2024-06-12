@@ -423,8 +423,8 @@ class UserCRUDL(SmartCRUDL):
             return r"^%s/%s/(?P<token>\w+)/$" % (path, action)
 
         def pre_process(self, request, *args, **kwargs):
-            token = self.kwargs.get("token")
-            validity_time = timezone.now() - timedelta(hours=48)
+            token = self.kwargs["token"]
+            validity_time = timezone.now() - timedelta(hours=1)
             recovery_token = RecoveryToken.objects.filter(created_on__gt=validity_time, token=token)
             if not recovery_token:
                 messages.info(
