@@ -1,3 +1,8 @@
+v5.0.5 (2024-06-12)
+-------------------------
+ * Support Python 3.12
+ * Update password recovery link validity time to 1 hour
+
 v5.0.4 (2024-06-11)
 -------------------------
  * Rework perms again, this time to configure the perms for each app individually
