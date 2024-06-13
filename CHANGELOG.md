@@ -1,3 +1,7 @@
+v5.0.6 (2024-06-13)
+-------------------------
+ * Add related names and replace auto_now_add on user app models
+
 v5.0.5 (2024-06-12)
 -------------------------
  * Support Python 3.12
