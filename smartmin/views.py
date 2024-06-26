@@ -1128,7 +1128,7 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
 class SmartUpdateView(SmartModelFormView, UpdateView):
     default_template = "smartmin/update.html"
     exclude = ("created_by", "modified_by")
-    submit_button_name = _("Save Changes")
+    submit_button_name = _("Save")
 
     # allows you to specify the name of URL to use for a remove link that will automatically be shown
     delete_url = None
