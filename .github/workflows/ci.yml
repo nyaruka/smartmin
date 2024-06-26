@@ -6,20 +6,23 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10.x", "3.11.x", "3.12.x"]
-        pg-version: ["14", "15"]
         django-version: ["4.2.x", "5.0.x"]
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: smartmin
+          POSTGRES_USER: smartmin
+          POSTGRES_PASSWORD: nyaruka
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Install PostgreSQL
-        uses: harmon758/postgresql-action@v1
-        with:
-          postgresql version: ${{ matrix.pg-version }}
-          postgresql db: smartmin
-          postgresql user: smartmin
-          postgresql password: nyaruka
 
       - name: Install Python
         uses: actions/setup-python@v5
