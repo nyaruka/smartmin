@@ -1,3 +1,7 @@
+v5.0.7 (2024-06-26)
+-------------------------
+ * Change default button name for update views to just Save
+
 v5.0.6 (2024-06-13)
 -------------------------
  * Add related names and replace auto_now_add on user app models
