@@ -1,3 +1,8 @@
+v5.0.8 (2024-07-11)
+-------------------------
+ * Merge pull request #194 from nyaruka/update-deps
+ * Update deps
+
 v5.0.7 (2024-06-26)
 -------------------------
  * Change default button name for update views to just Save
