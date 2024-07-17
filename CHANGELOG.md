@@ -1,3 +1,7 @@
+v5.0.9 (2024-07-17)
+-------------------------
+ * Update xlrd library
+
 v5.0.8 (2024-07-11)
 -------------------------
  * Merge pull request #194 from nyaruka/update-deps
