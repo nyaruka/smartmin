@@ -23,7 +23,7 @@ repository = "http://github.com/nyaruka/smartmin"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-Django = ">= 4.0, < 5.1"
+Django = ">= 5.0, < 5.2"
 celery = ">= 5.1"
 redis = ">= 3.5.3"
 sqlparse = ">=0.4.1,<0.6.0"
