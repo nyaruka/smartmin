@@ -1094,9 +1094,7 @@ class SmartModelFormView(SmartFormMixin, SmartSingleObjectView, ModelFormMixin):
             self.object = self.post_save(self.object)
 
             messages.success(self.request, self.derive_success_message())
-            response = self.render_to_response(self.get_context_data(form=form))
-            response["REDIRECT"] = self.get_success_url()
-            return response
+            return HttpResponseRedirect(self.get_success_url())
 
         except IntegrityError as e:
             message = str(e).capitalize()
