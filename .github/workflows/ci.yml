@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10.x", "3.11.x", "3.12.x"]
-        django-version: ["5.0.x", "5.1.x"]
+        django-version: ["5.0.0", "5.1.0"]
     runs-on: ubuntu-latest
     
     services:
@@ -37,7 +37,7 @@ jobs:
       - name: Initialize environment
         run: |
           poetry install
-          poetry add django==${{ matrix.django-version }}
+          poetry add django@~${{ matrix.django-version }}
 
       - name: Run pre-test checks
         run: poetry run ./code_check.py --debug
