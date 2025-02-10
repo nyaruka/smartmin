@@ -182,7 +182,6 @@ PERMISSIONS = {
         "readonly",
         "readonly2",
         "messages",
-        "csv_import",
         "list_no_pagination",
     ),
     "auth.user": ("profile",),

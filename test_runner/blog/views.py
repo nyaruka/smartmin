@@ -54,7 +54,6 @@ class PostCRUDL(SmartCRUDL):
         "readonly",
         "readonly2",
         "messages",
-        "csv_import",
         "by_uuid",
         "refresh",
         "no_refresh",

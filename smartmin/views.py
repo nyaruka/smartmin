@@ -1,4 +1,3 @@
-import json
 import operator
 from functools import reduce
 from urllib.parse import quote as urlquote
@@ -18,8 +17,6 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, FormView, ModelFormMixin, ProcessFormView, UpdateView
-
-from smartmin.mixins import NonAtomicMixin
 
 from . import widgets
 
