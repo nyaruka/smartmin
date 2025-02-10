@@ -1,3 +1,7 @@
+v5.1.1 (2024-11-25)
+-------------------------
+ * Smartmin doesn't concern itself with formax
+
 v5.1.0 (2024-08-16)
 -------------------------
  * Support Django 5.1
