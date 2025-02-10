@@ -1,3 +1,8 @@
+v5.1.2 (2025-02-10)
+-------------------------
+ * Remove CSV import functionality
+ * Update pyproject.toml for poetry 2
+
 v5.1.1 (2024-11-25)
 -------------------------
  * Smartmin doesn't concern itself with formax
