@@ -15,9 +15,6 @@ celerybeat-schedule
 
 *.DS_Store
 .tox/
-csv_imports/
-!smartmin/csv_imports/
-
 .vscode/
 deploy
 fabric

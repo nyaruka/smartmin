@@ -19,7 +19,6 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, FormView, ModelFormMixin, ProcessFormView, UpdateView
 
-from smartmin.csv_imports.models import ImportTask
 from smartmin.mixins import NonAtomicMixin
 
 from . import widgets
@@ -1288,30 +1287,6 @@ class SmartCreateView(SmartModelFormView, CreateView):
             return self.title
 
 
-class SmartCSVImportView(NonAtomicMixin, SmartCreateView):
-    success_url = "id@csv_imports.importtask_read"
-
-    fields = ("csv_file",)
-
-    def derive_title(self):
-        return _("Import %s") % self.crudl.model._meta.verbose_name_plural.title()
-
-    def pre_save(self, obj):
-        obj = super(SmartCSVImportView, self).pre_save(obj)
-        obj.model_class = "%s.%s" % (self.crudl.model.__module__, self.crudl.model.__name__)
-        return obj
-
-    def post_save(self, task):
-        task = super(SmartCSVImportView, self).post_save(task)
-
-        task.import_params = json.dumps(self.form.data)
-
-        # kick off our CSV import
-        task.start()
-
-        return task
-
-
 class SmartCRUDL(object):
     actions = ("create", "read", "update", "delete", "list")
     model_name = None
@@ -1462,10 +1437,6 @@ class SmartCRUDL(object):
                     options["add_button"] = True
 
                 view = type(str("%sListView" % self.model_name), (SmartListView,), options)
-
-            elif action == "csv_import":
-                options["model"] = ImportTask
-                view = type(str("%sCSVImportView" % self.model_name), (SmartCSVImportView,), options)
 
         if not view:
             # couldn't find a view?  blow up

@@ -16,7 +16,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 import smartmin
-from smartmin.csv_imports.models import ImportTask
 from smartmin.models import SmartImportRowError
 from smartmin.perms import update_group_permissions
 from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_string, view_as_json
@@ -668,89 +667,6 @@ class PostTest(SmartminTest):
 
         with open("test_runner/blog/test_files/bom_import.csv", "rb") as open_file:
             self.assertEqual(Post.get_import_file_headers(open_file), ["urn:tel", "name", "field:email-address"])
-
-    def test_csv_import(self):
-        with self.settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_RESULT_BACKED="cache"):
-            import_url = reverse("blog.post_csv_import")
-
-            response = self.client.get(import_url)
-            self.assertRedirect(response, reverse("users.user_login"))
-
-            self.client.login(username="author", password="author")
-
-            response = self.client.get(import_url)
-            self.assertTrue(200, response.status_code)
-            self.assertEqual(response.request["PATH_INFO"], import_url)
-
-            csv_file = open("test_runner/blog/test_files/posts.csv", "rb")
-            post_data = dict(csv_file=csv_file)
-
-            response = self.client.post(import_url, post_data, follow=True)
-            self.assertEqual(200, response.status_code)
-
-            task = ImportTask.objects.get()
-            self.assertEqual(json.loads(task.import_results), dict(records=4, errors=0, error_messages=[]))
-
-            # new posts should all have a new tag
-            self.assertEqual(Post.objects.filter(tags="new").count(), 4)
-
-            ImportTask.objects.all().delete()
-
-            csv_file = open("test_runner/blog/test_files/posts.xls", "rb")
-            post_data = dict(csv_file=csv_file)
-
-            response = self.client.post(import_url, post_data, follow=True)
-            self.assertEqual(200, response.status_code)
-
-            task = ImportTask.objects.get()
-            self.assertEqual(json.loads(task.import_results), dict(records=4, errors=0, error_messages=[]))
-
-            ImportTask.objects.all().delete()
-
-            with patch("test_runner.blog.models.Post.create_instance") as mock_create_instance:
-                mock_create_instance.side_effect = SmartImportRowError("foo")
-
-                csv_file = open("test_runner/blog/test_files/posts.csv", "rb")
-                post_data = dict(csv_file=csv_file)
-                response = self.client.post(import_url, post_data, follow=True)
-                self.assertEqual(200, response.status_code)
-
-                task = ImportTask.objects.get()
-                self.assertEqual(
-                    json.loads(task.import_results),
-                    dict(
-                        records=0,
-                        errors=4,
-                        error_messages=[
-                            dict(line=2, error="foo"),
-                            dict(line=3, error="foo"),
-                            dict(line=4, error="foo"),
-                            dict(line=5, error="foo"),
-                        ],
-                    ),
-                )
-
-                ImportTask.objects.all().delete()
-
-                csv_file = open("test_runner/blog/test_files/posts.xls", "rb")
-                post_data = dict(csv_file=csv_file)
-                response = self.client.post(import_url, post_data, follow=True)
-                self.assertEqual(200, response.status_code)
-
-                task = ImportTask.objects.get()
-                self.assertEqual(
-                    json.loads(task.import_results),
-                    dict(
-                        records=0,
-                        errors=4,
-                        error_messages=[
-                            dict(line=2, error="foo"),
-                            dict(line=3, error="foo"),
-                            dict(line=4, error="foo"),
-                            dict(line=5, error="foo"),
-                        ],
-                    ),
-                )
 
 
 class UserTest(TestCase):
