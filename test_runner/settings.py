@@ -144,7 +144,6 @@ INSTALLED_APPS = (
     "smartmin.users",
     "test_runner.blog",
     "django.contrib.admin",
-    "smartmin.csv_imports",
 )
 
 # A sample logging configuration. The only tangible logging
@@ -183,7 +182,6 @@ PERMISSIONS = {
         "readonly",
         "readonly2",
         "messages",
-        "csv_import",
         "list_no_pagination",
     ),
     "auth.user": ("profile",),
