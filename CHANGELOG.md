@@ -1,3 +1,7 @@
+v5.2.0 (2025-05-13)
+-------------------------
+ * Update to support django 5.2
+
 v5.1.2 (2025-02-10)
 -------------------------
  * Remove CSV import functionality
