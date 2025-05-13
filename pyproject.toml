@@ -7,9 +7,9 @@ authors = [
     {"name" = "TextIt", "email" = "code@textit.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<4.0"
 dependencies = [
-    "Django (>= 5.0,< 5.2)",
+    "Django (>= 5.1,< 5.3)",
     "celery (>=5.1)",
     "redis (>=3.5.3)",
     "sqlparse (>=0.4.1,<0.6.0)",
