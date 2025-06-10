@@ -1,3 +1,8 @@
+v5.2.1 (2025-06-10)
+-------------------------
+ * Merge pull request #205 from nyaruka/dependabot/pip/django-5.1.10
+ * Bump django from 5.1.4 to 5.1.10
+
 v5.2.0 (2025-05-13)
 -------------------------
  * Update to support django 5.2
