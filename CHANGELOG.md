@@ -1,3 +1,7 @@
+v5.2.2 (2025-06-13)
+-------------------------
+ * Make celery/redis dev only dependencies
+
 v5.2.1 (2025-06-10)
 -------------------------
  * Merge pull request #205 from nyaruka/dependabot/pip/django-5.1.10
