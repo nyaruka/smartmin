@@ -5,8 +5,8 @@ jobs:
     name: Test
     strategy:
       matrix:
-        python-version: ["3.11.x", "3.12.x", "3.13.x"]
-        django-version: ["5.1.0", "5.2.1"]
+        python-version: ["3.12.x", "3.13.x", "3.14.x"]
+        django-version: ["5.1.12", "5.2.9", "6.0"]
     runs-on: ubuntu-latest
     
     services:
