@@ -19,3 +19,4 @@ celerybeat-schedule
 deploy
 fabric
 fabfile.*
+.venv/
