@@ -31,6 +31,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
 
       - name: Initialize environment
         run: |
@@ -69,6 +71,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
 
       - name: Publish release
         run: |
