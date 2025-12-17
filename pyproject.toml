@@ -32,17 +32,19 @@ packages = [
 repository = "http://github.com/nyaruka/smartmin"
 
 
-[tool.poetry.group.dev.dependencies]
-celery = "^5.1.0"
-redis = "^3.5.3"
-black = "^24.3.0"
-coverage = {extras = ["toml"], version = "^7.2.7"}
-isort = "^5.12.0"
-ruff = "^0.0.278"
-psycopg2-binary = "^2.9.1"
-funcsigs = "^1.0.2"
-Pillow = "^10.3.0"
-colorama = "^0.4.6"
+[project.optional-dependencies]
+dev = [
+    "celery>=5.1.0",
+    "redis>=3.5.3",
+    "black>=24.3.0",
+    "coverage[toml]>=7.2.7",
+    "isort>=5.12.0",
+    "ruff>=0.0.278",
+    "psycopg2-binary>=2.9.1",
+    "funcsigs>=1.0.2",
+    "Pillow>=10.3.0",
+    "colorama>=0.4.6",
+]
 
 [tool.black]
 line-length = 120
