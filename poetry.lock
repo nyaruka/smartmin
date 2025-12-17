@@ -930,4 +930,4 @@ dev = ["Pillow", "black", "celery", "colorama", "coverage", "funcsigs", "isort",
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "ca3b9008b1998d3e930416a25b44ea1c70a0c76c3a0393c99a1cdd3373fef464"
+content-hash = "fc66d6740f40d79849f5323f6c06b292ca73e7369471e51658193452a14f9377"
