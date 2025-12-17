@@ -36,7 +36,7 @@ jobs:
 
       - name: Initialize environment
         run: |
-          poetry install
+          poetry install --all-groups
           poetry add django@~${{ matrix.django-version }}
 
       - name: Run pre-test checks
