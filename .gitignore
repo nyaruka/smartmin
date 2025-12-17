@@ -19,3 +19,7 @@ celerybeat-schedule
 deploy
 fabric
 fabfile.*
+
+# uv
+.venv/
+.python-version
