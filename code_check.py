@@ -39,7 +39,7 @@ if __name__ == "__main__":
     cmd("black smartmin test_runner")
 
     status("Running ruff")
-    cmd("ruff smartmin")
+    cmd("ruff check smartmin")
 
     status("Running isort")
     cmd("isort smartmin")
