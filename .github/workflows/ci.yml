@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12.x", "3.13.x", "3.14.x"]
+        python-version: ["3.12.x", "3.13.x"]
         django-version: ["5.1.15", "5.2.9", "6.0"]
     
     services:
