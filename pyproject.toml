@@ -47,6 +47,7 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
+fix = true
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
