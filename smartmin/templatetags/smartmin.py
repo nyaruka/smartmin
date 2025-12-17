@@ -57,7 +57,7 @@ def get_value_from_view(context, field):
     value = view.lookup_field_value(context, obj, field)
 
     # it's a date
-    if type(value) == datetime:
+    if isinstance(value, datetime):
         return format_datetime(value)
 
     return value
@@ -73,7 +73,7 @@ def get_value(context, obj, field):
     """
     view = context["view"]
     value = view.lookup_field_value(context, obj, field)
-    if type(value) == datetime:
+    if isinstance(value, datetime):
         return format_datetime(value)
 
     return value
