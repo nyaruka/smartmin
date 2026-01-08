@@ -1,3 +1,9 @@
+v5.2.4 (2026-01-08)
+-------------------------
+ * Bump python versions for CI
+ * Switch from Poetry to uv package manager
+ * Update django dependency
+
 v5.2.2 (2025-06-13)
 -------------------------
  * Make celery/redis dev only dependencies

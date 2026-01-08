@@ -1,6 +1,6 @@
 [project]
 name = "smartmin"
-version = "5.2.2"
+version = "5.2.4"
 description = "Scaffolding system for Django object management."
 license = { text = "BSD" }
 authors = [

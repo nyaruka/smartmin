@@ -565,7 +565,7 @@ wheels = [
 
 [[package]]
 name = "smartmin"
-version = "5.2.2"
+version = "5.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
