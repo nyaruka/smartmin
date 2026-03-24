@@ -34,7 +34,7 @@ class UserForm(forms.ModelForm):
         # if they specified a new password
         if password and not is_password_complex(password):
             raise forms.ValidationError(
-                _("Passwords must have at least 8 characters, including one uppercase, " "one lowercase and one number")
+                _("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
             )
 
         return password
@@ -73,12 +73,12 @@ class UserUpdateForm(UserForm):
 
         if password and not is_password_complex(password):
             raise forms.ValidationError(
-                _("Passwords must have at least 8 characters, including one uppercase, " "one lowercase and one number")
+                _("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
             )
 
         if password and PasswordHistory.is_password_repeat(self.instance, password):
             raise forms.ValidationError(
-                _("You have used this password before in the past year, " "please use a new password.")
+                _("You have used this password before in the past year, please use a new password.")
             )
 
         return password
@@ -112,12 +112,12 @@ class UserProfileForm(UserForm):
         password = self.cleaned_data["new_password"]
         if password and not is_password_complex(password):
             raise forms.ValidationError(
-                _("Passwords must have at least 8 characters, including one uppercase, " "one lowercase and one number")
+                _("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
             )
 
         if password and PasswordHistory.is_password_repeat(self.instance, password):
             raise forms.ValidationError(
-                _("You have used this password before in the past year, " "please use a new password.")
+                _("You have used this password before in the past year, please use a new password.")
             )
 
         return self.cleaned_data["new_password"]
@@ -186,12 +186,12 @@ class SetPasswordForm(UserForm):
         password = self.cleaned_data["new_password"]
         if password and not is_password_complex(password):
             raise forms.ValidationError(
-                _("Passwords must have at least 8 characters, including one uppercase, " "one lowercase and one number")
+                _("Passwords must have at least 8 characters, including one uppercase, one lowercase and one number")
             )
 
         if password and PasswordHistory.is_password_repeat(self.instance, password):
             raise forms.ValidationError(
-                _("You have used this password before in the past year, " "please use a new password.")
+                _("You have used this password before in the past year, please use a new password.")
             )
 
         return self.cleaned_data["new_password"]
