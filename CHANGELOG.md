@@ -1,3 +1,12 @@
+v5.2.5 (2026-03-24)
+-------------------------
+ * Merge pull request #220 from nyaruka/dependabot/uv/django-5.2.12
+ * Bump django from 5.2.9 to 5.2.12
+ * Merge pull request #221 from nyaruka/update-deps
+ * Replace black with ruff for code formatting
+ * Update deps
+ * Update actions/checkout and codecov-action to v5
+
 v5.2.4 (2026-01-08)
 -------------------------
  * Bump python versions for CI
