@@ -35,8 +35,8 @@ if __name__ == "__main__":
     status("Make any missing migrations")
     cmd("python manage.py makemigrations")
 
-    status("Running black")
-    cmd("black smartmin test_runner")
+    status("Running ruff format")
+    cmd("ruff format --check smartmin test_runner")
 
     status("Running ruff")
     cmd("ruff check smartmin")
