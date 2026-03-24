@@ -32,18 +32,14 @@ repository = "http://github.com/nyaruka/smartmin"
 dev = [
     "celery>=5.1.0",
     "redis>=3.5.3",
-    "black>=24.3.0",
     "coverage[toml]>=7.2.7",
     "isort>=5.12.0",
-    "ruff>=0.0.278",
+    "ruff>=0.15.7",
     "psycopg2-binary>=2.9.1",
     "funcsigs>=1.0.2",
-    "Pillow>=10.3.0",
+    "Pillow>=12.1.1",
     "colorama>=0.4.6",
 ]
-
-[tool.black]
-line-length = 120
 
 [tool.ruff]
 line-length = 120
