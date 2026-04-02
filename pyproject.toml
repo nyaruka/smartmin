@@ -33,7 +33,6 @@ dev = [
     "celery>=5.1.0",
     "redis>=3.5.3",
     "coverage[toml]>=7.2.7",
-    "isort>=5.12.0",
     "ruff>=0.15.7",
     "psycopg2-binary>=2.9.1",
     "funcsigs>=1.0.2",
@@ -46,17 +45,16 @@ line-length = 120
 fix = true
 
 [tool.ruff.lint]
-select = ["E", "F", "W"]
-ignore = ["E501", "F405"]
+select = ["E", "F", "W", "I"]
+ignore = ["E741", "E501", "F405"]
 
-[tool.isort]
-multi_line_output = 3
-force_grid_wrap = 0
-line_length = 120
-include_trailing_comma = true
-combine_as_imports = true
-sections = ["FUTURE", "STDLIB", "THIRDPARTY", "DJANGO", "FIRSTPARTY", "LOCALFOLDER"]
-known_django = ["django"]
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["smartmin"]
+section-order = ["future", "standard-library", "third-party", "django", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+django = ["django"]
 
 [tool.coverage.run]
 source = ["smartmin"]
