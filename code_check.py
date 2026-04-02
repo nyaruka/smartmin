@@ -38,11 +38,8 @@ if __name__ == "__main__":
     status("Running ruff format")
     cmd("ruff format --check smartmin test_runner")
 
-    status("Running ruff")
-    cmd("ruff check smartmin")
-
-    status("Running isort")
-    cmd("isort smartmin")
+    status("Running ruff check")
+    cmd("ruff check --fix smartmin")
 
     # if any code changes were made, exit with error
     if cmd("git diff smartmin test_runner"):
