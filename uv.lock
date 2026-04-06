@@ -508,7 +508,7 @@ requires-dist = [
     { name = "celery", marker = "extra == 'dev'", specifier = ">=5.1.0" },
     { name = "colorama", marker = "extra == 'dev'", specifier = ">=0.4.6" },
     { name = "coverage", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=7.2.7" },
-    { name = "django", specifier = ">=5.1.15,<5.3" },
+    { name = "django", specifier = ">=5.1.15,<6.1" },
     { name = "funcsigs", marker = "extra == 'dev'", specifier = ">=1.0.2" },
     { name = "pillow", marker = "extra == 'dev'", specifier = ">=12.1.1" },
     { name = "psycopg2-binary", marker = "extra == 'dev'", specifier = ">=2.9.1" },
