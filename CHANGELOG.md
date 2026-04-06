@@ -1,3 +1,11 @@
+v6.0.0 (2026-04-06)
+-------------------------
+ * Merge pull request #223 from nyaruka/django6-python313
+ * Add Django 6.0 to CI test matrix
+ * Remove accidentally added poetry.lock and update uv.lock instead
+ * Merge pull request #222 from nyaruka/bye_isort
+ * Replace isort with ruff
+
 v5.2.5 (2026-03-24)
 -------------------------
  * Merge pull request #220 from nyaruka/dependabot/uv/django-5.2.12
