@@ -36,7 +36,7 @@ dev = [
     "ruff>=0.15.7",
     "psycopg2-binary>=2.9.1",
     "funcsigs>=1.0.2",
-    "Pillow>=12.1.1",
+    "Pillow>=12.2.0",
     "colorama>=0.4.6",
 ]
 
