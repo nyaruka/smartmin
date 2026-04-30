@@ -45,14 +45,9 @@ jobs:
       - name: Run tests
         run: |
           uv run coverage run manage.py test smartmin test_runner --verbosity=2
-          uv run coverage report -i
-          uv run coverage xml
 
-      - name: Upload coverage
-        if: success()
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Coverage report
+        run: uv run coverage report -m
 
   release:
     name: Release
