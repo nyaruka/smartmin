@@ -23,3 +23,11 @@ fabfile.*
 # uv
 .venv/
 .python-version
+
+.devcontainer
+
+# AI
+.claude/
+CLAUDE.md
+CODEX.md
+AGENTS.md
