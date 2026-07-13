@@ -1,3 +1,9 @@
+v6.0.1 (2026-07-13)
+-------------------------
+ * Update dependencies
+ * Remove codecov from CI
+ * Update .gitignore to cover .devcontainer and AI agent files
+
 v6.0.0 (2026-04-06)
 -------------------------
  * Merge pull request #223 from nyaruka/django6-python313
