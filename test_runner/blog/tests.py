@@ -25,7 +25,7 @@ from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
 from test_runner.blog.models import Category, Post
 
-from .views import PostCRUDL
+from .views import PostCRUDL, UserCRUDL
 
 
 class PostTest(SmartminTest):
@@ -266,6 +266,20 @@ class PostTest(SmartminTest):
         # default ordering is by title
         response = self.client.get(reverse("blog.post_list"))
         self.assertEqual(list(response.context["post_list"]), [post1, post4, post2, post3, self.post])
+
+        # concrete model fields are orderable, non-fields are not
+        view = response.context["view"]
+        self.assertTrue(view.lookup_field_orderable("title"))
+        self.assertTrue(view.lookup_field_orderable("created_by"))
+        self.assertFalse(view.lookup_field_orderable("not_a_field"))
+
+        # and orderable columns render as sortable headers
+        self.assertContains(response, "header-title header")
+
+        # m2m fields aren't orderable as they would require joins that duplicate rows
+        user_list = UserCRUDL().view_for_action("list")()
+        self.assertFalse(user_list.lookup_field_orderable("groups"))
+        self.assertTrue(user_list.lookup_field_orderable("username"))
 
         # try ordering by title reversed
         response = self.client.get(reverse("blog.post_list") + "?_order=-title")
