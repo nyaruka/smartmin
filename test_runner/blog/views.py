@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.models import User
 
-from smartmin.views import SmartCreateView, SmartCRUDL, SmartListView, SmartReadView, SmartUpdateView
+from smartmin.views import SmartCreateView, SmartCRUDL, SmartCsvView, SmartListView, SmartReadView, SmartUpdateView
 
 from .models import Category, Post
 
@@ -58,6 +58,7 @@ class PostCRUDL(SmartCRUDL):
         "refresh",
         "no_refresh",
         "list_no_pagination",
+        "csv",
     )
 
     class Read(SmartReadView):
@@ -84,6 +85,10 @@ class PostCRUDL(SmartCRUDL):
     class Author(SmartListView):
         fields = ("title", "tags", "created_on", "created_by")
         default_order = ("created_by__username", "order")
+
+    class Csv(SmartCsvView):
+        fields = ("title", "tags")
+        default_order = "title"
 
     class Update(SmartUpdateView):
         success_message = "Your blog post has been updated."
