@@ -713,6 +713,42 @@ class UserTest(TestCase):
         self.assertTrue("form" in response.context)
         self.assertTrue(response.context["form"].errors)
 
+    def test_mimic_protected_users(self):
+        self.client.login(username="superuser", password="superuser")
+
+        # regular users can be mimicked
+        steve = User.objects.create_user("steve", "steve@group.com", "steve")
+        response = self.client.post(reverse("users.user_mimic", args=[steve.id]), follow=True)
+        self.assertEqual(response.context["user"].username, "steve")
+
+        # mimicking steve left us logged in as steve, so log back in as the superuser
+        self.client.logout()
+        self.client.login(username="superuser", password="superuser")
+
+        # but superusers and staff can't be mimicked
+        other_superuser = User.objects.create_user("otheradmin", "other@group.com", "otheradmin")
+        other_superuser.is_superuser = True
+        other_superuser.save()
+
+        staff = User.objects.create_user("staff", "staff@group.com", "staff")
+        staff.is_staff = True
+        staff.save()
+
+        response = self.client.post(reverse("users.user_mimic", args=[other_superuser.id]))
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("superuser", response.wsgi_request.user.username)
+
+        response = self.client.post(reverse("users.user_mimic", args=[staff.id]))
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("superuser", response.wsgi_request.user.username)
+
+        # and their edit pages don't offer the mimic button
+        response = self.client.get(reverse("users.user_update", args=[steve.id]))
+        self.assertContains(response, "Login as")
+
+        response = self.client.get(reverse("users.user_update", args=[other_superuser.id]))
+        self.assertNotContains(response, "Login as")
+
     def test_crudl(self):
         self.client.login(username="superuser", password="superuser")
 
