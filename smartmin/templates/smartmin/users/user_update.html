@@ -2,7 +2,7 @@
 {% load smartmin %}
 
 {% block post-form %}
-{% if perms.auth.user_mimic %}
+{% if perms.auth.user_mimic and not object.is_superuser and not object.is_staff %}
 <form class="smartmin-form form-horizontal" action="{% url 'users.user_mimic' object.id %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="form-group">
