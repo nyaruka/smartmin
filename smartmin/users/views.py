@@ -394,6 +394,10 @@ class UserCRUDL(SmartCRUDL):
     class Mimic(SmartUpdateView):
         fields = ("id",)
 
+        def derive_queryset(self):
+            # don't allow mimicking of superusers or staff as that would allow privilege escalation
+            return super().derive_queryset().exclude(is_staff=True).exclude(is_superuser=True)
+
         def derive_success_message(self):
             return _("You are now logged in as %s") % self.object.username
 
