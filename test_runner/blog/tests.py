@@ -1327,6 +1327,24 @@ class TagTestCase(TestCase):
         self.assertEqual("value", get(test_dict, "key"))
         self.assertEqual("", get(test_dict, "not_there"))
 
+    def test_ssl_urls(self):
+        from smartmin.templatetags.smartmin import non_ssl_url, ssl_url
+
+        read_url = "/blog/post/read/%d/" % self.post.id
+
+        # without SESSION_COOKIE_SECURE we get back plain paths, with and without args
+        self.assertEqual("/blog/post/create/", ssl_url("blog.post_create"))
+        self.assertEqual(read_url, ssl_url("blog.post_read", self.post.id))
+
+        with override_settings(SESSION_COOKIE_SECURE=True, HOSTNAME="example.com"):
+            self.assertEqual("https://example.com" + read_url, ssl_url("blog.post_read", self.post.id))
+
+        with override_settings(HOSTNAME="example.com"):
+            self.assertEqual("http://example.com" + read_url, non_ssl_url("blog.post_read", self.post.id))
+
+        with override_settings(HOSTNAME="localhost"):
+            self.assertEqual("/blog/post/create/", non_ssl_url("blog.post_create"))
+
     def test_map(self):
         from smartmin.templatetags.smartmin import map
 
