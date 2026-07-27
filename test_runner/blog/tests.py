@@ -782,6 +782,30 @@ class UserTest(TestCase):
         self.assertTrue("form" in response.context)
         self.assertTrue(response.context["form"].errors)
 
+    def test_list_group_filter(self):
+        self.client.login(username="superuser", password="superuser")
+
+        steve = User.objects.create_user("steve", "steve@apple.com", "steve")
+        editors = Group.objects.get(name="Editors")
+        steve.groups.add(editors)
+
+        list_url = reverse("users.user_list")
+
+        response = self.client.get(list_url + "?group_id=%d" % editors.id)
+        self.assertEqual([steve], list(response.context["object_list"]))
+        self.assertEqual(editors.id, response.context["group_id"])
+
+        # a non-numeric group_id is ignored rather than an error, leaving the list unfiltered
+        response = self.client.get(list_url + "?group_id=abc")
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.context["group_id"])
+        self.assertEqual([steve], list(response.context["object_list"]))
+
+        # same for an empty group_id
+        response = self.client.get(list_url + "?group_id=")
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.context["group_id"])
+
     def test_login_ambiguous_username(self):
         login_url = reverse("users.user_login")
 

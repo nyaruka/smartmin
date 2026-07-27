@@ -210,11 +210,17 @@ class UserCRUDL(SmartCRUDL):
         add_button = True
         template_name = "smartmin/users/user_list.html"
 
+        def derive_group_id(self):
+            group_id = self.request.POST.get("group_id", self.request.GET.get("group_id", 0))
+            try:
+                return int(group_id)
+            except (TypeError, ValueError):
+                return 0
+
         def get_context_data(self, **kwargs):
             context = super(UserCRUDL.List, self).get_context_data(**kwargs)
             context["groups"] = Group.objects.all()
-            group_id = self.request.POST.get("group_id", self.request.GET.get("group_id", 0))
-            context["group_id"] = int(group_id)
+            context["group_id"] = self.derive_group_id()
             return context
 
         def get_group(self, obj):
@@ -222,8 +228,7 @@ class UserCRUDL(SmartCRUDL):
 
         def get_queryset(self, **kwargs):
             queryset = super(UserCRUDL.List, self).get_queryset(**kwargs)
-            group_id = self.request.POST.get("group_id", self.request.GET.get("group_id", 0))
-            group_id = int(group_id)
+            group_id = self.derive_group_id()
 
             # filter by the group
             if group_id:
