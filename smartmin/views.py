@@ -747,14 +747,14 @@ class SmartCsvView(SmartListView):
         header = []
         for field in fields:
             header.append(str(self.lookup_field_label(dict(), field)))
-        writer.writerow([s.encode("utf-8") for s in header])
+        writer.writerow(header)
 
         # then our actual values
         for obj in self.object_list:
             row = []
             for field in fields:
                 row.append(str(self.lookup_field_value(dict(), obj, field)))
-            writer.writerow([s.encode("utf-8") for s in row])
+            writer.writerow(row)
 
         return response
 

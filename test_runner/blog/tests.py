@@ -431,6 +431,27 @@ class PostTest(SmartminTest):
         self.assertEqual(response.context["url_params"], "?=x&foo=bar&")
         self.assertEqual(response.context["order_params"], "_order=-title&")
 
+    def test_csv_export(self):
+        Post.objects.create(
+            title="Café Poste",
+            body="Non-ASCII content",
+            tags="café",
+            order=1,
+            created_by=self.author,
+            modified_by=self.author,
+        )
+
+        self.client.login(username="superuser", password="superuser")
+
+        response = self.client.get(reverse("blog.post_csv"))
+        self.assertEqual("text/csv; charset=utf-8", response["Content-Type"])
+
+        rows = response.content.decode("utf-8").splitlines()
+        self.assertEqual(3, len(rows))
+        self.assertEqual('"Title","Tags"', rows[0])
+        self.assertEqual('"Café Poste","café"', rows[1])
+        self.assertEqual('"Test Post","testing_tag"', rows[2])
+
     def test_success_url(self):
         self.client.login(username="author", password="author")
 
@@ -533,6 +554,7 @@ class PostTest(SmartminTest):
                 "blog.category_update",
                 "blog.post_author",
                 "blog.post_create",
+                "blog.post_csv",
                 "blog.post_delete",
                 "blog.post_exclude",
                 "blog.post_exclude2",
@@ -568,6 +590,7 @@ class PostTest(SmartminTest):
                 "auth.user_profile",
                 "blog.post_author",
                 "blog.post_create",
+                "blog.post_csv",
                 "blog.post_delete",
                 "blog.post_exclude",
                 "blog.post_exclude2",
