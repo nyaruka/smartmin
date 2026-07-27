@@ -1,5 +1,9 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
+
+logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveBackend(ModelBackend):
@@ -15,7 +19,12 @@ class CaseInsensitiveBackend(ModelBackend):
                 return user
             else:
                 return None
+        except User.MultipleObjectsReturned:
+            logger.warning("multiple users match username %r, refusing authentication", username)
+
+            # burn a hash anyway so this path is indistinguishable from the others
+            User().set_password(password)
         except User.DoesNotExist:
             # Run the default password hasher once to reduce the timing
-            # difference between an existing and a non-existing user (#20760).
+            # difference between a resolvable and an unresolvable user (#20760).
             User().set_password(password)
