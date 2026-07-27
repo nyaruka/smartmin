@@ -747,14 +747,14 @@ class SmartCsvView(SmartListView):
         header = []
         for field in fields:
             header.append(str(self.lookup_field_label(dict(), field)))
-        writer.writerow([s.encode("utf-8") for s in header])
+        writer.writerow(header)
 
         # then our actual values
         for obj in self.object_list:
             row = []
             for field in fields:
                 row.append(str(self.lookup_field_value(dict(), obj, field)))
-            writer.writerow([s.encode("utf-8") for s in row])
+            writer.writerow(row)
 
         return response
 
@@ -1193,52 +1193,6 @@ class SmartModelActionView(SmartFormMixin, SmartSingleObjectView, DetailView, Pr
         # all went well, stuff our success message in and return
         messages.success(self.request, self.derive_success_message())
         return super(SmartModelActionView, self).form_valid(form)
-
-
-class SmartMultiFormView(SmartView, TemplateView):
-    default_template = "smartmin/multi_form.html"
-    forms = {}
-
-    # allows you to specify the name of URL to use for a remove link that will automatically be shown
-    delete_url = None
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-
-        page_forms = []
-        for prefix, form in self.forms.items():
-            f = form(prefix=prefix)
-            page_forms.append(f)
-
-        context["forms"] = page_forms
-
-        return self.render_to_response(context)
-
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-
-        # process our forms
-        page_forms = []
-        valid = True
-        for prefix, form in self.forms.items():
-            f = form(request.POST, prefix=prefix)
-            valid = valid and f.is_valid()
-            page_forms.append(f)
-
-        if not valid:
-            context["forms"] = page_forms
-            return self.render_to_response(context)
-        else:
-            # redirect to success page
-            pass
-
-    def get_context_data(self, **kwargs):
-        context = super(SmartMultiFormView, self).get_context_data(**kwargs)
-
-        if self.delete_url:
-            context["delete_url"] = smart_url(self.delete_url, self.object)
-
-        return context
 
 
 class SmartCreateView(SmartModelFormView, CreateView):

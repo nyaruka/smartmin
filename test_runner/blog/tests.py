@@ -22,7 +22,7 @@ from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_str
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, PasswordHistory, RecoveryToken, is_password_complex
 from smartmin.views import smart_url
-from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
+from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget, VisibleHiddenWidget
 from test_runner.blog.models import Category, Post
 
 from .views import PostCRUDL, UserCRUDL
@@ -431,6 +431,27 @@ class PostTest(SmartminTest):
         self.assertEqual(response.context["url_params"], "?=x&foo=bar&")
         self.assertEqual(response.context["order_params"], "_order=-title&")
 
+    def test_csv_export(self):
+        Post.objects.create(
+            title="Café Poste",
+            body="Non-ASCII content",
+            tags="café",
+            order=1,
+            created_by=self.author,
+            modified_by=self.author,
+        )
+
+        self.client.login(username="superuser", password="superuser")
+
+        response = self.client.get(reverse("blog.post_csv"))
+        self.assertEqual("text/csv; charset=utf-8", response["Content-Type"])
+
+        rows = response.content.decode("utf-8").splitlines()
+        self.assertEqual(3, len(rows))
+        self.assertEqual('"Title","Tags"', rows[0])
+        self.assertEqual('"Café Poste","café"', rows[1])
+        self.assertEqual('"Test Post","testing_tag"', rows[2])
+
     def test_success_url(self):
         self.client.login(username="author", password="author")
 
@@ -533,6 +554,7 @@ class PostTest(SmartminTest):
                 "blog.category_update",
                 "blog.post_author",
                 "blog.post_create",
+                "blog.post_csv",
                 "blog.post_delete",
                 "blog.post_exclude",
                 "blog.post_exclude2",
@@ -568,6 +590,7 @@ class PostTest(SmartminTest):
                 "auth.user_profile",
                 "blog.post_author",
                 "blog.post_create",
+                "blog.post_csv",
                 "blog.post_delete",
                 "blog.post_exclude",
                 "blog.post_exclude2",
@@ -726,6 +749,24 @@ class UserTest(TestCase):
         response = self.client.post(login_url, dict(username="withcaps", password="thepassword"), follow=True)
         self.assertTrue("form" in response.context)
         self.assertTrue(response.context["form"].errors)
+
+    def test_login_ambiguous_username(self):
+        login_url = reverse("users.user_login")
+
+        # two users whose usernames differ only by case
+        User.objects.create_user("John", "john1@group.com", "Password1")
+        User.objects.create_user("john", "john2@group.com", "Password2")
+
+        # ambiguous logins fail cleanly rather than erroring
+        response = self.client.post(login_url, dict(username="JOHN", password="Password1"), follow=True)
+        self.assertTrue("form" in response.context)
+        self.assertTrue(response.context["form"].errors)
+        self.assertFalse(response.context["user"].is_authenticated)
+
+        # even the exact username with its correct password fails while the ambiguity exists
+        response = self.client.post(login_url, dict(username="John", password="Password1"), follow=True)
+        self.assertTrue(response.context["form"].errors)
+        self.assertFalse(response.context["user"].is_authenticated)
 
     def test_mimic_protected_users(self):
         self.client.login(username="superuser", password="superuser")
@@ -1518,6 +1559,15 @@ class PasswordExpirationTestCase(TestCase):
 
 
 class WidgetsTest(SmartminTest):
+    def test_visible_hidden(self):
+        widget = VisibleHiddenWidget()
+
+        html = widget.render("title", "<script>alert(1)</script>")
+
+        self.assertNotIn("<script>", html)
+        self.assertEqual(2, html.count("&lt;script&gt;alert(1)&lt;/script&gt;"))
+        self.assertIn('<input type="hidden" name="title" value="&lt;script&gt;alert(1)&lt;/script&gt;">', html)
+
     def test_image_thumbnail(self):
         widget = ImageThumbnailWidget(320, 240)
         img = SimpleUploadedFile("test_image.jpg", [], content_type="image/jpeg")
