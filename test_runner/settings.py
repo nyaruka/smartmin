@@ -177,6 +177,7 @@ PERMISSIONS = {
     ),
     "blog.post": (
         "author",
+        "csv",
         "exclude",
         "exclude2",
         "readonly",
