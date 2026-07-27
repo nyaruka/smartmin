@@ -1503,7 +1503,7 @@ class WidgetsTest(SmartminTest):
     def test_visible_hidden(self):
         widget = VisibleHiddenWidget()
 
-        html = widget.render("title", '<script>alert(1)</script>')
+        html = widget.render("title", "<script>alert(1)</script>")
 
         self.assertNotIn("<script>", html)
         self.assertEqual(2, html.count("&lt;script&gt;alert(1)&lt;/script&gt;"))
