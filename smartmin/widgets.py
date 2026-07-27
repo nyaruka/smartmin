@@ -11,8 +11,7 @@ class VisibleHiddenWidget(widgets.Widget):
         The 'value' given is not guaranteed to be valid input, so subclass
         implementations should program defensively.
         """
-        html = ""
-        html += "%s" % value
+        html = escape(value)
         html += '<input type="hidden" name="%s" value="%s">' % (escape(name), escape(value))
         return mark_safe(html)
 
