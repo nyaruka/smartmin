@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 from datetime import timedelta
 
@@ -346,7 +346,7 @@ class UserCRUDL(SmartCRUDL):
             context = build_email_context(self.request, user)
 
             if user:
-                token = "".join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
+                token = "".join(secrets.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token, user=user)
                 email_template = loader.get_template(user_email_template)
                 FailedLogin.objects.filter(username__iexact=user.username).delete()
@@ -393,6 +393,10 @@ class UserCRUDL(SmartCRUDL):
 
     class Mimic(SmartUpdateView):
         fields = ("id",)
+
+        def derive_queryset(self):
+            # don't allow mimicking of superusers or staff as that would allow privilege escalation
+            return super().derive_queryset().exclude(is_staff=True).exclude(is_superuser=True)
 
         def derive_success_message(self):
             return _("You are now logged in as %s") % self.object.username
