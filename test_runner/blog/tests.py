@@ -727,6 +727,24 @@ class UserTest(TestCase):
         self.assertTrue("form" in response.context)
         self.assertTrue(response.context["form"].errors)
 
+    def test_login_ambiguous_username(self):
+        login_url = reverse("users.user_login")
+
+        # two users whose usernames differ only by case
+        User.objects.create_user("John", "john1@group.com", "Password1")
+        User.objects.create_user("john", "john2@group.com", "Password2")
+
+        # ambiguous logins fail cleanly rather than erroring
+        response = self.client.post(login_url, dict(username="JOHN", password="Password1"), follow=True)
+        self.assertTrue("form" in response.context)
+        self.assertTrue(response.context["form"].errors)
+        self.assertFalse(response.context["user"].is_authenticated)
+
+        # even the exact username with its correct password fails while the ambiguity exists
+        response = self.client.post(login_url, dict(username="John", password="Password1"), follow=True)
+        self.assertTrue(response.context["form"].errors)
+        self.assertFalse(response.context["user"].is_authenticated)
+
     def test_mimic_protected_users(self):
         self.client.login(username="superuser", password="superuser")
 
