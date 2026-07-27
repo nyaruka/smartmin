@@ -7,7 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -561,14 +561,14 @@ class SmartListView(SmartView, ListView):
 
     def lookup_field_orderable(self, field):
         """
-        Returns whether the passed in field is sortable or not, by default all 'raw' fields, that
-        is fields that are part of the model are sortable.
+        Returns whether the passed in field is sortable or not, by default all concrete model fields
+        are sortable (i.e. not computed fields, m2ms or reverse relations which would require joins).
         """
+        model = self.model if self.model else self.object_list.model
+
         try:
-            self.model._meta.get_field_by_name(field)
-            return True
-        except Exception:
-            # that field doesn't exist, so not sortable
+            return model._meta.get_field(field).concrete
+        except FieldDoesNotExist:
             return False
 
     def get_context_data(self, **kwargs):
