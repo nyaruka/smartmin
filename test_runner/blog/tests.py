@@ -1457,7 +1457,7 @@ class WidgetsTest(SmartminTest):
         img.url = "/media/2423.jpg"
         html = widget.render("logo", img)
 
-        self.assertIn('<img src="/media/2423.jpg" width="320" width="240" />', html)
+        self.assertIn('<img src="/media/2423.jpg" width="320" height="240" />', html)
 
 
 class IsPasswordComplexTest(TestCase):
