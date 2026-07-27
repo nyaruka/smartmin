@@ -7,11 +7,11 @@ class TimezoneMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        response = self.get_response(request)
-
         user_tz = getattr(settings, "USER_TIME_ZONE", None)
 
         if user_tz:
             timezone.activate(user_tz)
+        else:
+            timezone.deactivate()
 
-        return response
+        return self.get_response(request)
