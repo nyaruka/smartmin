@@ -31,3 +31,5 @@ fabfile.*
 CLAUDE.md
 CODEX.md
 AGENTS.md
+
+/csv_imports/
