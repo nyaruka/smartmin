@@ -51,7 +51,7 @@ class ImageThumbnailWidget(widgets.ClearableFileInput):
             except ImportError:
                 pass
 
-            thumb_html += '<td><img src="%s" width="%s" width="%s" /></td>' % (value.url, self.width, self.height)
+            thumb_html += '<td><img src="%s" width="%s" height="%s" /></td>' % (value.url, self.width, self.height)
 
         thumb_html += '<td><input type="checkbox" name="%s-clear" /> Clear' % name
         thumb_html += '<input type="file" name="%s" /></td>' % name

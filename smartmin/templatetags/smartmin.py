@@ -230,22 +230,6 @@ def field_orderable(view, field):
     return view.lookup_field_orderable(field)
 
 
-class PDBNode(template.Node):
-    """
-    Woot woot, simple pdb debugging. {% pdb %}
-    """
-
-    def render(self, context):
-        import pdb
-
-        pdb.set_trace()  # noqa
-
-
-@register.tag
-def pdb(parser, token):
-    return PDBNode()
-
-
 @register.simple_tag(takes_context=True)
 def getblock(context, prefix, suffix=None):
     key = prefix
