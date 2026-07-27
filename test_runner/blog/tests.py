@@ -25,7 +25,7 @@ from smartmin.views import smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
 from test_runner.blog.models import Category, Post
 
-from .views import PostCRUDL
+from .views import PostCRUDL, UserCRUDL
 
 
 class PostTest(SmartminTest):
@@ -266,6 +266,20 @@ class PostTest(SmartminTest):
         # default ordering is by title
         response = self.client.get(reverse("blog.post_list"))
         self.assertEqual(list(response.context["post_list"]), [post1, post4, post2, post3, self.post])
+
+        # concrete model fields are orderable, non-fields are not
+        view = response.context["view"]
+        self.assertTrue(view.lookup_field_orderable("title"))
+        self.assertTrue(view.lookup_field_orderable("created_by"))
+        self.assertFalse(view.lookup_field_orderable("not_a_field"))
+
+        # and orderable columns render as sortable headers
+        self.assertContains(response, "header-title header")
+
+        # m2m fields aren't orderable as they would require joins that duplicate rows
+        user_list = UserCRUDL().view_for_action("list")()
+        self.assertFalse(user_list.lookup_field_orderable("groups"))
+        self.assertTrue(user_list.lookup_field_orderable("username"))
 
         # try ordering by title reversed
         response = self.client.get(reverse("blog.post_list") + "?_order=-title")
@@ -736,6 +750,42 @@ class UserTest(TestCase):
         self.assertTrue("form" in response.context)
         self.assertTrue(response.context["form"].errors)
 
+    def test_mimic_protected_users(self):
+        self.client.login(username="superuser", password="superuser")
+
+        # regular users can be mimicked
+        steve = User.objects.create_user("steve", "steve@group.com", "steve")
+        response = self.client.post(reverse("users.user_mimic", args=[steve.id]), follow=True)
+        self.assertEqual(response.context["user"].username, "steve")
+
+        # mimicking steve left us logged in as steve, so log back in as the superuser
+        self.client.logout()
+        self.client.login(username="superuser", password="superuser")
+
+        # but superusers and staff can't be mimicked
+        other_superuser = User.objects.create_user("otheradmin", "other@group.com", "otheradmin")
+        other_superuser.is_superuser = True
+        other_superuser.save()
+
+        staff = User.objects.create_user("staff", "staff@group.com", "staff")
+        staff.is_staff = True
+        staff.save()
+
+        response = self.client.post(reverse("users.user_mimic", args=[other_superuser.id]))
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("superuser", response.wsgi_request.user.username)
+
+        response = self.client.post(reverse("users.user_mimic", args=[staff.id]))
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("superuser", response.wsgi_request.user.username)
+
+        # and their edit pages don't offer the mimic button
+        response = self.client.get(reverse("users.user_update", args=[steve.id]))
+        self.assertContains(response, "Login as")
+
+        response = self.client.get(reverse("users.user_update", args=[other_superuser.id]))
+        self.assertNotContains(response, "Login as")
+
     def test_crudl(self):
         self.client.login(username="superuser", password="superuser")
 
@@ -1183,7 +1233,10 @@ class TagTestCase(TestCase):
         context = dict(view=self.read_view, object=self.post)
         self.assertEqual(self.post.title, get_value_from_view(context, "title"))
         local_created = self.post.created_on.replace(tzinfo=tzone.utc).astimezone(ZoneInfo("Africa/Kigali"))
-        self.assertEqual(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
+
+        # aware values are rendered in the active timezone
+        with timezone.override("Africa/Kigali"):
+            self.assertEqual(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
 
     def test_view_as_json(self):
         self.list_view.object_list = Post.objects.all()
@@ -1209,10 +1262,11 @@ class TagTestCase(TestCase):
     def test_gmail_time(self):
         from smartmin.templatetags.smartmin import gmail_time
 
-        # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
+        # given the time as now, should display "Hour:Minutes AM|PM" in the active timezone, eg. "5:05 pm"
         now = timezone.now()
         modified_now = now.replace(hour=17, minute=5)
-        self.assertEqual("7:05 pm", gmail_time(modified_now))
+        with timezone.override("Africa/Kigali"):
+            self.assertEqual("7:05 pm", gmail_time(modified_now))
 
         # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
         now = now.replace(day=3, month=3, hour=10)
@@ -1480,7 +1534,7 @@ class WidgetsTest(SmartminTest):
         img.url = "/media/2423.jpg"
         html = widget.render("logo", img)
 
-        self.assertIn('<img src="/media/2423.jpg" width="320" width="240" />', html)
+        self.assertIn('<img src="/media/2423.jpg" width="320" height="240" />', html)
 
 
 class IsPasswordComplexTest(TestCase):
