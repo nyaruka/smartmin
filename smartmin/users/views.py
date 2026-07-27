@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 from datetime import timedelta
 
@@ -346,7 +346,7 @@ class UserCRUDL(SmartCRUDL):
             context = build_email_context(self.request, user)
 
             if user:
-                token = "".join(random.choice(string.ascii_uppercase + string.digits) for x in range(32))
+                token = "".join(secrets.choice(string.ascii_uppercase + string.digits) for x in range(32))
                 RecoveryToken.objects.create(token=token, user=user)
                 email_template = loader.get_template(user_email_template)
                 FailedLogin.objects.filter(username__iexact=user.username).delete()
