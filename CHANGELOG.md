@@ -1,3 +1,23 @@
+v6.1.0 (2026-07-27)
+-------------------------
+ * Apply ruff formatting to new test
+ * Prevent mimicking of superusers and staff users
+ * Don't error on non-numeric group_id values in the user list view
+ * Remove committed test upload artifacts in csv_imports directory
+ * Fix column sorting detection in list views
+ * Fix TimezoneMiddleware to activate timezone before the view runs
+ * Fail authentication cleanly when usernames differ only by case
+ * Fix ssl_url and non_ssl_url template tags to accept URL args
+ * Fix CSV export writing Python byte string reprs instead of text
+ * Prevent open redirect via the loc form field in SmartFormMixin.get_success_url
+ * Escape displayed value in VisibleHiddenWidget to prevent XSS
+ * Remove pdb template tag
+ * Replace deprecated datetime.utcnow in collect_sql
+ * Fix ImageThumbnailWidget rendering a duplicate width attribute instead of height
+ * Remove unfinished SmartMultiFormView
+ * Remove broken PDFMixin module
+ * Use cryptographically secure random source for password recovery tokens
+
 v6.0.1 (2026-07-13)
 -------------------------
  * Update dependencies
