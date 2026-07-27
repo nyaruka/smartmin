@@ -22,7 +22,7 @@ from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_str
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, PasswordHistory, RecoveryToken, is_password_complex
 from smartmin.views import smart_url
-from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget
+from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget, VisibleHiddenWidget
 from test_runner.blog.models import Category, Post
 
 from .views import PostCRUDL, UserCRUDL
@@ -1518,6 +1518,15 @@ class PasswordExpirationTestCase(TestCase):
 
 
 class WidgetsTest(SmartminTest):
+    def test_visible_hidden(self):
+        widget = VisibleHiddenWidget()
+
+        html = widget.render("title", "<script>alert(1)</script>")
+
+        self.assertNotIn("<script>", html)
+        self.assertEqual(2, html.count("&lt;script&gt;alert(1)&lt;/script&gt;"))
+        self.assertIn('<input type="hidden" name="title" value="&lt;script&gt;alert(1)&lt;/script&gt;">', html)
+
     def test_image_thumbnail(self):
         widget = ImageThumbnailWidget(320, 240)
         img = SimpleUploadedFile("test_image.jpg", [], content_type="image/jpeg")
