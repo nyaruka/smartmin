@@ -13,6 +13,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import re_path, reverse
 from django.utils.encoding import force_str
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 from django.views.generic.base import TemplateView
@@ -1013,7 +1014,15 @@ class SmartFormMixin(object):
                 return smart_url(self.success_url, None)
 
         elif "loc" in self.form.cleaned_data:
-            return self.form.cleaned_data["loc"]
+            loc = self.form.cleaned_data["loc"]
+
+            # loc is submitted by the client so only trust it if it points to this host
+            if loc and not url_has_allowed_host_and_scheme(
+                loc, allowed_hosts={self.request.get_host()}, require_https=self.request.is_secure()
+            ):
+                loc = ""
+
+            return loc
 
         raise ImproperlyConfigured("No redirect location found, override get_success_url to not use redirect urls")
 

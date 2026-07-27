@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone as tzone
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
+from django import forms
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import Group, User
@@ -10,7 +11,7 @@ from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import F, Value
 from django.db.models.functions import Concat
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
@@ -21,7 +22,7 @@ from smartmin.perms import update_group_permissions
 from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_string, view_as_json
 from smartmin.tests import SmartminTest
 from smartmin.users.models import FailedLogin, PasswordHistory, RecoveryToken, is_password_complex
-from smartmin.views import smart_url
+from smartmin.views import SmartFormView, smart_url
 from smartmin.widgets import DatePickerWidget, ImageThumbnailWidget, VisibleHiddenWidget
 from test_runner.blog.models import Category, Post
 
@@ -459,6 +460,37 @@ class PostTest(SmartminTest):
         response = self.client.post(reverse("blog.post_create"), post_data, follow=True)
 
         self.assertEqual(reverse("blog.post_list"), response.request["PATH_INFO"])
+
+    def test_success_url_from_loc(self):
+        view = SmartFormView()
+        view.request = RequestFactory().post("/foo/")
+        view.form = forms.Form()
+
+        # relative and same host URLs are trusted
+        view.form.cleaned_data = {"loc": "/blog/post/"}
+        self.assertEqual("/blog/post/", view.get_success_url())
+
+        view.form.cleaned_data = {"loc": "http://testserver/blog/post/"}
+        self.assertEqual("http://testserver/blog/post/", view.get_success_url())
+
+        # no referer leaves loc empty and that is returned as is
+        view.form.cleaned_data = {"loc": ""}
+        self.assertEqual("", view.get_success_url())
+
+        # URLs pointing to other hosts are not trusted
+        view.form.cleaned_data = {"loc": "http://evil.com/blog/post/"}
+        self.assertEqual("", view.get_success_url())
+
+        view.form.cleaned_data = {"loc": "//evil.com"}
+        self.assertEqual("", view.get_success_url())
+
+        # on a secure request, downgrades to plain http are not trusted either
+        view.request = RequestFactory().post("/foo/", secure=True)
+        view.form.cleaned_data = {"loc": "http://testserver/blog/post/"}
+        self.assertEqual("", view.get_success_url())
+
+        view.form.cleaned_data = {"loc": "https://testserver/blog/post/"}
+        self.assertEqual("https://testserver/blog/post/", view.get_success_url())
 
     def test_submit_button_name(self):
         self.client.login(username="author", password="author")
