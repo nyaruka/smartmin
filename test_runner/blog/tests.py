@@ -1160,7 +1160,10 @@ class TagTestCase(TestCase):
         context = dict(view=self.read_view, object=self.post)
         self.assertEqual(self.post.title, get_value_from_view(context, "title"))
         local_created = self.post.created_on.replace(tzinfo=tzone.utc).astimezone(ZoneInfo("Africa/Kigali"))
-        self.assertEqual(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
+
+        # aware values are rendered in the active timezone
+        with timezone.override("Africa/Kigali"):
+            self.assertEqual(local_created.strftime("%b %d, %Y %H:%M"), get_value_from_view(context, "created_on"))
 
     def test_view_as_json(self):
         self.list_view.object_list = Post.objects.all()
@@ -1186,10 +1189,11 @@ class TagTestCase(TestCase):
     def test_gmail_time(self):
         from smartmin.templatetags.smartmin import gmail_time
 
-        # given the time as now, should display "Hour:Minutes AM|PM" eg. "5:05 pm"
+        # given the time as now, should display "Hour:Minutes AM|PM" in the active timezone, eg. "5:05 pm"
         now = timezone.now()
         modified_now = now.replace(hour=17, minute=5)
-        self.assertEqual("7:05 pm", gmail_time(modified_now))
+        with timezone.override("Africa/Kigali"):
+            self.assertEqual("7:05 pm", gmail_time(modified_now))
 
         # given the time beyond 12 hours ago within the same month, should display "MonthName DayOfMonth" eg. "Jan 2"
         now = now.replace(day=3, month=3, hour=10)
