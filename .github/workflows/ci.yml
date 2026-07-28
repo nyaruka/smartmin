@@ -70,3 +70,13 @@ jobs:
         run: |
           uv build
           uv publish --token ${{ secrets.PYPI_TOKEN }}
+
+
+  test-all:
+    name: Test
+    needs: [test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all matrix legs passed
+        run: test "${{ needs.test.result }}" = "success"
