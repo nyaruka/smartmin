@@ -571,7 +571,7 @@ class SmartListView(SmartView, ListView):
         except FieldDoesNotExist:
             return False
 
-        # m2m fields report themselves as concrete on Django < 6.0, so exclude them explicitly
+        # m2ms are excluded explicitly rather than relying on their concreteness, which has varied by Django version
         return model_field.concrete and not model_field.many_to_many
 
     def get_context_data(self, **kwargs):
