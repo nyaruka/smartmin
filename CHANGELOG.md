@@ -1,3 +1,7 @@
+v6.2.1 (2026-08-21)
+-------------------------
+ * Update sqlparse to 0.6.0 which includes several security fixes
+
 v6.2.0 (2026-08-21)
 -------------------------
  * Add support for Django 6.1
