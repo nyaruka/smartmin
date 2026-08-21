@@ -1,3 +1,8 @@
+v6.2.0 (2026-08-21)
+-------------------------
+ * Add support for Django 6.1
+ * Drop support for Django 5.1 and 5.2, and require Python 3.12 or later
+
 v6.1.0 (2026-07-27)
 -------------------------
  * Apply ruff formatting to new test
