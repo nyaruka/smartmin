@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12.x", "3.13.x", "3.14.x"]
-        django-version: ["5.1.15", "5.2.17", "6.0.8", "6.1.0"]
+        django-version: ["5.2.17", "6.0.8", "6.1.0"]
     runs-on: ubuntu-latest
     
     services:
@@ -40,14 +40,14 @@ jobs:
           uv pip install django~=${{ matrix.django-version }}
 
       - name: Run pre-test checks
-        run: uv run ./code_check.py --debug
+        run: uv run --no-sync ./code_check.py --debug
 
       - name: Run tests
         run: |
-          uv run coverage run manage.py test smartmin test_runner --verbosity=2
+          uv run --no-sync coverage run manage.py test smartmin test_runner --verbosity=2
 
       - name: Coverage report
-        run: uv run coverage report -m
+        run: uv run --no-sync coverage report -m
 
   release:
     name: Release

@@ -567,9 +567,12 @@ class SmartListView(SmartView, ListView):
         model = self.model if self.model else self.object_list.model
 
         try:
-            return model._meta.get_field(field).concrete
+            model_field = model._meta.get_field(field)
         except FieldDoesNotExist:
             return False
+
+        # m2m fields report themselves as concrete on Django < 6.0, so exclude them explicitly
+        return model_field.concrete and not model_field.many_to_many
 
     def get_context_data(self, **kwargs):
         """

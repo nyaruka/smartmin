@@ -21,7 +21,7 @@ Smartmin tries to stay in lock step with the latest Django versions. With each n
 a new Smartmin major version and we will reserve major changes (possibly breaking backwards compatibility) for such 
 releases.
 
-The latest version is the 5.* series which supports the Django 5.0 and 4.2.
+The range of Django versions supported by a given Smartmin release is declared in `pyproject.toml`.
 
 About
 =====
