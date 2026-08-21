@@ -39,6 +39,9 @@ jobs:
           uv sync --extra dev
           uv pip install django~=${{ matrix.django-version }}
 
+      - name: Show versions under test
+        run: uv run --no-sync python -c "import sys, django; print('Python', sys.version.split()[0], '/ Django', django.get_version())"
+
       - name: Run pre-test checks
         run: uv run --no-sync ./code_check.py --debug
 
