@@ -1,3 +1,7 @@
+v6.2.2 (2026-09-08)
+-------------------------
+ * Return 403 instead of redirecting to login when an authenticated user lacks permission for a view
+
 v6.2.1 (2026-08-21)
 -------------------------
  * Update sqlparse to 0.6.0 which includes several security fixes
