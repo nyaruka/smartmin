@@ -17,7 +17,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 import smartmin
-from smartmin.models import SmartImportRowError
 from smartmin.perms import update_group_permissions
 from smartmin.templatetags.smartmin import get, get_value_from_view, user_as_string, view_as_json
 from smartmin.tests import SmartminTest
@@ -61,7 +60,9 @@ class PostTest(SmartminTest):
     def assertNoAccess(self, user, url):
         self.client.login(username=user.username, password=user.username)
         response = self.client.get(url)
-        self.assertIsLogin(response)
+        self.assertEqual(
+            403, response.status_code, "User '%s' should not have access to URL: %s" % (user.username, url)
+        )
 
     def assertHasAccess(self, user, url):
         self.client.login(username=user.username, password=user.username)
@@ -817,12 +818,12 @@ class UserTest(TestCase):
         response = self.client.post(login_url, dict(username="JOHN", password="Password1"), follow=True)
         self.assertTrue("form" in response.context)
         self.assertTrue(response.context["form"].errors)
-        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
 
         # even the exact username with its correct password fails while the ambiguity exists
         response = self.client.post(login_url, dict(username="John", password="Password1"), follow=True)
         self.assertTrue(response.context["form"].errors)
-        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
 
     def test_mimic_protected_users(self):
         self.client.login(username="superuser", password="superuser")
@@ -830,7 +831,7 @@ class UserTest(TestCase):
         # regular users can be mimicked
         steve = User.objects.create_user("steve", "steve@group.com", "steve")
         response = self.client.post(reverse("users.user_mimic", args=[steve.id]), follow=True)
-        self.assertEqual(response.context["user"].username, "steve")
+        self.assertEqual(response.wsgi_request.user.username, "steve")
 
         # mimicking steve left us logged in as steve, so log back in as the superuser
         self.client.logout()
@@ -955,12 +956,12 @@ class UserTest(TestCase):
         response = self.client.post(reverse("users.user_mimic", args=[steve.id]), follow=True)
 
         # check if the logged in user is steve now
-        self.assertEqual(response.context["user"].username, "steve")
+        self.assertEqual(response.wsgi_request.user.username, "steve")
         self.assertEqual(response.request["PATH_INFO"], settings.LOGIN_REDIRECT_URL)
 
         # now that steve is the one logged in can he mimic woz?
-        response = self.client.get(reverse("users.user_mimic", args=[woz.id]), follow=True)
-        self.assertEqual(response.request["PATH_INFO"], settings.LOGIN_URL)
+        response = self.client.get(reverse("users.user_mimic", args=[woz.id]))
+        self.assertEqual(403, response.status_code)
 
         # login as super user
         self.assertTrue(self.client.login(username="superuser", password="superuser"))
@@ -978,7 +979,7 @@ class UserTest(TestCase):
 
         # check is access his profile, should not since plain users don't have that permission
         response = self.client.get(reverse("users.user_profile", args=[plain.id]))
-        self.assertEqual(302, response.status_code)
+        self.assertEqual(403, response.status_code)
 
         # log in as an editor instead
         self.assertTrue(self.client.login(username="steve", password=" googleIsNumber1"))
@@ -1265,7 +1266,7 @@ class UserTest(TestCase):
         # try to log in four times
         for i in range(4):
             response = self.client.post(login_url, post_data)
-            self.assertFalse(response.context["user"].is_authenticated)
+            self.assertFalse(response.wsgi_request.user.is_authenticated)
 
         # on the fifth failed login we get redirected
         response = self.client.post(login_url, post_data)
@@ -1435,14 +1436,14 @@ class UserLockoutTestCase(TestCase):
 
         # on the fifth time it should fail
         response = self.client.post(reverse("users.user_login"), post_data, follow=True)
-        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
         content = response.content.decode("utf-8")
         self.assertEqual(content.find(reverse("users.user_forget")), -1)
 
         # even with right password, no dice
         post_data = dict(username="plain", password="plain")
         response = self.client.post(reverse("users.user_login"), post_data, follow=True)
-        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
         content = response.content.decode("utf-8")
         self.assertEqual(content.find(reverse("users.user_forget")), -1)
 
@@ -1464,7 +1465,7 @@ class UserLockoutTestCase(TestCase):
 
             # should now be able to log in
             response = self.client.post(reverse("users.user_login"), post_data, follow=True)
-            self.assertTrue(response.context["user"].is_authenticated)
+            self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def testNoRecoveryNoTimeout(self):
         with self.settings(USER_ALLOW_EMAIL_RECOVERY=False, USER_LOCKOUT_TIMEOUT=-1):
@@ -1509,7 +1510,7 @@ class UserLockoutTestCase(TestCase):
 
             post_data = dict(username="plain", password="Password1")
             response = self.client.post(reverse("users.user_login"), post_data, follow=True)
-            self.assertTrue(response.context["user"].is_authenticated)
+            self.assertTrue(response.wsgi_request.user.is_authenticated)
 
 
 class PasswordExpirationTestCase(TestCase):
@@ -1529,7 +1530,7 @@ class PasswordExpirationTestCase(TestCase):
         self.client.logout()
         post_data = dict(username="plain", password="Password1 ")
         response = self.client.post(reverse("users.user_login"), post_data, follow=True)
-        self.assertTrue(response.context["user"].is_authenticated)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
         # we shouldn't be on a page asking us for a new password
         self.assertFalse("form" in response.context)

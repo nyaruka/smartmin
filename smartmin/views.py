@@ -7,7 +7,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured, PermissionDenied
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -99,6 +99,10 @@ class SmartView:
 
         def wrapper(request, *args, **kwargs):
             if not self.has_permission(request, *args, **kwargs):
+                # redirecting an authenticated user to login would just bounce them straight back here
+                if request.user.is_authenticated:
+                    raise PermissionDenied()
+
                 path = urlquote(request.get_full_path())
                 login_url = kwargs.pop("login_url", settings.LOGIN_URL)
                 redirect_field_name = kwargs.pop("redirect_field_name", REDIRECT_FIELD_NAME)
