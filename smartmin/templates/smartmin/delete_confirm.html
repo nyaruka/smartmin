@@ -5,28 +5,25 @@
 {% block pre-content %}{% endblock %}
 
 {% block content %}
-{% block pjax %}
-<div class="confirmation">
-
-  <h2>{% trans "Remove Item?" %}</h2>
-  <p>
-    {% blocktrans with object=object %}
+  {% block pjax %}
+    <div class="confirmation">
+      <h2>{% trans "Remove Item?" %}</h2>
+      <p>
+        {% blocktrans with object=object %}
     Are you sure you want to remove <b>{{ object }}</b>?
     {% endblocktrans %}
-  </p>
-  <p>{% trans "Once it is removed, it will be gone forever. There is no way to undo this operation." %}</p>
-  
-  <form method="POST">
+      </p>
+      <p>{% trans "Once it is removed, it will be gone forever. There is no way to undo this operation." %}</p>
 
-    {% block delete_form %}{% endblock %}
-    
-    <div class="buttons">
-      <a class="btn btn-default" href="{{ cancel_url }}">{% trans "Cancel" %}</a>
-      {% csrf_token %}
-        <input type="submit" class="btn btn-danger" value='{% trans "Remove" %}'/>
+      <form method="POST">
+        {% block delete_form %}{% endblock %}
+
+        <div class="buttons">
+          <a class="btn btn-default" href="{{ cancel_url }}">{% trans "Cancel" %}</a>
+          {% csrf_token %}
+          <input type="submit" class="btn btn-danger" value='{% trans "Remove" %}'>
+        </div>
+      </form>
     </div>
-  </form>
-
-</div>
-{% endblock %}
+  {% endblock %}
 {% endblock %}

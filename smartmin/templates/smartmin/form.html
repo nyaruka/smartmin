@@ -1,91 +1,89 @@
 {% extends "smartmin/base.html" %}
 
-{% load smartmin i18n  %}
+{% load smartmin i18n %}
 
 {% block content %}
-{% block pjax %}
-<div class="row" id="pjax">
-  <div class="{% block form-span %}col-md-12{% endblock %}">
+  {% block pjax %}
+    <div class="row" id="pjax">
+      <div class="{% block form-span %}col-md-12{% endblock %}">
+        {% block pre-form %}{% endblock %}
 
-  {% block pre-form %}{% endblock %}
+        <form class="smartmin-form form-horizontal" method="post" enctype="multipart/form-data" role="form">
+          {% block pre-form-errors %}
+          {% endblock pre-form-errors %}
 
-  <form class="smartmin-form form-horizontal" method="post" enctype="multipart/form-data" role="form">
-    {% block pre-form-errors %}
-    {% endblock pre-form-errors %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger form-errors">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
 
-    {% if form.non_field_errors %}
-    <div class="alert alert-danger form-errors">
-      {{ form.non_field_errors }}
-    </div>
-    {% endif %}
+          {% block post-form-errors %}
+          {% endblock post-form-errors %}
 
-    {% block post-form-errors %}
-    {% endblock post-form-errors %}
+          {% block pre-fields %}
+          {% endblock %}
 
-    {% block pre-fields %}
-    {% endblock %}
+          {% block form-help %}{% endblock form-help %}
 
-    {% block form-help %}{% endblock form-help %}
+          {% block fields %}
+            <fieldset>
+              {% for field in fields %}
+                {% render_field field %}
+              {% endfor %}
 
-    {% block fields %}
-    <fieldset>
-    {% for field in fields %}
-    {% render_field field %}
-    {% endfor %}
+              {% block extra-fields %}
+              {% endblock %}
+            </fieldset>
+          {% endblock fields %}
 
-    {% block extra-fields %}
-    {% endblock %}
-    </fieldset>
-    {% endblock fields %}
+          {% block post-fields %}
+          {% endblock post-fields %}
 
-    {% block post-fields %}
-    {% endblock post-fields %}
+          {% csrf_token %}
 
-    {% csrf_token %}
+          {% block form-buttons %}
+            <div class="form-group smartmin-form-buttons">
+              <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">{{ submit_button_name }}</button>
+                <a class="btn btn-default" onclick="javascript:history.go(-1)">{% trans "Cancel" %}</a>
+              </div>
+            </div>
+          {% endblock %}
+        </form>
 
-    {% block form-buttons %}
-    <div class="form-group smartmin-form-buttons">
-      <div class="col-sm-offset-2 col-sm-10">
-	<button type="submit" class="btn btn-primary">{{ submit_button_name }}</button>
-	<a class="btn btn-default" onclick="javascript:history.go(-1)">{% trans "Cancel" %}</a>
+        {% block post-form %}{% endblock post-form %}
       </div>
+
+      {% block form-right %}
+      {% endblock %}
     </div>
-    {% endblock %}
-  </form>
-
-  {% block post-form %}{% endblock post-form %}
-  </div>
-
-  {% block form-right %}
-  {% endblock %}
-</div>
-{% endblock pjax %}
+  {% endblock pjax %}
 {% endblock content %}
 
 {% block extra-script %}
-{{ block.super }}
-<script>
-  $(document).ready(function() {
-   $('input[type="checkbox"]').removeClass('form-control');
-   $('input[type="radio"]').removeClass('form-control');
-  });
-</script>
+  {{ block.super }}
+  <script>
+    $(document).ready(function() {
+     $('input[type="checkbox"]').removeClass('form-control');
+     $('input[type="radio"]').removeClass('form-control');
+    });
+  </script>
 
-{% if javascript_submit %}
-<script>
-  // attach a submit handler to the form
-  $("#smartmin_form").submit(function(event) {
-  
-  // stop form from submitting normally
-  event.preventDefault();
-  event.stopPropagation();
+  {% if javascript_submit %}
+    <script>
+      // attach a submit handler to the form
+      $("#smartmin_form").submit(function(event) {
 
-  // get some values from elements on the page:
-  var form = $(this);
-  var data = form.serialize();
-  {{ javascript_submit }}(form, data);
-  });
+      // stop form from submitting normally
+      event.preventDefault();
+      event.stopPropagation();
 
-</script>
-{% endif %}
+      // get some values from elements on the page:
+      var form = $(this);
+      var data = form.serialize();
+      {{ javascript_submit }}(form, data);
+      });
+    </script>
+  {% endif %}
 {% endblock %}

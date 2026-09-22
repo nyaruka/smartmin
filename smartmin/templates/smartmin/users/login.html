@@ -5,38 +5,37 @@
 {% block login %}{% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-7 col-md-offset-2">
-    <div class="page-header"><h2>{% trans "Sign in" %}</h2></div>
+  <div class="row">
+    <div class="col-md-7 col-md-offset-2">
+      <div class="page-header"><h2>{% trans "Sign in" %}</h2></div>
 
-    <form method="post" class="form-stacked" id="login-form">
-      {% for field, errors in form.errors.items %}
-      {% if field == '__all__' %}
-      <div class="alert alert-danger form-errors">
-        <h3>Error</h3>
-        {{ errors }}
-      </div>
-      {% endif %}
-      {% endfor %}
-      
-      <fieldset>
-        {% for field in form %}
-        <div class="form-group {% if field.error %}has-error{% endif %}">
-          <label for="{{ field.name }}">{{ field.label }}</label>
-          <div class="input">{{ field|add_css:"form-control" }}</div>
-          {% if field.error %}
-          <span class="help-block">{{ field.error }}</span>
+      <form method="post" class="form-stacked" id="login-form">
+        {% for field, errors in form.errors.items %}
+          {% if field == '__all__' %}
+            <div class="alert alert-danger form-errors">
+              <h3>Error</h3>
+              {{ errors }}
+            </div>
           {% endif %}
-        </div>
         {% endfor %}
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
-        {% if allow_email_recovery %}
-        <span class="pull-right" style="padding-top:7px;padding-right:150px;"><a href="{% url 'users.user_forget' %}">{% trans "Forgot Password?" %}</a></span>
-        {% endif %}
-      </fieldset>
-    </form>
-  </div>
 
-</div>
+        <fieldset>
+          {% for field in form %}
+            <div class="form-group {% if field.error %}has-error{% endif %}">
+              <label for="{{ field.name }}">{{ field.label }}</label>
+              <div class="input">{{ field|add_css:"form-control" }}</div>
+              {% if field.error %}
+                <span class="help-block">{{ field.error }}</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
+          {% if allow_email_recovery %}
+            <span class="pull-right" style="padding-top: 7px; padding-right: 150px"><a href="{% url 'users.user_forget' %}">{% trans "Forgot Password?" %}</a></span>
+          {% endif %}
+        </fieldset>
+      </form>
+    </div>
+  </div>
 {% endblock %}

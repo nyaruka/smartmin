@@ -34,6 +34,7 @@ dev = [
     "redis>=3.5.3",
     "coverage[toml]>=7.2.7",
     "ruff>=0.15.7",
+    "djangofmt>=1.0.0",
     "psycopg2-binary>=2.9.1",
     "funcsigs>=1.0.2",
     "Pillow>=12.2.0",
@@ -55,6 +56,10 @@ section-order = ["future", "standard-library", "third-party", "django", "first-p
 
 [tool.ruff.lint.isort.sections]
 django = ["django"]
+
+[tool.djangofmt]
+indent-width = 2
+line-length = 200
 
 [tool.coverage.run]
 source = ["smartmin"]
