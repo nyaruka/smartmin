@@ -2,15 +2,15 @@
 {% load smartmin %}
 
 {% block post-form %}
-{% if perms.auth.user_mimic and not object.is_superuser and not object.is_staff %}
-<form class="smartmin-form form-horizontal" action="{% url 'users.user_mimic' object.id %}" method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  <div class="form-group">
-    <label class="col-sm-2 control-label">Login as</label>
-    <div class="col-sm-10">
-      <button type="submit" class="btn btn-primary">{{object|user_as_string}}</button>
-    </div>
-  </div>
-</form>
-{% endif %}
+  {% if perms.auth.user_mimic and not object.is_superuser and not object.is_staff %}
+    <form class="smartmin-form form-horizontal" action="{% url 'users.user_mimic' object.id %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Login as</label>
+        <div class="col-sm-10">
+          <button type="submit" class="btn btn-primary">{{ object|user_as_string }}</button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
 {% endblock %}

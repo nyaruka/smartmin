@@ -41,6 +41,9 @@ if __name__ == "__main__":
     status("Running ruff check")
     cmd("ruff check --fix smartmin")
 
+    status("Running djangofmt")
+    cmd("djangofmt --check smartmin test_runner")
+
     # if any code changes were made, exit with error
     if cmd("git diff smartmin test_runner"):
         print("👎 " + colorama.Fore.RED + "Changes to be committed")

@@ -3,46 +3,45 @@
 {% load smartmin i18n %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-7 col-md-offset-2">
-    <div class="alert alert-danger">
-    <div class="page-header"><h2>{% trans "Login Failure" %}</h2></div>
-    <p>
-      {% blocktrans %}
+  <div class="row">
+    <div class="col-md-7 col-md-offset-2">
+      <div class="alert alert-danger">
+        <div class="page-header"><h2>{% trans "Login Failure" %}</h2></div>
+        <p>
+          {% blocktrans %}
       Sorry, you cannot log in at this time because we received {{failed_login_limit}} incorrect login attempts.
       {% endblocktrans %}
-    </p>
+        </p>
 
-    {% if lockout_timeout >= 0 %}
-    <p>
-      {% blocktrans %}
+        {% if lockout_timeout >= 0 %}
+          <p>
+            {% blocktrans %}
       Please wait {{lockout_timeout}} minutes before to try log in again.
       {% endblocktrans %}
-    </p>
-    {% endif %}
+          </p>
+        {% endif %}
 
-    {% if allow_email_recovery %}
-    <p>{% trans "Alternatively, you can fill out the form below to have your password reset via e-mail." %}</p>
-    {% else %}
-    <p>{% trans "Please contact the website administrator to have your password reset." %}</p>
-    {% endif %}
+        {% if allow_email_recovery %}
+          <p>{% trans "Alternatively, you can fill out the form below to have your password reset via e-mail." %}</p>
+        {% else %}
+          <p>{% trans "Please contact the website administrator to have your password reset." %}</p>
+        {% endif %}
+      </div>
     </div>
   </div>
-</div>
 
-{% if allow_email_recovery %}
-<div class="row" >
-  <div class="col-md-7 col-md-offset-2">
-    <form class="form-inline" method="post" action="{% url 'users.user_forget' %}">
-      {% csrf_token %}
-      <fieldset>
-	<label>{% trans "Email Address" %}</label> 
-	<input  class="col-md-4" type="text" name="email">
-	<input type="submit" value='{% trans "Recover" %}' class="btn btn-primary">
-      </fieldset>
-    </form>
-  </div>
-</div>
-{% endif %}
-
+  {% if allow_email_recovery %}
+    <div class="row">
+      <div class="col-md-7 col-md-offset-2">
+        <form class="form-inline" method="post" action="{% url 'users.user_forget' %}">
+          {% csrf_token %}
+          <fieldset>
+            <label>{% trans "Email Address" %}</label>
+            <input class="col-md-4" type="text" name="email">
+            <input type="submit" value='{% trans "Recover" %}' class="btn btn-primary">
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}
