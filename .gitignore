@@ -16,9 +16,6 @@ celerybeat-schedule
 *.DS_Store
 .tox/
 .vscode/
-deploy
-fabric
-fabfile.*
 
 # uv
 .venv/
